@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>voice_mod</name>
+  <version>0.1.0</version>
+  <description>
+    dorai real-time mic-array front-end. Auto-detects a USB microphone
+    array, async-resamples every mic to a common 16 kHz master timeline with
+    per-mic clock-drift correction, runs the dorai_beamformer.ort multichannel beamformer
+    continuously in real time, and publishes the enhanced single-channel
+    speech on /dorai_clean_audio in configurable N-second frames (default 10 s).
+  </description>
+  <maintainer email="info@sensifai.com">Sensifai</maintainer>
+  <license>None</license>
+
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+
+  <!-- Pure-python runtime deps installed via pip (rosdep keys do not cover
+       sounddevice / samplerate / onnxruntime); listed here for documentation. -->
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>python3-scipy</exec_depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
