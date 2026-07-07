@@ -81,6 +81,8 @@ ros2 run voice_mod voice
 * `--ros-args -p requested_rate:=48000` (Preferred capture rate per mic; default `48000` Hz)
 * `--ros-args -p include_internal:=false` (Allow built-in/internal microphones; default `false`)
 * `--ros-args -p prefer_usb:=true` (Order USB/external mics first; default `true`)
+* `--ros-args -p mic_name_filter:=""` (Case-insensitive device-name substring; when set, only inputs whose name contains it are used as array mics. Pins the real array and excludes stray inputs — e.g. an empty dock jack — that would otherwise be auto-selected as a dead channel and collapse the beamformer. Empty = plain auto-detection; default `""`)
+* `--ros-args -p capture_channels:=0` (Per-mic capture channel count: `0` = auto (open each device at its native count, capped at 2, then downmix to mono), `1` = force legacy mono open, `2` = force stereo. Some stereo-native USB mics deliver a much weaker signal when opened mono, so auto restores full level while staying single-channel-per-mic downstream; default `0`)
 * `--ros-args -p output_topic:=/dorai_clean_audio` (Topic name for enhanced speech; default `/dorai_clean_audio`)
 * `--ros-args -p num_threads:=2` (ONNX Runtime intra-op threads; 0 = ORT default, default `2`)
 * `--ros-args -p input_latency:=0.0` (PortAudio input latency in seconds, <= 0.0 uses 'high'; default `0.0`)

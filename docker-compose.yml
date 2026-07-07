@@ -1,0 +1,61 @@
+# dorai pipeline — two ROS 2 nodes from one image.
+#
+#   voice : mic-array capture + beamformer  -> /dorai_clean_audio
+#   stt   : subscribes to clean audio       -> /dorai_transcript
+#
+# Both use host networking so ROS 2 DDS discovery works between them (and with
+# `ros2 topic echo` on the host) with zero extra config.
+#
+#   docker compose build
+#   docker compose up            # both nodes
+#   docker compose up stt        # transcription only (no mic needed)
+#
+services:
+  voice:
+    build: .
+    image: dorai:latest
+    network_mode: host
+    # Share the host IPC namespace so both nodes see the SAME /dev/shm. Without
+    # this, Fast DDS discovers peers over UDP but its shared-memory data
+    # transport can't cross container boundaries, so topics connect yet deliver
+    # zero messages.
+    ipc: host
+    # Expose every ALSA sound card (each USB mic enumerates as its own card).
+    devices:
+      - /dev/snd:/dev/snd
+    group_add:
+      - audio
+    environment:
+      - ROS_DOMAIN_ID=0
+    # 4-mic array -> raise the default cap (max_mics defaults to 3).
+    # mic_name_filter pins the real array by device-name substring and excludes
+    # stray inputs (e.g. an empty dock jack) that would otherwise be auto-picked
+    # as a dead channel and collapse the beamformer. Set it to a substring of
+    # your mics' name (here the PU425 lavaliers enumerate as "Earpods"); clear
+    # it (-p mic_name_filter:="") to fall back to plain auto-detection.
+    command: >
+      ros2 run voice_mod voice --ros-args
+      -p max_mics:=4
+      -p mic_name_filter:=Earpods
+    restart: unless-stopped
+
+  stt:
+    build: .
+    image: dorai:latest
+    network_mode: host
+    ipc: host        # shared /dev/shm — see note on the voice service
+    environment:
+      - ROS_DOMAIN_ID=0
+    # Persist downloaded Vosk / Whisper models across restarts.
+    volumes:
+      - dorai-models:/root/.cache
+    # Default engine is Vosk (streaming + partials). Swap to Whisper with:
+    #   command: ros2 run stt_mod stt --ros-args -p engine:=whisper -p whisper_model:=tiny.en
+    command: >
+      ros2 run stt_mod stt --ros-args
+      -p engine:=vosk
+      -p model_lang:=en-us
+    restart: unless-stopped
+
+volumes:
+  dorai-models:
