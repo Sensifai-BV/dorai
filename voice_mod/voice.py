@@ -1073,14 +1073,24 @@ class VoiceMod(Node):
                     ch.stream.close()
                 except Exception:
                     pass
+        # Join the publisher thread BEFORE flushing. The publisher thread calls
+        # self.enhancer.push() and _flush() calls self.enhancer.flush(); the
+        # ContinuousEnhancer holds multi-step state (inbuf/acc/accw/g) and is
+        # NOT thread-safe. Draining it here while the publisher is still mid-
+        # frame would be two threads mutating it at once. Joining first makes
+        # the main thread the sole enhancer owner during the tail drain. Any
+        # frame still queued-but-unprocessed is dropped, which is harmless at
+        # shutdown (the worker has already stopped feeding the queue, so it is
+        # normally empty); the flush still emits the enhancer's held overlap
+        # tail for everything the publisher did process.
+        if getattr(self, "_pub_thread", None) is not None \
+                and self._pub_thread.is_alive():
+            self._pub_thread.join(timeout=2.0)
         # flush any tail audio so the last words aren't lost
         try:
             self._flush()
         except Exception:
             pass
-        if getattr(self, "_pub_thread", None) is not None \
-                and self._pub_thread.is_alive():
-            self._pub_thread.join(timeout=2.0)
         if getattr(self, "_delay_log_file", None) is not None:
             try:
                 self._delay_log_file.close()
