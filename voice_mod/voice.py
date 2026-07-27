@@ -6,13 +6,26 @@ A single ROS 2 node that runs the full capture-to-enhancement path:
 
     mic array (N mics, USB/other)
         -> per-mic clock-drift-corrected async resample to 16 kHz
-        -> dorai_beamformer.ort multichannel beamformer (continuous, real-time)
+        -> dorai_beamformer.ort multichannel beamformer (continuous overlap-add)
+        -> single slow AGC for a steady STT level
         -> clean single-channel speech
         -> published on /dorai_clean_audio in N-second frames (default 10 s)
 
-Enhancement runs continuously on a 3200/1600 sliding window with no added
-algorithmic delay; only the publish to the topic is batched into
-`publish_interval`-second frames so stt_mod receives larger, cheaper chunks.
+Enhancement runs continuously via overlap-add: a `enh_window`-second analysis
+window slides by `enh_hop` seconds across the *continuous* stream, each window
+is enhanced with full context and Hann-overlap-added, so the reconstruction is
+seamless (bit-identical no matter how the input is chunked). Publishing is
+batched into `publish_interval`-second frames only so stt_mod receives larger,
+cheaper chunks — it introduces no boundary artifact. Added algorithmic latency
+is one analysis window (`enh_window`, default 2 s).
+
+Why this shape (see ContinuousEnhancer): the model is a whole-signal enhancer
+that (a) peak-normalises its output regardless of input scale and (b) leaves
+uncompensated samples at each window edge. The previous path enhanced disjoint
+publish frames and concatenated them, injecting a step ('knock') at every join,
+and set level by grabbing each frame's peak — which, given (a), only pumped
+loudness and amplified noise between frames. Overlap-add fixes the knock; the
+slow gated AGC fixes the level.
 
 Design properties:
   * Audio callbacks only append to bounded, per-channel locked ring buffers,
@@ -60,9 +73,9 @@ BLOCK_MS = 100                    # worker tick period (ms)
 BLOCK_S = BLOCK_MS / 1000.0
 L_OUT = OUTPUT_RATE * BLOCK_MS // 1000          # output samples/block/ch (1600)
 
-# dorai_beamformer.ort is a whole-signal model (enhanced once per publish frame, not over
-# a sliding window). WINDOW_SIZE is only the dummy length used to warm the
-# session up before real frames arrive.
+# dorai_beamformer.ort is a whole-signal model driven by a continuous
+# overlap-add sliding window (see ContinuousEnhancer). WINDOW_SIZE is only the
+# dummy length used to warm the ONNX session up before real audio arrives.
 WINDOW_SIZE = 3200
 
 # Asynchronous-resampler drift control.
@@ -328,13 +341,27 @@ def detect_microphones(logger, include_internal=False, max_mics=3,
 # dorai_beamformer.ort beamformer wrapper.
 # ---------------------------------------------------------------------------
 class Beamformer:
-    """Multichannel enhancer. dorai_beamformer.ort is a *whole-signal* model: it takes the
-    entire [M, T] utterance in one pass and returns the clean [T] mono — it is
-    NOT a streaming model. Feeding it short isolated windows (e.g. 3200/1600)
-    and stitching the centers produces a discontinuity at every window boundary
-    (an audible click train at the block rate) and starves the model of the
-    context its internal STFT/Wiener stage needs. So we enhance one full publish
-    frame per call, exactly like the reference app."""
+    """Thin ONNX wrapper: run one [M, T] multichannel window through the model
+    and return the clean [T] mono.
+
+    dorai_beamformer.ort is a *whole-signal* model: its internal STFT / Wiener
+    stage needs surrounding context, and two independent facts govern how it
+    must be driven:
+
+      1. Its output is peak-normalised to ~0.9 *regardless of input scale* — the
+         model is completely gain-invariant. So there is no point normalising
+         the input by its peak and multiplying the output back by it (the old
+         path did exactly that): the round-trip only re-injects the input's
+         peak jitter and does nothing useful. Output level must be set by a
+         separate, slow AGC on the continuous stream (see ContinuousEnhancer).
+
+      2. Its synthesis leaves large *uncompensated* samples at the extreme
+         edges of the window. Enhancing disjoint frames and concatenating them
+         therefore injects a step at every join — an audible 'knock' at the
+         publish-frame rate. The cure is overlap-add across a sliding window,
+         which ContinuousEnhancer does; this class stays a pure per-window
+         call so it can be composed into that overlap-add machinery.
+    """
 
     def __init__(self, model_path, num_threads, logger):
         so = ort.SessionOptions()
@@ -355,27 +382,117 @@ class Beamformer:
         for _ in range(2):
             self.sess.run([self.out_name], {self.in_name: dummy})
 
-    def enhance_frame(self, mc):
-        """Enhance one [M, T] multichannel frame in a single pass.
+    def run(self, mc):
+        """Enhance one [M, T] window in a single pass; return clean [T] float32.
 
-        Peak-normalize the whole frame (the model expects roughly unit-scale
-        input, as the reference app does), then restore the original scale on
-        the output so per-frame loudness is preserved and silent frames don't
-        get their noise amplified."""
+        No input/output scaling here — the model is gain-invariant, so scaling
+        is a no-op that would only distort level. On failure return zeros of the
+        input length so a bad window never kills the stream."""
         x = np.ascontiguousarray(mc.astype(np.float32, copy=False))
         L = x.shape[1]
-        g = float(np.max(np.abs(x)))
-        xn = x / g if g > 1e-9 else x
         try:
-            out = self.sess.run([self.out_name], {self.in_name: xn})[0]
-            clean = np.asarray(out, dtype=np.float32).reshape(-1)[:L]
-            if g > 1e-9:
-                clean = clean * g
+            out = self.sess.run([self.out_name], {self.in_name: x})[0]
+            return np.asarray(out, dtype=np.float32).reshape(-1)[:L]
         except Exception as e:  # never let inference kill the stream
             self.logger.error(
                 f"Inference failed: {e}", throttle_duration_sec=2.0)
-            clean = np.zeros(L, dtype=np.float32)
-        return clean
+            return np.zeros(L, dtype=np.float32)
+
+
+class ContinuousEnhancer:
+    """Overlap-add streaming wrapper around the whole-signal enhancement model.
+
+    Slides a ``win``-sample analysis window across the *continuous* mic stream
+    in ``hop``-sample steps, enhances each window with full context, applies a
+    Hann synthesis window and overlap-adds with running window-sum
+    normalisation (correct for any win/hop, not just exact COLA). This removes
+    the boundary 'knock' the old disjoint-frame path produced: output is
+    bit-identical no matter how the input is chunked, so publishing in
+    publish_interval batches introduces no seam.
+
+    Level is set by ONE slow, gated RMS AGC on the reconstructed stream — never
+    by per-frame peak grabbing. Because the model already peak-normalises every
+    window to ~0.9, per-frame peak scaling only pumps loudness up and down and
+    amplifies noise in speech-sparse frames (the old 'bad gain for STT'); a slow
+    AGC with a floor gate holds a steady speech level and leaves silence alone.
+
+    Algorithmic latency is ``win`` samples (one window must fill before the
+    first hop is emitted). Not thread-safe: drive push()/flush() from a single
+    thread (here, the publisher thread), or guard with an external lock.
+    """
+
+    def __init__(self, run_model, win, hop, fs=OUTPUT_RATE,
+                 agc_target_rms=0.06, agc_tc_s=2.0, agc_max_gain=15.0,
+                 agc_gate_rms=3e-3, out_ceiling=0.99):
+        assert 0 < hop <= win, "require 0 < hop <= win"
+        self.run = run_model
+        self.win = int(win)
+        self.hop = int(hop)
+        self.fs = int(fs)
+        self.wsyn = np.hanning(self.win).astype(np.float64)
+        self.inbuf = None                          # [M, t] pending input
+        self.acc = np.zeros(self.win)              # OLA numerator (len win)
+        self.accw = np.zeros(self.win)             # OLA denominator (len win)
+        self.g = 1.0                               # smoothed AGC gain
+        self.tgt = float(agc_target_rms)
+        self.alpha = float(np.exp(-self.hop / (agc_tc_s * self.fs)))
+        self.max_gain = float(agc_max_gain)
+        self.gate = float(agc_gate_rms)
+        self.ceil = float(out_ceiling)
+
+    def _agc(self, ready):
+        out = np.empty(len(ready), dtype=np.float32)
+        for s in range(0, len(ready), self.hop):
+            seg = ready[s:s + self.hop]
+            rms = float(np.sqrt((seg ** 2).mean() + 1e-12))
+            g_inst = min(self.tgt / rms, self.max_gain) if rms > self.gate else self.g
+            self.g = self.alpha * self.g + (1.0 - self.alpha) * g_inst
+            out[s:s + len(seg)] = np.clip(seg * self.g, -self.ceil, self.ceil)
+        return out
+
+    def _consume(self):
+        ready = []
+        while self.inbuf is not None and self.inbuf.shape[1] >= self.win:
+            raw = np.asarray(self.run(self.inbuf[:, :self.win]),
+                             dtype=np.float64).reshape(-1)
+            c = np.zeros(self.win)
+            m = min(len(raw), self.win)            # model may trim a few edge samples
+            c[:m] = raw[:m]
+            c *= self.wsyn
+            self.acc += c
+            self.accw += self.wsyn
+            ready.append((self.acc[:self.hop]
+                          / np.maximum(self.accw[:self.hop], 1e-8)).copy())
+            self.acc = np.concatenate([self.acc[self.hop:], np.zeros(self.hop)])
+            self.accw = np.concatenate([self.accw[self.hop:], np.zeros(self.hop)])
+            self.inbuf = self.inbuf[:, self.hop:]
+        return np.concatenate(ready) if ready else np.zeros(0)
+
+    def push(self, mc):
+        """Feed raw [M, n] 16 kHz audio; return finished clean samples (>= 0).
+
+        Returned length lags the input by up to `win` samples (state held for
+        overlap); the held tail is emitted by flush()."""
+        mc = np.asarray(mc, dtype=np.float32)
+        self.inbuf = mc.copy() if self.inbuf is None \
+            else np.concatenate([self.inbuf, mc], axis=1)
+        r = self._consume()
+        return self._agc(r) if len(r) else np.zeros(0, dtype=np.float32)
+
+    def flush(self):
+        """Drain the tail on shutdown by zero-padding to a whole window so the
+        last words aren't lost."""
+        if self.inbuf is None or self.inbuf.shape[1] == 0:
+            return np.zeros(0, dtype=np.float32)
+        rem = self.inbuf.shape[1]
+        pad = (self.win - rem) if rem < self.win \
+            else ((self.hop - rem % self.hop) % self.hop)
+        if pad:
+            self.inbuf = np.concatenate(
+                [self.inbuf, np.zeros((self.inbuf.shape[0], pad), np.float32)],
+                axis=1)
+        r = self._consume()
+        return self._agc(r) if len(r) else np.zeros(0, dtype=np.float32)
 
 
 # ---------------------------------------------------------------------------
@@ -409,12 +526,24 @@ class VoiceMod(Node):
         # Speech high-pass cutoff (Hz) per mic. Raise toward ~200 if low-freq
         # rumble from cheap USB mics still dominates; 0 disables.
         self.declare_parameter("hpf_hz", 150.0, dyn)
-        # Output loudness: normalize each published clean frame up to this peak
-        # so the speech is easy to hear / gives STT a healthy level. 0 disables
-        # (keep dorai_beamformer's native scale). output_max_gain caps the boost so silent
-        # frames aren't amplified into loud noise.
-        self.declare_parameter("output_peak", 0.9, dyn)
-        self.declare_parameter("output_max_gain", 12.0, dyn)
+        # Continuous overlap-add enhancement window / hop (seconds). The model
+        # is a whole-signal enhancer, so a longer window gives it more context
+        # and tracks the offline reference more closely, at the cost of added
+        # latency (= enh_window). 2.0/1.0 is the quality/latency balance point;
+        # hop must be <= window (50% overlap at the default). Changing these
+        # does NOT change the seam behaviour — overlap-add stays seamless.
+        self.declare_parameter("enh_window", 2.0, dyn)
+        self.declare_parameter("enh_hop", 1.0, dyn)
+        # Output loudness: a single SLOW, gated RMS AGC lifts the continuous
+        # clean stream toward agc_target_rms so STT sees a steady level. Unlike
+        # the old per-frame peak grab, it does not pump between frames and does
+        # not amplify silence: agc_gate_rms floors it (segments quieter than the
+        # gate hold the last gain) and agc_max_gain caps the boost. agc_tc_s is
+        # the gain smoothing time-constant (larger = slower, steadier).
+        self.declare_parameter("agc_target_rms", 0.06, dyn)
+        self.declare_parameter("agc_tc_s", 2.0, dyn)
+        self.declare_parameter("agc_max_gain", 15.0, dyn)
+        self.declare_parameter("agc_gate_rms", 0.003, dyn)
         # Debug: per-frame capture -> clean-speech delay metering. Setting a
         # non-empty path auto-enables metering (no separate boolean needed)
         # and appends one CSV row per published frame:
@@ -442,8 +571,12 @@ class VoiceMod(Node):
         self.publish_raw = bool(gp("publish_raw").value)
         self.raw_topic = gp("raw_topic").value
         self.hpf_hz = float(gp("hpf_hz").value)
-        self.output_peak = float(gp("output_peak").value)
-        self.output_max_gain = float(gp("output_max_gain").value)
+        self.enh_window = float(gp("enh_window").value)
+        self.enh_hop = float(gp("enh_hop").value)
+        self.agc_target_rms = float(gp("agc_target_rms").value)
+        self.agc_tc_s = float(gp("agc_tc_s").value)
+        self.agc_max_gain = float(gp("agc_max_gain").value)
+        self.agc_gate_rms = float(gp("agc_gate_rms").value)
         self.delay_log_path = str(gp("delay_log_path").value or "").strip()
         model_path = gp("model_path").value
 
@@ -471,6 +604,23 @@ class VoiceMod(Node):
         self.get_logger().info(
             f"dorai_beamformer.ort ready ({self.num_channels}ch) via {self.beam.in_name}"
             f"->{self.beam.out_name}"
+        )
+
+        # Continuous overlap-add enhancer wrapping the per-window model call.
+        # Driven only from the publisher thread (_pub_loop / _flush), so it
+        # needs no lock. enh_hop is clamped to <= enh_window.
+        win = max(1, int(round(self.enh_window * OUTPUT_RATE)))
+        hop = max(1, int(round(min(self.enh_hop, self.enh_window) * OUTPUT_RATE)))
+        self.enhancer = ContinuousEnhancer(
+            self.beam.run, win=win, hop=hop, fs=OUTPUT_RATE,
+            agc_target_rms=self.agc_target_rms, agc_tc_s=self.agc_tc_s,
+            agc_max_gain=self.agc_max_gain, agc_gate_rms=self.agc_gate_rms,
+        )
+        self.get_logger().info(
+            f"Continuous overlap-add enhancer: win={win / OUTPUT_RATE:.2f}s "
+            f"hop={hop / OUTPUT_RATE:.2f}s (latency +{win / OUTPUT_RATE:.2f}s), "
+            f"AGC target_rms={self.agc_target_rms:.3f} tc={self.agc_tc_s:.1f}s "
+            f"max_gain={self.agc_max_gain:.1f} gate={self.agc_gate_rms:.4f}"
         )
 
         self.pub = self.create_publisher(Float32MultiArray, self.output_topic, 10)
@@ -754,19 +904,29 @@ class VoiceMod(Node):
         mc = np.concatenate(blocks, axis=1)          # [M, T]
         if self.publish_raw:
             self._emit_raw(mc, cap0)
-        clean = self.beam.enhance_frame(mc)
+        # Continuous overlap-add: push this frame's audio into the enhancer and
+        # publish whatever finished clean samples come back. Output is seamless
+        # across frames (the enhancer holds up to one window of overlap state),
+        # so no boundary knock. push() may return slightly fewer samples than
+        # the frame length (the held tail is emitted on the next frame / flush)
+        # and, on the very first frame, could be empty if the frame is shorter
+        # than one window.
+        clean = self.enhancer.push(mc)
         infer_done_mono = time.monotonic()
         seq = self._seq
-        self._emit(clean, cap0)
+        if len(clean):
+            self._emit(clean, cap0)
         publish_done_mono = time.monotonic()
-        if self._delay_log_file is not None:
+        if self._delay_log_file is not None and len(clean):
             self._log_delay(
                 cap0, seq, len(clean),
                 frame_ready_mono, dequeue_mono, infer_done_mono, publish_done_mono,
             )
 
     def _flush(self):
-        """Publish any remaining partial frame (called on shutdown)."""
+        """Publish any remaining partial frame, then drain the enhancer's
+        overlap-add tail so the last ~window of speech isn't lost (called on
+        shutdown)."""
         with self._acc_lock:
             blocks = self._mc_acc
             cap0 = self._mc_caps[0] if self._mc_caps else 0.0
@@ -774,6 +934,12 @@ class VoiceMod(Node):
             self._mc_caps = []
         if blocks:
             self._process_frame(blocks, cap0)
+        try:
+            tail = self.enhancer.flush()
+            if len(tail):
+                self._emit(tail, cap0)
+        except Exception as e:
+            self.get_logger().error(f"enhancer flush failed: {e}")
 
     def _emit_raw(self, mc, capture_s):
         """Publish one frame of pre-beamformer multichannel audio (debug tap).
@@ -803,15 +969,10 @@ class VoiceMod(Node):
         self._raw_seq += 1
 
     def _emit(self, clean, capture_s):
-        clean = np.asarray(clean, dtype=np.float32)
-        # Loudness normalization: lift the frame to a target peak (capped so a
-        # near-silent frame isn't blown up), then hard-limit to avoid clipping.
-        if self.output_peak > 0:
-            peak = float(np.max(np.abs(clean)))
-            if peak > 1e-6:
-                gain = min(self.output_peak / peak, self.output_max_gain)
-                clean = clean * gain
-            clean = np.clip(clean, -0.99, 0.99).astype(np.float32)
+        # Level is already set by the enhancer's slow gated AGC and hard-limited
+        # to +/-0.99, so there is deliberately no per-frame gain here — a second
+        # per-frame normalisation is exactly what caused the old level pumping.
+        clean = np.ascontiguousarray(np.asarray(clean, dtype=np.float32))
         msg = Float32MultiArray()
         header = np.array(
             [capture_s, float(OUTPUT_RATE), 1.0, float(self._seq)],
