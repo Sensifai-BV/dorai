@@ -1,0 +1,18 @@
+# Build/output artifacts — never ship into the image
+install
+build
+log
+.pyenv
+**/__pycache__
+
+# MATLAB acoustic simulator — not part of the ROS runtime, needs a MATLAB
+# license, and would bloat the build context with sample wavs.
+lab
+
+# Docker + git noise
+.git
+.gitignore
+Dockerfile
+docker-compose.yml
+.dockerignore
+README.md

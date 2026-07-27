@@ -150,11 +150,13 @@ class MicChannel:
     """Owns capture, drift-corrected resampling and the 16 kHz output FIFO for
     a single microphone. All cross-thread state is guarded by `self.lock`."""
 
-    def __init__(self, label, device, sample_rate, name="", hpf_hz=150.0):
+    def __init__(self, label, device, sample_rate, name="", hpf_hz=150.0,
+                 capture_channels=1):
         self.label = label
         self.device = device
         self.sample_rate = int(sample_rate)
         self.name = name
+        self.capture_channels = int(capture_channels)
 
         self.lock = threading.Lock()
         self.in_buf = np.zeros(0, dtype=np.float32)     # raw capture samples
@@ -277,7 +279,7 @@ def looks_usb(name: str) -> bool:
     return any(t in low for t in ("usb", "mic", "uac", "card"))
 
 
-def choose_rate(device: int, requested_rate=None) -> int:
+def choose_rate(device: int, requested_rate=None, channels=1) -> int:
     info = sd.query_devices(device)
     default_rate = int(info["default_samplerate"])
     candidates = []
@@ -291,7 +293,7 @@ def choose_rate(device: int, requested_rate=None) -> int:
         seen.add(rate)
         try:
             sd.check_input_settings(
-                device=device, channels=1, dtype="float32", samplerate=rate
+                device=device, channels=channels, dtype="float32", samplerate=rate
             )
             return int(rate)
         except Exception:
@@ -300,7 +302,8 @@ def choose_rate(device: int, requested_rate=None) -> int:
 
 
 def detect_microphones(logger, include_internal=False, max_mics=3,
-                       requested_rate=None, prefer_usb=True):
+                       requested_rate=None, prefer_usb=True,
+                       capture_channels=0, mic_name_filter=""):
     devices = sd.query_devices()
     inputs = [(i, d) for i, d in enumerate(devices)
               if d.get("max_input_channels", 0) > 0]
@@ -314,6 +317,21 @@ def detect_microphones(logger, include_internal=False, max_mics=3,
         usable = [(i, d) for i, d in inputs
                   if is_usable_input(d["name"], include_internal=True)]
 
+    if mic_name_filter:
+        needle = mic_name_filter.lower()
+        filtered = [(i, d) for i, d in usable if needle in d["name"].lower()]
+        logger.info(
+            f"mic_name_filter='{mic_name_filter}' kept {len(filtered)} of "
+            f"{len(usable)} usable input(s)."
+        )
+        if filtered:
+            usable = filtered
+        else:
+            logger.warning(
+                f"mic_name_filter='{mic_name_filter}' matched no devices; "
+                f"ignoring the filter."
+            )
+
     if prefer_usb:
         # Stable order: USB-looking devices first, then by device index.
         usable.sort(key=lambda it: (not looks_usb(it[1]["name"]), it[0]))
@@ -322,14 +340,24 @@ def detect_microphones(logger, include_internal=False, max_mics=3,
     for idx, dev in usable:
         if len(resolved) >= max_mics:
             break
-        rate = choose_rate(idx, requested_rate)
+        # Decide how many channels to open. 0 = auto: native count capped at 2
+        # (stereo-native mics like the PULUZ PU425 need their native format to
+        # deliver full level). >0 forces that exact count. Always clamped to
+        # [1, 2]; the callback downmixes whatever we open back to one mono
+        # stream, so downstream stays single-channel-per-mic either way.
+        native = int(dev.get("max_input_channels", 1))
+        cap_ch = native if capture_channels == 0 else capture_channels
+        cap_ch = max(1, min(cap_ch, 2))
+        rate = choose_rate(idx, requested_rate, channels=cap_ch)
         label = f"mic{len(resolved)}"
         logger.info(
-            f"Auto-detected {label}: dev #{idx} '{dev['name']}' @ {rate} Hz"
+            f"Auto-detected {label}: dev #{idx} '{dev['name']}' @ {rate} Hz "
+            f"({cap_ch}ch capture -> mono)"
         )
         resolved.append({
             "label": label, "device": idx,
             "sample_rate": rate, "name": dev["name"],
+            "capture_channels": cap_ch,
         })
 
     if not resolved:
@@ -511,6 +539,17 @@ class VoiceMod(Node):
         self.declare_parameter("max_mics", 3)
         self.declare_parameter("requested_rate", 48000)
         self.declare_parameter("prefer_usb", True)
+        # Case-insensitive substring; when set, only input devices whose name
+        # contains it are used as array mics. Lets you pin the real array (e.g.
+        # "earpod") and exclude dead/irrelevant inputs like an empty dock jack
+        # that would otherwise be auto-selected and collapse the beamformer.
+        self.declare_parameter("mic_name_filter", "")
+        # Per-mic capture channel count. 0 = auto (open each device at its native
+        # channel count, capped at 2, then downmix to mono); 1 = force the legacy
+        # mono-open path; 2 = force stereo. Some USB-C lavaliers (e.g. PULUZ
+        # PU425) are stereo-native and deliver a ~3x weaker signal when opened
+        # mono, so auto restores full level while staying mono downstream.
+        self.declare_parameter("capture_channels", 0)
         self.declare_parameter("publish_interval", 10.0, dyn)   # N-second frame
         self.declare_parameter("output_topic", "/dorai_clean_audio")
         # On a 4-core Pi 4B, letting ORT grab all cores starves the PortAudio
@@ -563,6 +602,8 @@ class VoiceMod(Node):
         req_rate = int(gp("requested_rate").value)
         self.requested_rate = req_rate if req_rate > 0 else None
         self.prefer_usb = bool(gp("prefer_usb").value)
+        self.mic_name_filter = str(gp("mic_name_filter").value or "").strip()
+        self.capture_channels = int(gp("capture_channels").value)
         self.publish_interval = float(gp("publish_interval").value)
         self.output_topic = gp("output_topic").value
         num_threads = int(gp("num_threads").value)
@@ -590,11 +631,12 @@ class VoiceMod(Node):
 
         resolved = detect_microphones(
             self.get_logger(), self.include_internal, self.max_mics,
-            self.requested_rate, self.prefer_usb,
+            self.requested_rate, self.prefer_usb, self.capture_channels,
+            self.mic_name_filter,
         )
         self.mics = [
             MicChannel(m["label"], m["device"], m["sample_rate"], m["name"],
-                       hpf_hz=self.hpf_hz)
+                       hpf_hz=self.hpf_hz, capture_channels=m["capture_channels"])
             for m in resolved
         ]
         self.num_channels = len(self.mics)
@@ -656,7 +698,8 @@ class VoiceMod(Node):
         for ch in self.mics:
             blocksize = int(ch.sample_rate * BLOCK_S)
             ch.stream = sd.InputStream(
-                samplerate=ch.sample_rate, device=ch.device, channels=1,
+                samplerate=ch.sample_rate, device=ch.device,
+                channels=ch.capture_channels,
                 blocksize=blocksize, dtype="float32",
                 latency=self.input_latency,
                 callback=self._make_callback(ch),
@@ -781,7 +824,15 @@ class VoiceMod(Node):
                 capture_mono = now - max(age, 0.0)
             except Exception:
                 capture_mono = now
-            ch.push(indata[:, 0].copy(), capture_mono)
+            # Collapse whatever we captured to one mono stream. For a genuine
+            # mono device this is exactly the old indata[:, 0]; for a stereo
+            # capture it averages the channels (identical channels -> full
+            # level; signal on one channel -> still preserved).
+            if indata.shape[1] > 1:
+                mono = indata.mean(axis=1)
+            else:
+                mono = indata[:, 0]
+            ch.push(mono.copy(), capture_mono)
         return callback
 
     def _run(self):
