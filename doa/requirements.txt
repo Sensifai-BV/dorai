@@ -1,0 +1,30 @@
+# dorai/doa — direction-of-arrival estimation and live display
+#
+# Install:            pip install -r requirements.txt
+# Analysis only:      pip install "numpy>=1.24"
+#   (doa_core.py, multi_device.py and doa_protocol.py need nothing else —
+#    this is the right install on a Raspberry Pi, which runs the capture and
+#    the maths but not the GUI)
+#
+# Versions below are the FLOOR, not a pin: they are the oldest releases whose
+# APIs this code uses. Verified working on numpy 2.4.6 / matplotlib 3.11.0 /
+# sounddevice 0.5.5.
+
+# --- required by every module -------------------------------------------
+numpy>=1.24                 # ndarray, fft, linalg.lstsq
+
+# --- required only by live_doa.py (the GUI) -----------------------------
+# Imported at module load, so live_doa.py cannot even be imported without it.
+matplotlib>=3.6             # FuncAnimation display
+
+# --- required only for LIVE microphone capture --------------------------
+# Imported lazily inside the capture paths, so wav replay and offline
+# analysis work without it. Needs the PortAudio system library:
+#   macOS           brew install portaudio
+#   Debian/Ubuntu   sudo apt install libportaudio2
+sounddevice>=0.4.6          # PortAudio bindings; multi-device streams
+
+# --- NOT required --------------------------------------------------------
+# scipy is deliberately absent: no module in this package imports it. Filter
+# design and resampling appear only in test/validation scripts outside the
+# package. Do not add it here without an import to justify it.
