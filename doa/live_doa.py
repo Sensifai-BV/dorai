@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
-"""live_doa — live DoA display for the ReSpeaker 4-Mic array.
+"""live_doa — live DoA display for any microphone array.
 
-Three panels, matching the offline analysis figure:
+No geometry input needed: the array's mic positions are auto-calibrated from
+audio during a short startup phase. Works with linear, circular, and arbitrary
+array layouts.
+
+Three panels:
   (a) array geometry with the current bearing, plus a decaying history fan
   (b) SRP-PHAT spatial spectrum, instantaneous and time-averaged
   (c) azimuth vs time, speech-active frames highlighted
 
 Usage
 -----
-    python live_doa.py                       # live from the ReSpeaker
+    python live_doa.py                       # auto-calibrate, then live display
     python live_doa.py --list-devices        # find the device index
     python live_doa.py --device 7
+    python live_doa.py --circle 32           # skip calibration, use known circle
     python live_doa.py --wav-dir <dir>       # replay ch1..ch4 wavs (no hardware)
     python live_doa.py --wav-dir <dir> --realtime   # replay at wall-clock speed
 
@@ -18,9 +23,10 @@ The device presents 6 channels; the beamformer/DoA input is channels 1-4
 (0-based), i.e. ch0 is the device's own processed output and ch5 is playback.
 See --channels to override.
 
-Estimates are gated on voice activity: a frame below the adaptive RMS floor is
-plotted grey and excluded from the running average, because a DoA estimate from
-a silent frame is a direction to the room's noise field, not to the talker.
+Estimates are gated on voice activity via Neural VAD (neural speech detector).
+Frames without speech are plotted grey and excluded from the running average,
+because a DoA estimate from a silent frame is a direction to the room's noise
+field, not to the talker. Falls back to RMS energy gating if vad.onnx is absent.
 """
 from __future__ import annotations
 
@@ -39,6 +45,12 @@ import matplotlib.pyplot as plt
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import doa_core as dc
+import auto_calibrate as acal
+try:
+    from vad import NeuralVAD as _NeuralVAD
+    _HAS_VAD = True
+except Exception:
+    _HAS_VAD = False
 
 FS = 16000
 BLOCK = 2048            # 128 ms — long enough for a stable GCC-PHAT peak
@@ -215,7 +227,7 @@ class WavSource:
 class LiveDoADisplay:
     def __init__(self, source, radius=dc.R_NOMINAL, vad_percentile=70.0,
                  avg_tc=2.0, pos=None, f_hi=dc.F_HI, aperture_m=None,
-                 linear_gaps=None, side=None):
+                 linear_gaps=None, side=None, vad_threshold=0.45):
         self.src = source
         # pos overrides the built-in ReSpeaker geometry: with separate mics on
         # stands only the operator knows where they are.
@@ -236,13 +248,28 @@ class LiveDoADisplay:
         self.grid = (np.arange(0.0, 180.5, 1.0) if linear_gaps is not None
                      else np.arange(0.0, 360.0, 1.0))
         self.vad_pct = vad_percentile
+        self.vad_threshold = vad_threshold
         # Take the rate from the SOURCE, not the module constant: a USB mic
         # opened at its native 48 kHz would otherwise get a 16 kHz time axis
         # and a mis-scaled analysis band.
         self.fs = int(getattr(source, 'fs', FS))
         self.alpha = float(np.exp(-HOP / (avg_tc * self.fs)))
         self.srp_avg = None
-        self.rms_hist = deque(maxlen=400)
+        # Neural VAD: prefer neural VAD over RMS energy gating.
+        if _HAS_VAD:
+            try:
+                self._vad = _NeuralVAD()
+                self._use_neural_vad = True
+            except Exception as exc:
+                print(f"[live_doa] Neural VAD init failed ({exc}), "
+                      f"falling back to RMS energy gating", file=sys.stderr)
+                self._vad = None
+                self._use_neural_vad = False
+                self.rms_hist = deque(maxlen=400)
+        else:
+            self._vad = None
+            self._use_neural_vad = False
+            self.rms_hist = deque(maxlen=400)
         self.hist = deque(maxlen=int(HISTORY_S * self.fs / HOP))
         self.t = 0.0
         # Only meaningful for independent-clock captures; harmless otherwise.
@@ -355,11 +382,19 @@ class LiveDoADisplay:
             return self._artists()
         self.t += HOP / self.fs
 
-        rms = dc.frame_rms(block)               # windowed — matches the threshold
-        self.rms_hist.append(rms)
-        thr = (np.percentile(self.rms_hist, self.vad_pct)
-               if len(self.rms_hist) >= 20 else np.inf)
-        active = rms > thr
+        if self._use_neural_vad:
+            # Feed first channel to Neural VAD; it handles resampling internally.
+            ref_ch = block[0] if block.ndim == 2 else block
+            vad_result = self._vad.process_buffer(
+                ref_ch, fs=self.fs, threshold=self.vad_threshold)
+            active = vad_result['is_speech']
+        else:
+            # Fallback: adaptive RMS percentile gate
+            rms = dc.frame_rms(block)
+            self.rms_hist.append(rms)
+            thr = (np.percentile(self.rms_hist, self.vad_pct)
+                   if len(self.rms_hist) >= 20 else np.inf)
+            active = rms > thr
 
         if self.linear_gaps is not None:
             est = dc.doa_linear(block, self.linear_gaps, fs=self.fs,
@@ -587,7 +622,8 @@ def main(argv=None):
     ap.add_argument('--realtime', action='store_true',
                     help='with --wav-dir, replay at wall-clock speed')
     ap.add_argument('--radius', type=float, default=dc.R_NOMINAL * 1000,
-                    help='array radius in mm (azimuth is invariant to this)')
+                    help='array radius in mm (only used when no geometry is '
+                         'given and no calibration is run)')
     ap.add_argument('--vad-percentile', type=float, default=70.0)
     ap.add_argument('--fs', type=int, default=FS,
                     help='sample rate; 0 = auto-detect from the device. Use 0 '
@@ -595,21 +631,12 @@ def main(argv=None):
                          'refuse a 16 kHz open.')
     ap.add_argument('--devices', type=int, nargs='+', default=None,
                     help='SEVERAL independent input device indices, one mono mic '
-                         'each (e.g. --devices 1 3 4). Requires --positions. '
+                         'each (e.g. --devices 1 3 4). '
                          'Read the drift warning this prints before trusting it.')
-    ap.add_argument('--linear', type=float, nargs='+', default=None,
-                    help='mics in a straight LINE: gaps between consecutive '
-                         'mics in mm, in channel order (e.g. --linear 140 140 '
-                         'for 3 mics, or --linear 140 for equal gaps). Reports '
-                         'the angle to the array axis plus its mirror — a line '
-                         'cannot tell which side you are on.')
-    ap.add_argument('--side', choices=['+', '-'], default=None,
-                    help="which side of the line you are on, if you know it. "
-                         "This is YOUR prior, not a measurement; it only picks "
-                         "which mirror branch is displayed.")
-    ap.add_argument('--positions', type=float, nargs='+', default=None,
-                    help='mic xy positions in mm, flat: x1 y1 x2 y2 ... '
-                         'Must be non-collinear and match --devices in count.')
+    ap.add_argument('--calibrate-seconds', type=float, default=10.0,
+                    dest='calibrate_seconds',
+                    help='duration of the auto-calibration phase in seconds '
+                         '(default 10). Walk around the array while speaking.')
     args = ap.parse_args(argv)
 
     if args.list_devices:
@@ -620,40 +647,15 @@ def main(argv=None):
     if args.devices:
         return _run_multi(args)
 
-    # Explicit geometry (mm) overrides the built-in ReSpeaker circle. Needed
-    # for an Aggregate Device whose mics sit wherever you put them.
+    # -- geometry: either a --circle shortcut or auto-calibration -----------
     pos = f_hi = aperture = None
     linear_gaps = None
-    if args.linear:
-        gaps = np.asarray(args.linear, float) / 1000.0
-        pos = dc.linear_positions(gaps if gaps.size > 1 else gaps[0])
-        linear_gaps = gaps if gaps.size > 1 else float(gaps[0])
-        aperture = float(pos[:, 0].max() - pos[:, 0].min())
-        f_hi = min(dc.F_HI, dc.C_SOUND / (2.0 * aperture))
-        print(f"[live_doa] LINEAR array: {pos.shape[0]} mics at "
-              f"{np.round(pos[:,0]*1000,1)} mm, aperture {aperture*1000:.0f} mm")
-        print(f"[live_doa] band {dc.F_LO:.0f}-{f_hi:.0f} Hz "
-              f"(spatial aliasing limit {dc.C_SOUND/(2*aperture):.0f} Hz)")
-        print("[live_doa] A line measures the angle to its OWN AXIS: 0° = past the")
-        print("[live_doa] first mic, 90° = broadside, 180° = past the last. It")
-        print("[live_doa] CANNOT tell which side of the line you are on — +40° and")
-        print("[live_doa] −40° give identical delays. Both branches are shown.")
-        if f_hi < 800.0:
-            best = dc.C_SOUND / (2.0 * 1200.0)      # aperture for a 1200 Hz ceiling
-            print(f"[live_doa]")
-            print(f"[live_doa] [!] The band stops at {f_hi:.0f} Hz because the array is")
-            print(f"[live_doa]     {aperture*1000:.0f} mm wide — above that it aliases "
-                  f"spatially and")
-            print(f"[live_doa]     bearings become ambiguous. Speech DoA wants ~300-1500 Hz,")
-            print(f"[live_doa]     so this leaves a thin band and a noisy estimate.")
-            print(f"[live_doa]     Closing the mics to ~{best*1000/2:.0f} mm gaps "
-                  f"(≈{best*1000:.0f} mm total) would")
-            print(f"[live_doa]     raise the ceiling to ~1200 Hz. Wider = finer resolution")
-            print(f"[live_doa]     but a lower ceiling; this is a real trade-off, not a bug.")
-    elif args.circle:
+    need_calibration = True
+
+    if args.circle:
         radius_mm = float(args.circle[0])
         start_deg = float(args.circle[1]) if len(args.circle) > 1 else 90.0
-        n_total = len(args.devices) if args.devices else len(args.channels)
+        n_total = len(args.channels)
         n_rim = n_total - 1 if args.centre_mic else n_total
         if n_rim < 3:
             print(f"[live_doa] a circle needs 3+ RIM mics; --channels gives "
@@ -671,41 +673,12 @@ def main(argv=None):
                   else f"{n_rim} on the rim")
         print(f"[live_doa] CIRCULAR array: {layout}, radius {radius_mm:.1f} mm, "
               f"{360.0/n_rim:.0f}° apart")
-        print(f"[live_doa] mic1 at {start_deg:.0f}°, numbering "
-              f"{'clockwise' if args.clockwise else 'counter-clockwise'}")
         print(f"[live_doa] aperture {aperture*1000:.0f} mm, band "
               f"{dc.F_LO:.0f}-{f_hi:.0f} Hz (aliasing limit "
               f"{dc.aliasing_limit_hz(pos):.0f} Hz)")
-        print("[live_doa] A circle resolves the FULL 360° — no mirror ambiguity.")
-        print("[live_doa] But --circle only says the mics form a circle; it "
-              "cannot know")
-        print("[live_doa] which physical mic is channel 1 or which way the "
-              "numbering runs.")
-        print("[live_doa] If bearings are consistently rotated or mirrored, fix "
-              "that with")
-        print("[live_doa] the mic1 angle argument and --clockwise, not by "
-              "adjusting the result.")
-    elif args.positions:
-        if len(args.positions) % 2:
-            print("[live_doa] --positions needs an even count: x y per mic, mm.",
-                  file=sys.stderr)
-            return 1
-        pos = np.asarray(args.positions, float).reshape(-1, 2) / 1000.0
-        if pos.shape[0] < 3:
-            print("[live_doa] --positions needs 3+ non-collinear mics: a pair "
-                  "resolves only the angle to its own axis.", file=sys.stderr)
-            return 1
-        D = dc.pair_baselines(pos, dc.pairs_for(pos.shape[0]))
-        if np.linalg.matrix_rank(D, tol=1e-9) < 2:
-            print("[live_doa] those positions are collinear; offset one mic "
-                  "perpendicular to the line.", file=sys.stderr)
-            return 1
-        aperture = max(np.linalg.norm(pos[i] - pos[j])
-                       for i, j in dc.pairs_for(pos.shape[0]))
-        f_hi = min(dc.F_HI, dc.aliasing_limit_hz(pos))
-        print(f"[live_doa] geometry: {pos.shape[0]} mics, aperture "
-              f"{aperture*1000:.0f} mm, band {dc.F_LO:.0f}-{f_hi:.0f} Hz")
+        need_calibration = False
 
+    # -- open audio source -------------------------------------------------
     if args.wav_dir:
         # fs=None (the default, and what --fs 0 means) adopts the files' rate.
         src = WavSource(args.wav_dir, fs=(args.fs or None),
@@ -722,9 +695,41 @@ def main(argv=None):
                   f"to replay files.", file=sys.stderr)
             return 1
 
+    # -- auto-calibrate if no geometry was given ----------------------------
+    if need_calibration:
+        src.start()
+        print()
+        print("=" * 66)
+        print("  AUTO-CALIBRATION")
+        print("  Walk slowly around the microphone array while speaking")
+        print(f"  continuously for {args.calibrate_seconds:.0f} seconds.")
+        print("  Cover as wide an arc as possible (ideally a full semicircle).")
+        print("=" * 66)
+        if not args.wav_dir:
+            input("  Press Enter when ready… ")
+        try:
+            pos, cal_info = acal.auto_calibrate(
+                src, seconds=args.calibrate_seconds,
+                block_size=BLOCK, hop=HOP)
+            aperture = cal_info['aperture_m']
+            f_hi = cal_info['f_hi']
+            if cal_info['is_linear']:
+                gaps, order = acal.linear_gaps_from_positions(pos)
+                linear_gaps = gaps
+        except RuntimeError as exc:
+            print(f"\n[live_doa] calibration failed: {exc}", file=sys.stderr)
+            src.stop()
+            return 1
+        # For wav replay the source was started for calibration; for live mic
+        # the source stays running and the display continues seamlessly.
+        if args.wav_dir:
+            # Re-create WavSource so replay starts from the beginning
+            src = WavSource(args.wav_dir, fs=(args.fs or None),
+                            realtime=args.realtime)
+
     kw = {} if pos is None else dict(pos=pos, f_hi=f_hi, aperture_m=aperture)
     if linear_gaps is not None:
-        kw.update(linear_gaps=linear_gaps, side=args.side)
+        kw['linear_gaps'] = linear_gaps
     LiveDoADisplay(src, radius=args.radius / 1000.0,
                    vad_percentile=args.vad_percentile, **kw).run()
     return 0
@@ -742,44 +747,7 @@ def _run_multi(args):
               f"           non-collinear mics, or use doa_core.doa_pair() directly\n"
               f"           and accept the two-branch answer.", file=sys.stderr)
         return 1
-    linear_gaps = None
-    if args.linear:
-        gaps = np.asarray(args.linear, float) / 1000.0
-        if gaps.size == 1:
-            gaps = np.repeat(gaps, n - 1)
-        if gaps.size != n - 1:
-            print(f"[live_doa] --linear needs {n-1} gap(s) for {n} devices "
-                  f"(or one value for equal gaps), got {gaps.size}.",
-                  file=sys.stderr)
-            return 1
-        pos = dc.linear_positions(gaps)
-        linear_gaps = gaps
-    elif args.positions and len(args.positions) == 2 * n:
-        pos = np.asarray(args.positions, dtype=np.float64).reshape(n, 2) / 1000.0
-    else:
-        print(f"[live_doa] give the geometry for your {n} devices:\n"
-              f"           --linear <{n-1} gaps in mm>      mics in a straight line\n"
-              f"           --positions <{2*n} numbers>      x y per mic, mm\n"
-              f"           There is no default: with separate mics on stands, only\n"
-              f"           you know where they are, and a wrong geometry produces a\n"
-              f"           confident wrong bearing. Measure them.", file=sys.stderr)
-        return 1
-    if linear_gaps is None:
-        D = dc.pair_baselines(pos, dc.pairs_for(n))
-        if np.linalg.matrix_rank(D, tol=1e-9) < 2:
-            print("[live_doa] those positions are collinear. Use --linear "
-                  f"<{n-1} gaps in mm>\n"
-                  "           instead, which solves the axis angle properly and "
-                  "reports both\n"
-                  "           mirror branches. Or offset one mic perpendicular "
-                  "to the line\n"
-                  "           to get an unambiguous 360° bearing.", file=sys.stderr)
-            return 1
 
-    aperture = max(np.linalg.norm(pos[i] - pos[j]) for i, j in dc.pairs_for(n))
-    f_hi = min(dc.F_HI, dc.aliasing_limit_hz(pos))
-    print(f"[live_doa] {n} independent devices, aperture {aperture*1000:.0f} mm, "
-          f"band {dc.F_LO:.0f}-{f_hi:.0f} Hz")
     print("[live_doa] ---- INDEPENDENT CLOCKS: READ THIS ----")
     print("[live_doa] Each USB mic has its own crystal. Nothing locks them, so the")
     print("[live_doa] inter-stream delay walks at roughly 1 us/s per ppm of error;")
@@ -803,7 +771,7 @@ def _run_multi(args):
     # even 5 ms is 6x the entire 816 us geometric range, so EVERY frame is
     # physically impossible until this offset is removed.
     src.start()
-    print("[live_doa] ---- CALIBRATION ----")
+    print("[live_doa] ---- ALIGNMENT CALIBRATION ----")
     print("[live_doa] Stand in FRONT OF THE MIDDLE of the array (broadside),")
     print("[live_doa] facing it, and speak steadily for 4 seconds.")
     print("[live_doa] Position matters: calibration cannot tell start skew from")
@@ -812,15 +780,40 @@ def _run_multi(args):
     print("[live_doa] bakes that angle in as an error on every later bearing.")
     input("[live_doa] press Enter when you are in position… ")
     try:
-        src.calibrate_alignment(seconds=4.0, positions=pos, cal_az_deg=90.0)
+        src.calibrate_alignment(seconds=4.0, positions=None, cal_az_deg=90.0)
     except Exception as exc:
         print(f"[live_doa] alignment failed: {exc}", file=sys.stderr)
         src.stop()
         return 1
 
-    disp = LiveDoADisplay(src, vad_percentile=args.vad_percentile,
-                          pos=pos, f_hi=f_hi, aperture_m=aperture,
-                          linear_gaps=linear_gaps, side=args.side)
+    # Auto-calibrate geometry from audio
+    print()
+    print("=" * 66)
+    print("  GEOMETRY CALIBRATION")
+    print("  Now walk slowly around the microphone array while speaking")
+    print(f"  continuously for {args.calibrate_seconds:.0f} seconds.")
+    print("  Cover as wide an arc as possible (ideally a full semicircle).")
+    print("=" * 66)
+    input("  Press Enter when ready… ")
+    try:
+        pos, cal_info = acal.auto_calibrate(
+            src, seconds=args.calibrate_seconds,
+            block_size=BLOCK, hop=HOP)
+        aperture = cal_info['aperture_m']
+        f_hi = cal_info['f_hi']
+        linear_gaps = None
+        if cal_info['is_linear']:
+            gaps, order = acal.linear_gaps_from_positions(pos)
+            linear_gaps = gaps
+    except RuntimeError as exc:
+        print(f"\n[live_doa] geometry calibration failed: {exc}", file=sys.stderr)
+        src.stop()
+        return 1
+
+    kw = dict(pos=pos, f_hi=f_hi, aperture_m=aperture)
+    if linear_gaps is not None:
+        kw['linear_gaps'] = linear_gaps
+    disp = LiveDoADisplay(src, vad_percentile=args.vad_percentile, **kw)
     disp.run()
     return 0
 

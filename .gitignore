@@ -4,3 +4,4 @@ log
 .pyenv
 lab/recordings
 __pycache__
+dorai_*
