@@ -38,6 +38,7 @@ RUN pip3 install --no-cache-dir --break-system-packages \
 WORKDIR /ros2_ws
 COPY voice_mod src/voice_mod
 COPY stt_mod   src/stt_mod
+COPY doa_mod   src/doa_mod
 
 # Source the ROS base, then colcon-build both ament_python packages.
 RUN . /opt/ros/jazzy/setup.sh && \

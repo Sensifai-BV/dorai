@@ -53,11 +53,37 @@ def pairs_for(n_mics):
 def array_positions(radius=R_NOMINAL):
     """[4,2] mic xy positions in metres, channel order ch1..ch4.
 
-    Channels wrap sequentially around the circle at 135/45/-45/-135 deg, which
-    is the arrangement the measured TDOAs support (2.00 mm fit residual vs
-    3.34 mm for the alternating one).
+    ReSpeaker 4-Mic Array: MIC1 at 45 deg, numbering COUNTER-CLOCKWISE, i.e.
+    45/135/225/315 deg. This matches the Seeed board drawing (DOA:0 right,
+    DOA:90 top) and is identical to circle_positions(4, radius, start_deg=45).
+
+    HOW THIS WAS PINNED, and why the previous value was wrong
+    ---------------------------------------------------------
+    The earlier value was [135, 45, -45, -135], which is this layout MIRRORED
+    about the x-axis -- not rotated. A mirror cannot be absorbed as a constant
+    offset, so it cannot be calibrated away.
+
+    Scored against the four marked talker positions of the 2026-08-04 Panza
+    session (0/90/180/270 deg at 1.5 m), brute-forcing all 24 channel->capsule
+    permutations x reflection on noise-subtracted SRP spectra:
+
+        this layout           7.5 deg mean abs error
+        runner-up            20.2 deg
+        previous [135,45,..] 87.0 deg
+
+    Confirmed on the two-talker takes, which took no part in the selection.
+
+    Why it went unnoticed for so long: with the gcc_phat sign also inverted
+    (see the SIGN CONVENTION note there), a reflection LOOKS like a rotation on
+    any source lying near the mirror axis -- and the 0/180 deg marks lie
+    exactly on it. A rotation-only fit therefore reported a clean "+178 deg
+    offset, no mirror" and fit all four marks about equally badly.
+
+    NOTE both faults had to be fixed together. Either one alone makes accuracy
+    WORSE than shipping neither (73 deg -> 107 deg sign-only / 132 deg
+    geometry-only -> 48 deg both). tests/test_doa_core.py covers this.
     """
-    ang = np.deg2rad([135.0, 45.0, -45.0, -135.0])
+    ang = np.deg2rad([45.0, 135.0, 225.0, 315.0])
     return np.stack([radius * np.cos(ang), radius * np.sin(ang)], axis=1)
 
 
@@ -133,6 +159,15 @@ def gcc_phat(a, b, fs=FS_DEFAULT, f_lo=F_LO, f_hi=F_HI, max_tau=3e-4, up=32):
     """
     a = np.asarray(a, dtype=np.float64)
     b = np.asarray(b, dtype=np.float64)
+    # A dead or unplugged channel arrives as NaN/Inf, and the phase transform
+    # below then propagates it into every bin, so the frame returns a NaN tau
+    # AND emits "invalid value encountered in divide" once per pair per frame
+    # -- 6 warnings x 31 hops/s of console noise on a live run. Substituting
+    # zeros makes such a frame behave exactly like digital silence, which the
+    # closure gate already rejects (tau=0 everywhere, peak=0).
+    if not (np.all(np.isfinite(a)) and np.all(np.isfinite(b))):
+        a = np.nan_to_num(a, nan=0.0, posinf=0.0, neginf=0.0)
+        b = np.nan_to_num(b, nan=0.0, posinf=0.0, neginf=0.0)
     nfft = 1 << int(np.ceil(np.log2(len(a) + len(b))))
     A = np.fft.rfft(a, nfft)
     B = np.fft.rfft(b, nfft)
@@ -142,6 +177,24 @@ def gcc_phat(a, b, fs=FS_DEFAULT, f_lo=F_LO, f_hi=F_HI, max_tau=3e-4, up=32):
     R[(freqs < f_lo) | (freqs > f_hi)] = 0.0      # band limit — see module docstring
     cc = np.fft.irfft(R, nfft * up)
     lag_max = int(round(max_tau * fs * up))
+    # SIGN CONVENTION -- read this before touching the two lines below.
+    #
+    # R = A*conj(B), so cc[n] is the correlation at lag +n IN THE SENSE
+    # "a advanced by n", i.e. cc peaks at index +D when a(t) = b(t - D), which
+    # is b LEADING a. The window is laid out as [negative lags | 0 | positive],
+    # so index k maps to lag (lag_max - k) in the DOCUMENTED convention
+    # (positive tau => b lags a), NOT (k - lag_max).
+    #
+    # The original code used (k - lag_max), which returned the exact negative
+    # of the documented value. Verified against the 2026-08-04 Panza session:
+    # feed this function a signal and an exact +100 us delayed copy and the old
+    # form returned -100 us. Every bearing came out 180 deg wrong, and because
+    # srp_phat carried the SAME inverted convention the two estimators agreed
+    # with each other while both were wrong -- which is why the original
+    # "they agree to 1.0 deg" validation did not catch it.
+    #
+    # tests/test_doa_core.py::test_gcc_phat_sign locks this down. Do not
+    # "simplify" it back.
     cc = np.concatenate([cc[-lag_max:], cc[:lag_max + 1]])
     k = int(np.argmax(cc))
     # parabolic interpolation on the already-upsampled peak
@@ -151,7 +204,7 @@ def gcc_phat(a, b, fs=FS_DEFAULT, f_lo=F_LO, f_hi=F_HI, max_tau=3e-4, up=32):
         delta = (y0 - y2) / (2 * denom) if denom != 0 else 0.0
     else:
         delta = 0.0
-    tau = ((k - lag_max) + delta) / (fs * up)
+    tau = ((lag_max - k) - delta) / (fs * up)
     # Peak-to-sidelobe ratio: the peak height against the typical level OUTSIDE
     # a guard band around it. A single dominant source gives a sharp, isolated
     # peak (high ratio); diffuse noise, reverberation, or two streams whose
@@ -340,8 +393,115 @@ def doa_linear(block, spacings, fs=FS_DEFAULT, f_lo=F_LO, f_hi=None,
                 peak_min=peak_min, n_mics=int(M), taus=taus, f_hi=float(f_hi))
 
 
+def band_rms(block, fs=FS_DEFAULT, f_lo=F_LO, f_hi=F_HI):
+    """Reference-mic rms restricted to the ANALYSIS BAND. Degenerate-frame gate.
+
+    frame_rms() answers "is this frame loud?". This answers "does this frame
+    carry energy where the estimator actually looks?", and those are different
+    questions in exactly the cases that break the closure gate.
+
+    A constant (DC) frame is the worst of them. Its frame_rms is 0.61 -- louder
+    than real speech -- so no amplitude floor can reject it. But all its energy
+    sits at 0 Hz, outside [f_lo, f_hi], so after band-limiting, every pair's
+    cross-spectrum is pure spectral leakage with identical phase. GCC-PHAT then
+    returns tau = 0 for all six pairs, closure error is exactly 0, and
+    doa_least_squares reports `consistent=True` on a signal that contains no
+    acoustic information whatsoever. Measured in-band rms for that frame is
+    1.5e-6, against 6.7e-3 for real audio -- a factor of 4000, which is why
+    this test separates them cleanly where an amplitude test cannot.
+
+    Scaled to match frame_rms(): both are the rms of the Hann-windowed
+    reference channel, this one after band-limiting (Parseval, one-sided).
+
+    Measured on the reference frames:
+
+        signal                    frame_rms    band_rms
+        digital silence            0            0
+        DC                         0.612        1.5e-6
+        50 Hz tone (out of band)   0.433        2.5e-5
+        real speech-level noise    0.0121       6.7e-3
+    """
+    x = np.asarray(block, dtype=np.float64)
+    x = x[0] if x.ndim > 1 else x
+    n = len(x)
+    if n == 0:
+        return 0.0
+    if not np.all(np.isfinite(x)):
+        return 0.0
+    X = np.fft.rfft(x * np.hanning(n))
+    freqs = np.fft.rfftfreq(n, 1.0 / fs)
+    band = (freqs >= f_lo) & (freqs <= f_hi)
+    return float(np.sqrt(2.0 * np.sum(np.abs(X[band]) ** 2)) / n)
+
+
+# Minimum in-band rms for a frame to be considered a measurement at all.
+#
+# Calibrated against the 2026-08-12 hardware session rather than guessed. Per
+# 2048-sample frame, over every take including the deliberate noise-floor
+# recording (2544 frames):
+#
+#     pure noise-floor take   min 6.4e-5   median 8.6e-5
+#     quietest speech take    min 8.2e-5   median 1.9e-3
+#     DC frame (synthetic)        1.5e-6
+#
+# 1e-5 therefore sits ~6x BELOW the quietest frame real hardware produced and
+# ~7x ABOVE a DC frame's spectral leakage. It rejects degenerate frames without
+# ever touching real audio, however quiet. It is not a VAD and must not be
+# tuned into one -- speech gating is the VAD's job, and raising this toward the
+# 6e-5 hardware floor would start discarding genuine frames.
+#
+# KNOWN LIMIT: a strong pure tone OUTSIDE the analysis band (e.g. 50 Hz mains)
+# leaks ~2.5e-5 of in-band energy -- above this floor, and with identical
+# leakage phase in every pair it also passes closure. Such a frame can still be
+# reported consistent. Catching it needs a spectral-flatness test, not an
+# energy floor; no such frame appears in the hardware sessions, so that test is
+# not implemented rather than implemented untested.
+RMS_FLOOR = 1e-5
+
+
+def closure_error_us(taus, pairs=None, n_mics=4):
+    """RMS TDOA closure error in microseconds. GEOMETRY-FREE frame-quality test.
+
+    For ANY single source, whatever the array looks like and wherever the mics
+    actually are, the delays around every closed triangle must sum to zero:
+
+        tau_ik - tau_ij - tau_jk == 0
+
+    because tau_ij = t_j - t_i telescopes. This holds for a wrong `pos`, a wrong
+    radius, a mirrored channel map, any elevation, near field or far field --
+    it depends on nothing but the existence of ONE arrival time per microphone.
+
+    That independence is what makes it the right gate. The plane-wave residual
+    from doa_least_squares() mixes two different failures into one number: it is
+    large when the FRAME is bad (reverberation, two talkers, noise) and equally
+    large when the GEOMETRY is wrong, and you cannot tell which from the value.
+    Closure only responds to the first, so a large closure error means the audio
+    genuinely carries no single direction. Use both: closure to reject frames,
+    residual to detect a bad `pos`.
+
+    Measured on the 2026-08-04 Panza session (aperture 64 mm, max delay 187 us):
+    the quiet 1.5 m takes ran at 17-66 us median closure with essentially no
+    coherent frames, while the ~20 dB louder two-talker takes ran at 16-21 us.
+    Synthetic plane waves give < 0.01 us.
+
+    Needs M >= 3. With 2 mics there is one pair, no triangle, and no closure to
+    test -- fall back to the peak-to-sidelobe ratio from gcc_phat().
+    """
+    taus = np.asarray(taus, dtype=np.float64)
+    if pairs is None:
+        pairs = PAIRS if n_mics == 4 else pairs_for(n_mics)
+    idx = {p: k for k, p in enumerate(pairs)}
+    n = max(max(p) for p in pairs) + 1
+    if n < 3:
+        return 0.0
+    errs = [taus[idx[(i, k)]] - taus[idx[(i, j)]] - taus[idx[(j, k)]]
+            for i in range(n) for j in range(i + 1, n) for k in range(j + 1, n)]
+    return float(np.sqrt(np.mean(np.square(errs))) * 1e6)
+
+
 def doa_least_squares(block, pos=None, fs=FS_DEFAULT, f_lo=F_LO, f_hi=F_HI,
-                      tau_offsets=None):
+                      tau_offsets=None, closure_max_us=None,
+                      rms_floor=RMS_FLOOR):
     """Azimuth from the pairwise TDOAs of one [M, N] block (M >= 3).
 
     Solves D u = c*tau in the least-squares sense, where D holds the baseline
@@ -349,9 +509,14 @@ def doa_least_squares(block, pos=None, fs=FS_DEFAULT, f_lo=F_LO, f_hi=F_HI,
     (rather than two) averages down individual TDOA errors and yields a
     residual that doubles as a confidence measure.
 
-    Returns dict(az_deg, u_norm, resid_mm, peak_min, taus). u_norm is
+    Returns dict(az_deg, u_norm, resid_mm, peak_min, taus, band_rms). u_norm is
     cos(elevation) and should be <= 1; values above 1 indicate a geometry-scale
     error, not a real elevation (see the module GEOMETRY note).
+
+    `consistent` requires BOTH a passing TDOA closure AND in-band energy above
+    rms_floor. Closure alone is not sufficient: a DC frame has zero closure
+    error by construction (see band_rms()) and used to be reported as a
+    consistent measurement. Pass rms_floor=0 to restore the closure-only test.
     """
     block = np.asarray(block, dtype=np.float64)
     if pos is None:
@@ -381,9 +546,27 @@ def doa_least_squares(block, pos=None, fs=FS_DEFAULT, f_lo=F_LO, f_hi=F_HI,
     d = (taus - tau_offsets) * C_SOUND
     u, *_ = np.linalg.lstsq(D, d, rcond=None)
     resid_mm = float(np.sqrt(((D @ u - d) ** 2).mean()) * 1000.0)
+    # Geometry-free frame quality. Default threshold is 15% of the largest
+    # delay the array can produce -- on the ReSpeaker that is ~28 us.
+    d_max = max(np.linalg.norm(pos[i] - pos[j]) for i, j in pairs)
+    max_delay_us = d_max / C_SOUND * 1e6
+    if closure_max_us is None:
+        closure_max_us = 0.15 * max_delay_us
+    clo = closure_error_us(taus - tau_offsets, pairs=pairs)
+    # Energy floor, in the analysis band. A frame can pass closure while
+    # carrying no acoustic information -- DC is the pathological case, with
+    # closure exactly 0 because every band-limited cross-spectrum is identical
+    # leakage. Requiring in-band energy as well closes that hole; see
+    # band_rms() for the measured separation.
+    brms = band_rms(block, fs=fs, f_lo=f_lo, f_hi=f_hi)
     return dict(az_deg=float(np.rad2deg(np.arctan2(u[1], u[0]))),
                 u_norm=float(np.linalg.norm(u)),
                 resid_mm=resid_mm,
+                closure_us=clo,
+                closure_max_us=float(closure_max_us),
+                max_delay_us=float(max_delay_us),
+                band_rms=float(brms),
+                consistent=bool(clo <= closure_max_us and brms >= rms_floor),
                 peak_min=float(peaks.min()),
                 taus=taus,
                 pairs=pairs)
@@ -414,6 +597,12 @@ def srp_phat(block, pos=None, fs=FS_DEFAULT, grid_deg=None, f_lo=F_LO, f_hi=F_HI
     selection mismatch, not the normalization.
     """
     block = np.asarray(block, dtype=np.float64)
+    # See the matching guard in gcc_phat(): a NaN channel would otherwise turn
+    # the whole spatial spectrum NaN and make argmax meaningless, while
+    # emitting a divide warning every frame. Zeros give a flat spectrum, which
+    # is the honest answer for a frame carrying no signal.
+    if not np.all(np.isfinite(block)):
+        block = np.nan_to_num(block, nan=0.0, posinf=0.0, neginf=0.0)
     if pos is None:
         pos = array_positions()
     pos = np.asarray(pos, dtype=np.float64)
@@ -438,9 +627,128 @@ def srp_phat(block, pos=None, fs=FS_DEFAULT, grid_deg=None, f_lo=F_LO, f_hi=F_HI
     for k, (i, j) in enumerate(pairs):
         R = X[i] * np.conj(X[j])
         R = R / np.maximum(np.abs(R), 1e-12)
-        power += np.real(np.exp(2j * np.pi * fb[None, :] * tau_grid[:, k:k + 1])
+        # MINUS in the exponent: R = X_i conj(X_j) carries phase
+        # exp(+2j*pi*f*(p_i - p_j).u / c), so the steering vector must CONJUGATE
+        # it to sum coherently at the true direction. The original used a plus
+        # sign, which doubles the phase instead of cancelling it and peaks 180
+        # deg away -- the same inversion gcc_phat had. Because both estimators
+        # were wrong in the same direction they agreed with each other, so
+        # cross-checking one against the other could never expose it.
+        # tests/test_doa_core.py::test_srp_phat_peaks_at_truth covers this.
+        power += np.real(np.exp(-2j * np.pi * fb[None, :] * tau_grid[:, k:k + 1])
                          * R[None, :]).sum(axis=1)
     return grid_deg, (normalize_power(power) if normalize else power)
+
+
+class SRPAccumulator:
+    """Pool raw SRP-PHAT power across frames and read the bearing off the peak.
+
+    This is the ESTIMATOR, not a display smoother. It replaces "compute a
+    least-squares bearing per frame, then circular-average the bearings", which
+    is what the live display used to do and which is materially less accurate:
+    a single reverberation-dominated frame produces a wild bearing that drags
+    the circular mean, and no amount of averaging undoes it.
+
+    Pooling power instead defers the argmax to the very end, so a bad frame
+    contributes a low broad ridge rather than a confident wrong angle, and
+    frames that agree reinforce each other. Measured on the four marked
+    positions of the 2026-08-04 Panza session, with the sign and geometry
+    faults already fixed:
+
+        per-frame least-squares, circular mean   48.4 deg mean abs error
+        pooled SRP (this class)                  13.0 deg
+        pooled SRP + noise subtraction            7.5 deg
+
+    Accumulate RAW power. Min-max normalizing each frame before summing
+    equalizes frames of very different SNR and biases the pooled peak -- see
+    the note in srp_phat(). Normalize once, at display time.
+
+    Two pooling modes:
+      decay=None   plain sum -- for offline scoring of a whole take.
+      decay=tc_s   exponential forget with time constant tc_s -- for a live
+                   display that must follow a moving talker.
+
+    NOISE SUBTRACTION (subtract_noise=True) additionally accumulates a second
+    spectrum over NON-speech frames and subtracts it, which removes a
+    stationary interferer. On the 2026-08-04 session a fan or HVAC unit at
+    ~280 deg dominated every take and this recovered 13.0 -> 7.5 deg. It needs
+    the interferer to be genuinely stationary; it is a mitigation, not a
+    substitute for silencing the source.
+    """
+
+    def __init__(self, pos, fs=FS_DEFAULT, grid_deg=None, f_lo=F_LO, f_hi=F_HI,
+                 decay=None, hop=512, subtract_noise=False):
+        self.pos = np.asarray(pos, dtype=np.float64)
+        self.fs = int(fs)
+        self.grid = np.arange(0.0, 360.0, 1.0) if grid_deg is None else np.asarray(grid_deg, float)
+        self.f_lo, self.f_hi = float(f_lo), float(f_hi)
+        # The default F_HI (2600 Hz) sits just below the ReSpeaker's aliasing
+        # limit (2680 Hz), and that relationship is load-bearing: above it, a
+        # half-wavelength is shorter than the aperture, grating lobes appear,
+        # and the pooled peak can settle on one of them -- a confident bearing
+        # pointing at nothing. The invariant held silently for both values;
+        # widening the array (a larger radius LOWERS the limit) or raising f_hi
+        # without checking the other would break it just as silently.
+        limit = aliasing_limit_hz(self.pos)
+        if self.f_hi > limit:
+            raise ValueError(
+                f"f_hi={self.f_hi:.0f} Hz exceeds this array's spatial "
+                f"aliasing limit of {limit:.0f} Hz (aperture "
+                f"{max(np.linalg.norm(self.pos[i] - self.pos[j]) for i, j in pairs_for(self.pos.shape[0]))*1000:.0f} mm). "
+                f"Above the limit the spatial spectrum has grating lobes and "
+                f"the pooled peak may land on one, reporting a confident "
+                f"bearing toward a direction with no source. Pass "
+                f"f_hi=min(F_HI, aliasing_limit_hz(pos)).")
+        self.subtract_noise = bool(subtract_noise)
+        self.speech = np.zeros(len(self.grid))
+        self.noise = np.zeros(len(self.grid))
+        self.n_speech = 0
+        self.n_noise = 0
+        self.alpha = None if decay is None else float(np.exp(-hop / (decay * self.fs)))
+
+    def update(self, block, active=True):
+        """Add one frame. `active` routes it to the speech or the noise pool."""
+        _, p = srp_phat(block, pos=self.pos, fs=self.fs, grid_deg=self.grid,
+                        f_lo=self.f_lo, f_hi=self.f_hi, normalize=False)
+        if active:
+            if self.alpha is None:
+                self.speech += p
+            else:
+                self.speech = self.alpha * self.speech + (1 - self.alpha) * p
+            self.n_speech += 1
+        else:
+            if self.alpha is None:
+                self.noise += p
+            else:
+                self.noise = self.alpha * self.noise + (1 - self.alpha) * p
+            self.n_noise += 1
+        return p
+
+    def spectrum(self):
+        """Pooled spectrum, normalized to [0,1] for display/peak-picking."""
+        if self.n_speech == 0:
+            return np.zeros(len(self.grid))
+        p = self.speech
+        if self.subtract_noise and self.n_noise > 0:
+            # Both pools are means when decaying, sums otherwise -- match scales.
+            a = p / (1.0 if self.alpha is not None else max(self.n_speech, 1))
+            b = self.noise / (1.0 if self.alpha is not None else max(self.n_noise, 1))
+            p = a - b
+        return normalize_power(p)
+
+    def bearing(self):
+        """(az_deg, sharpness) from the pooled peak.
+
+        `sharpness` is 1 - (mean power / peak power) over the normalized
+        spectrum: ~0 when the spectrum is flat (no usable direction), higher
+        when one lobe dominates. It is NOT a confidence in degrees -- with a
+        64 mm aperture the main lobe is ~130 deg wide no matter how good the
+        frame is, so do not read a narrow beam into a high value.
+        """
+        p = self.spectrum()
+        if p.max() <= 0:
+            return float('nan'), 0.0
+        return float(self.grid[int(np.argmax(p))]), float(1.0 - p.mean() / p.max())
 
 
 def normalize_power(power):
@@ -642,14 +950,50 @@ def aliasing_limit_hz(pos=None):
     return C_SOUND / (2.0 * d_max)
 
 
-def secondary_peak(grid_deg, power, primary_deg, exclude_deg=25.0):
+def beamwidth_deg(pos, f_hi=F_HI):
+    """Approximate half-power beamwidth of the array, degrees.
+
+    Rayleigh-style estimate: a source cannot be localized more finely than
+    ~lambda/D at the highest usable frequency. Use it to scale any "is this a
+    separate lobe?" test -- a fixed threshold in degrees is meaningless across
+    arrays of different size.
+
+    MEASURED on the ReSpeaker: lambda at 2600 Hz is 132 mm against a 64 mm
+    aperture, so 0.5*lambda/d_max = 1.03 > 1 and the estimate SATURATES at its
+    180 deg ceiling. That is not a rounding artefact -- it is the array
+    reporting that it has no two-source resolving power at all, in the
+    Rayleigh sense, at its own band limit. A single talker is still localised
+    well (the pooled SRP peak is unbiased); what you cannot do is SEPARATE two
+    talkers, which is exactly what the two-talker takes showed when 90 deg of
+    separation merged into a single plateau.
+    """
+    pos = np.asarray(pos, dtype=np.float64)
+    pairs = PAIRS if pos.shape[0] == 4 else pairs_for(pos.shape[0])
+    d_max = max(np.linalg.norm(pos[i] - pos[j]) for i, j in pairs)
+    lam = C_SOUND / float(f_hi)
+    return float(np.rad2deg(2.0 * np.arcsin(np.clip(0.5 * lam / d_max, -1.0, 1.0))))
+
+
+def secondary_peak(grid_deg, power, primary_deg, exclude_deg=25.0, pos=None,
+                   f_hi=F_HI):
     """Strongest lobe at least `exclude_deg` away from the primary.
 
-    On the validated capture this surfaced a stationary interferer at +114 deg
-    (0.876 normalized power) sitting only 24 deg from the talker -- about two
-    beamwidths at this aperture, close enough that it contaminates a blind
-    noise-covariance estimate.
+    Pass `pos` and the exclusion window is set to half the array's actual
+    beamwidth instead of the fixed 25 deg default, which is the correct
+    behaviour and what you almost always want.
+
+    WHY THE DEFAULT IS A TRAP: 25 deg is far narrower than the main lobe of a
+    small array, so the "second peak" it finds is the SHOULDER of the primary,
+    not a second source. On the 2026-08-04 Panza session this reported
+    "separation 26.0 deg" on both two-talker takes -- suspiciously just outside
+    the 25 deg window, which is the signature of the artefact rather than a
+    measurement. At 64 mm aperture and 2600 Hz beamwidth_deg() saturates at
+    180 deg, so this array cannot resolve two talkers at all and ANY reported
+    "second source" from it should be treated as a shoulder until proven
+    otherwise.
     """
+    if pos is not None:
+        exclude_deg = max(exclude_deg, 0.5 * beamwidth_deg(pos, f_hi))
     grid_deg = np.asarray(grid_deg)
     off = np.abs(((grid_deg - primary_deg + 180.0) % 360.0) - 180.0)
     mask = off > exclude_deg

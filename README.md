@@ -4,20 +4,33 @@
 
 `voice_mod` runs the full capture-to-enhancement path in a single node: it auto-detects the microphone array, async-resamples every mic to a common 16 kHz timeline with per-mic clock-drift correction, and runs the `dorai_beamformer.ort` beamformer continuously. Enhancement runs on a real-time sliding window with no added algorithmic delay; only the publish of the clean stream is batched into configurable N-second frames (default 10 s). `stt_mod` then transcribes that clean stream using Vosk (streaming, partials) or OpenAI Whisper via `faster-whisper` (whole-utterance).
 
+`doa_mod` runs alongside them and answers a different question — *where* the
+talker is, rather than what they said. It takes the raw array channels, gates
+them on voice activity, and publishes the bearing in degrees.
+
 ```
-                 +-----------+
-                 | voice_mod |  <-- Mic-array capture + drift-corrected 16 kHz
-                 |           |      resample + dorai_beamformer.ort beamformer (real-time);
-                 +-----------+      publishes clean speech every N seconds
-                       |
-            [/dorai_clean_audio]
-                       v
-                  +---------+
-                  | stt_mod |  <-- Speech-to-Text (Vosk or Whisper)
-                  +---------+
-                       |
-              [/dorai_transcript]
+                     [ microphone array ]
+                        |            |
+        +---------------+            +---------------+
+        v                                            v
+  +-----------+                                +---------+
+  | voice_mod |  Mic-array capture +           | doa_mod |  VAD gate + pooled
+  |           |  drift-corrected 16 kHz        |         |  SRP-PHAT; publishes
+  +-----------+  resample + beamformer         +---------+  a bearing ~5 Hz
+        |                                            |
+ [/dorai_clean_audio]                          [/dorai_doa]  (degrees, 0-360)
+        v
+   +---------+
+   | stt_mod |  Speech-to-Text (Vosk or Whisper)
+   +---------+
+        |
+ [/dorai_transcript]
 ```
+
+`voice_mod` and `doa_mod` both want the microphone, and two processes cannot
+open one ALSA capture device — run one or the other, or have `voice_mod`
+publish its raw tap (`-p publish_raw:=true`) and run `doa_mod -p source:=topic`.
+See `doa_mod/README.md`.
 
 ---
 
@@ -42,7 +55,7 @@
    ```
 
 2. **Clone/Copy Modules**:
-   Place the two pipeline package directories (`voice_mod`, `stt_mod`) directly inside your workspace.
+   Place the pipeline package directories (`voice_mod`, `stt_mod`, `doa_mod`) directly inside your workspace. The `doa/` directory is the DoA research tree, not a ROS package — leave it out of the workspace.
 
 3. **Install Python Package Dependencies**:
    Install the required Python packages directly to your user-site location (so they are accessible by the system Python interpreter used by ROS 2):
@@ -138,6 +151,49 @@ ros2 run stt_mod stt --ros-args -p engine:=whisper -p whisper_model:=tiny.en -p 
 
 ---
 
+### 3. Direction of Arrival (`doa_mod`)
+
+Publishes the talker bearing. Needs the **raw** array channels on one clock, so
+it either owns the device or reads `voice_mod`'s raw tap.
+
+```bash
+ros2 run doa_mod doa
+```
+
+#### doa_mod Parameters
+
+| Parameter | Default | Description |
+| :--- | :--- | :--- |
+| `source` | `mic` | `mic` opens the device directly; `topic` reads `/dorai_raw_audio`. |
+| `device_channels` | `6` | Channels to open (the ReSpeaker 4-Mic exposes 6). |
+| `channels` | `[1,2,3,4]` | Which of those are the raw capsules. |
+| `radius_mm` | `32.0` | Built-in ReSpeaker geometry. |
+| `positions_mm` | `""` | Explicit `"x,y x,y ..."` per mic in channel order; overrides `radius_mm`. |
+| `vad_mode` | `neural` | `neural` (vad.onnx), `energy` (RMS, no model), or `off` (no gating). |
+| `vad_hangover_ms` | `800` | How long publishing outlives the last speech frame. |
+| `avg_tc` | `0.5` | Pooling time constant (s). Longer = steadier; shorter tracks movement sooner. |
+| `publish_period` | `0.2` | Seconds between bearings. |
+
+Run without the neural VAD (drops the `onnxruntime` dependency):
+
+```bash
+ros2 run doa_mod doa --ros-args -p vad_mode:=energy
+```
+
+Alongside a running `voice_mod`:
+
+```bash
+ros2 run voice_mod voice --ros-args -p publish_raw:=true
+ros2 run doa_mod  doa   --ros-args -p source:=topic
+```
+
+> **Before trusting the output**, verify the geometry is not mirrored: put a
+> talker at 90°, then at 0°. If 90° reads correctly and 0° does not, the
+> channel order is mirrored — that is not an offset and cannot be calibrated
+> away. See `doa_mod/README.md`.
+
+---
+
 ## Pipeline Topics
 
 The audio data published on `/dorai_clean_audio` and `/dorai_raw_audio` includes a 4-float header at the start of the data array:
@@ -155,6 +211,15 @@ The audio samples follow the header in interleaved format: `[ch1_s1, ch2_s1, ...
 | `/dorai_transcript` | `std_msgs/String` | Final transcribed text results. |
 | `/dorai_partial_transcript` | `std_msgs/String` | Real-time partial transcripts (Vosk engine only). |
 | `/voice_mod/diagnostics` | `std_msgs/String` | Per-mic rate, FIFO/backlog, underruns, xruns, and drift ratio. |
+| `/dorai_doa` | `std_msgs/Float32` | Talker bearing in degrees, 0–360, CCW from the array's +x axis. Published only while speech is present. |
+| `/dorai_doa/state` | `std_msgs/Float32MultiArray` | `[elapsed_s, azimuth_deg, sharpness, consistent_frac, speech_flag, seq]`. |
+| `/dorai_doa/human` | `std_msgs/String` | The same state in plain words, for `ros2 topic echo` (`-p publish_human:=false` to disable). Format is for eyes, not a contract. |
+| `/doa_mod/diagnostics` | `std_msgs/String` | Frames seen, speech fraction, gate pass rate, worker duty cycle. |
+
+`/dorai_doa` does **not** use the 4-float header convention — it carries a
+single number. It falls silent when nobody is talking, so consumers should
+treat "no message" as "no talker" rather than holding the last value
+indefinitely.
 
 ---
 

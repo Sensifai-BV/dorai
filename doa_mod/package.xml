@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>doa_mod</name>
+  <version>0.1.0</version>
+  <description>
+    dorai direction-of-arrival estimator. Captures the raw microphone-array
+    channels, gates frames on voice activity, pools PHAT-weighted
+    steered-response power across speech frames, and publishes the talker
+    bearing in degrees (0-360) on /dorai_doa.
+
+    The estimator is doa_core.py, vendored byte-identical from the validated
+    doa/ research tree: 6.1 deg mean absolute error over the eight marked
+    positions of the 2026-08-12 hardware session. See README.md before
+    changing the array geometry -- a mirrored channel map cannot be
+    calibrated away.
+  </description>
+  <maintainer email="info@sensifai.com">Sensifai</maintainer>
+  <license>None</license>
+
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+
+  <!-- Pure-python runtime deps installed via pip (rosdep keys do not cover
+       sounddevice / onnxruntime); listed here for documentation. -->
+  <exec_depend>python3-numpy</exec_depend>
+
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

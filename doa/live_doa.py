@@ -227,7 +227,8 @@ class WavSource:
 class LiveDoADisplay:
     def __init__(self, source, radius=dc.R_NOMINAL, vad_percentile=70.0,
                  avg_tc=2.0, pos=None, f_hi=dc.F_HI, aperture_m=None,
-                 linear_gaps=None, side=None, vad_threshold=0.45):
+                 linear_gaps=None, side=None, vad_threshold=0.45,
+                 subtract_noise=False):
         self.src = source
         # pos overrides the built-in ReSpeaker geometry: with separate mics on
         # stands only the operator knows where they are.
@@ -255,6 +256,17 @@ class LiveDoADisplay:
         self.fs = int(getattr(source, 'fs', FS))
         self.alpha = float(np.exp(-HOP / (avg_tc * self.fs)))
         self.srp_avg = None
+        # THE reported bearing comes from this pooled-power accumulator, not
+        # from circular-averaging per-frame least-squares bearings. Pooling
+        # raw SRP power and taking the argmax once cut mean absolute error
+        # from 48.4 to 13.0 deg on the 2026-08-04 Panza session; see
+        # doa_core.SRPAccumulator. The per-frame least-squares estimate is
+        # still computed, but only as a per-frame diagnostic (history panel,
+        # closure gate, drift monitor).
+        self.subtract_noise = bool(subtract_noise)
+        self.acc = None if linear_gaps is not None else dc.SRPAccumulator(
+            self.pos, fs=self.fs, grid_deg=self.grid, f_hi=self.f_hi,
+            decay=avg_tc, hop=HOP, subtract_noise=self.subtract_noise)
         # Neural VAD: prefer neural VAD over RMS energy gating.
         if _HAS_VAD:
             try:
@@ -414,17 +426,25 @@ class LiveDoADisplay:
         self.hist.append((self.t, az, active and ok))
         self.drift.update(est['taus'], active=active)
 
-        _, raw = dc.srp_phat(block, pos=self.pos, grid_deg=self.grid,
-                             f_hi=self.f_hi, fs=self.fs)
-        if active:
-            # accumulate RAW power; normalize only for display. Averaging
-            # already-normalized frames biases the pooled peak.
-            self.srp_avg = raw if self.srp_avg is None else \
-                self.alpha * self.srp_avg + (1 - self.alpha) * raw
+        if self.acc is not None:
+            # Feed BOTH speech and non-speech frames: the accumulator routes
+            # them to separate pools so a stationary interferer can be
+            # subtracted out. Only speech frames move the reported bearing.
+            raw = self.acc.update(block, active=active)
+            self.srp_avg = self.acc.speech if self.acc.n_speech else None
+        else:
+            _, raw = dc.srp_phat(block, pos=self.pos, grid_deg=self.grid,
+                                 f_hi=self.f_hi, fs=self.fs)
+            if active:
+                # accumulate RAW power; normalize only for display. Averaging
+                # already-normalized frames biases the pooled peak.
+                self.srp_avg = raw if self.srp_avg is None else \
+                    self.alpha * self.srp_avg + (1 - self.alpha) * raw
 
         self.l_inst.set_ydata(dc.normalize_power(raw))
         if self.srp_avg is not None:
-            avg_n = dc.normalize_power(self.srp_avg)
+            avg_n = (self.acc.spectrum() if self.acc is not None
+                     else dc.normalize_power(self.srp_avg))
             self.l_avg.set_ydata(avg_n)
             pk = float(self.grid[int(np.argmax(avg_n))])
             sec, sec_p = dc.secondary_peak(self.grid, avg_n, pk)
@@ -463,7 +483,15 @@ class LiveDoADisplay:
             self.axC.set_ylim(max(0.0, lo - pad), min(360.0, hi + pad))
 
         if talk:
-            mean_az, R, sd = dc.circular_mean([a for _, a in talk])
+            # sd/R still describe the per-frame SPREAD (useful as a stability
+            # readout), but the reported bearing itself is the pooled-power
+            # peak -- see the SRPAccumulator note in __init__.
+            frame_az, R, sd = dc.circular_mean([a for _, a in talk])
+            if self.acc is not None and self.acc.n_speech:
+                pooled_az, _sharp = self.acc.bearing()
+                mean_az = pooled_az if np.isfinite(pooled_az) else frame_az
+            else:
+                mean_az = frame_az
             mean_az %= 360.0
             self.h_mean.set_ydata([mean_az, mean_az])
             rad = np.deg2rad(mean_az)
@@ -526,10 +554,25 @@ class LiveDoADisplay:
                     f'{rej}{sat}')
             else:
                 flag = '' if est['u_norm'] <= 1.02 else '   [!] |u|>1: check geometry'
-                self.banner.set_text(
-                    f'talker {mean_az:5.1f}°   sd {sd:4.1f}°   R {R:.3f}   '
-                    f'residual {est["resid_mm"]:.1f} mm   '
-                    f'{len(talk)} active / {len(self.hist)} frames{flag}')
+                seen, bad = getattr(self, 'n_seen', 0), getattr(self, 'n_bad', 0)
+                # Closure is geometry-free: when most speech frames fail it the
+                # room (or the SNR) is the problem, not `pos`. Say so, rather
+                # than printing a confident bearing built from the residue.
+                if seen >= 20 and bad > 0.7 * seen:
+                    self.banner.set_color(TALKER_COLOR)
+                    self.banner.set_text(
+                        f'LOW CONFIDENCE — {bad}/{seen} frames '
+                        f'({100 * bad / seen:.0f}%) fail the TDOA closure test: '
+                        f'no single coherent source. Bearing {mean_az:5.1f}° is '
+                        f'a pooled best guess. Move closer or reduce room noise.')
+                else:
+                    self.banner.set_color('black')
+                    rej = f'   {bad}/{seen} rejected' if bad else ''
+                    self.banner.set_text(
+                        f'talker {mean_az:5.1f}°   frame sd {sd:4.1f}°   R {R:.3f}   '
+                        f'closure {est["closure_us"]:.0f}/{est["closure_max_us"]:.0f} µs   '
+                        f'residual {est["resid_mm"]:.1f} mm   '
+                        f'{len(talk)} active / {len(self.hist)} frames{rej}{flag}')
             if self.multi:
                 self._update_drift_readout()
         else:
@@ -599,6 +642,17 @@ def main(argv=None):
     ap.add_argument('--device', type=int, default=None,
                     help='sounddevice input index (see --list-devices)')
     ap.add_argument('--list-devices', action='store_true')
+    ap.add_argument('--avg-tc', type=float, default=2.0, metavar='SECONDS',
+                    help='time constant of the pooled-SRP accumulator, seconds '
+                         '(default 2.0). Longer averages more frames and is '
+                         'more accurate on a stationary talker; shorter tracks '
+                         'a moving one faster. Was hard-coded before.')
+    ap.add_argument('--subtract-noise', action='store_true',
+                    help='accumulate a second spatial spectrum over NON-speech '
+                         'frames and subtract it, removing a stationary '
+                         'interferer (fan, HVAC, projector). On the 2026-08-04 '
+                         'session this recovered 13.0 -> 7.5 deg mean error. '
+                         'Only valid if the interferer really is stationary.')
     ap.add_argument('--channels', type=int, nargs='+', default=(1, 2, 3, 4),
                     help='0-based device channels for mic1..micN, in array '
                          'order (default 1 2 3 4 for the ReSpeaker, whose ch0 '
@@ -731,7 +785,9 @@ def main(argv=None):
     if linear_gaps is not None:
         kw['linear_gaps'] = linear_gaps
     LiveDoADisplay(src, radius=args.radius / 1000.0,
-                   vad_percentile=args.vad_percentile, **kw).run()
+                   vad_percentile=args.vad_percentile,
+                   avg_tc=args.avg_tc,
+                   subtract_noise=args.subtract_noise, **kw).run()
     return 0
 
 
