@@ -39,6 +39,41 @@ services:
       -p mic_name_filter:=Earpods
     restart: unless-stopped
 
+  # Direction of arrival. NOT started by default: it needs the raw mic-array
+  # channels on ONE clock, and two processes cannot open the same ALSA capture
+  # device, so `voice` and `doa` cannot both hold the array.
+  #
+  #   docker compose up doa          # DoA instead of voice
+  #
+  # To run BOTH, have voice publish its raw tap and point doa at the topic:
+  #   voice:  command: ... -p publish_raw:=true
+  #   doa:    command: ... -p source:=topic
+  # Read the caveat on TopicSource first -- that path is only trustworthy when
+  # voice_mod is driving a single multichannel device.
+  #
+  # device_channels/channels below describe the ReSpeaker 4-Mic Array: 6
+  # channels exposed, of which ch0 is the board's own processed mix and
+  # ch1..ch4 are the raw capsules. Set them to match your hardware, and set the
+  # geometry to match the channel order -- see doa_mod/README.md.
+  doa:
+    build: .
+    image: dorai:latest
+    profiles: ["doa"]
+    network_mode: host
+    ipc: host        # shared /dev/shm — see note on the voice service
+    devices:
+      - /dev/snd:/dev/snd
+    group_add:
+      - audio
+    environment:
+      - ROS_DOMAIN_ID=0
+    command: >
+      ros2 run doa_mod doa --ros-args
+      -p source:=mic
+      -p device_channels:=6
+      -p vad_mode:=neural
+    restart: unless-stopped
+
   stt:
     build: .
     image: dorai:latest
