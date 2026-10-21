@@ -1,0 +1,17 @@
+# dorai intent_mod defaults. Use with:
+#   ros2 run intent_mod intent --ros-args --params-file $(ros2 pkg prefix intent_mod)/share/intent_mod/config/intent.yaml
+#   ros2 launch intent_mod intent.launch.py
+intent_mod:
+  ros__parameters:
+    engine: auto            # auto (LLM if the GGUF is found, else rules) | llm (fail if missing) | rules
+    model: LFM2.5-1.2B-Instruct-Q4_K_M.gguf     # base GGUF (698 MB)
+    lora: intent-lfm25-1.2b-lora-f16.gguf       # dorai fine-tuned intent adapter (21 MB)
+    grounding_guard: true                       # 'did you mean X?' when the plan names an unsaid place
+    models_dir: ""          # extra models root searched first
+    num_threads: 2
+    n_ctx: 2048
+    locations_file: ""      # "" = share/intent_mod/config/locations.yaml
+    require_wake: true      # false: every transcript is a command (stop always works either way)
+    wake_word: artaban
+    wake_max_edits: 2
+    status_period_s: 5.0

@@ -1,0 +1,9 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.11.17, pytest-9.1.1, pluggy-1.7.0
+rootdir: /Users/javad/Projects/python/dorai/intent_mod
+collected 70 items
+
+intent_mod/test/test_intent.py ......................................... [ 58%]
+.............................                                            [100%]
+
+============================== 70 passed in 3.32s ==============================

@@ -25,14 +25,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # --- Python runtime dependencies --------------------------------------------
 # Not covered by rosdep. --break-system-packages is required because Ubuntu
 # 24.04 (Jazzy's base) marks the system Python as externally managed (PEP 668),
-# matching the project README. faster-whisper + vosk make BOTH STT engines
-# runnable; the engine is chosen at runtime via `-p engine:=vosk|whisper`.
+# matching the project README. sherpa-onnx runs the Nemotron STT (stt_mod).
+# The Nemotron model files (~640 MB each) are NOT baked in: mount ~/dorai/models at
+# /root/.cache/dorai/models (see docker-compose.yml) or set DORAI_MODELS_DIR.
 RUN pip3 install --no-cache-dir --break-system-packages \
         onnxruntime \
         sounddevice \
         samplerate \
-        vosk \
-        faster-whisper
+        sherpa-onnx
 
 # --- Build the ROS 2 workspace ----------------------------------------------
 WORKDIR /ros2_ws
@@ -44,9 +44,7 @@ COPY doa_mod   src/doa_mod
 RUN . /opt/ros/jazzy/setup.sh && \
     colcon build --symlink-install
 
-# Persisted STT model caches (Vosk + Hugging Face for faster-whisper) land here.
-ENV HF_HOME=/root/.cache/huggingface \
-    VOSK_MODEL_PATH=/root/.cache/vosk
+ENV DORAI_MODELS_DIR=/root/.cache/dorai/models
 
 # Entrypoint sources both the ROS base and this workspace overlay before exec.
 COPY ros_entrypoint.sh /ros_entrypoint.sh

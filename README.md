@@ -2,7 +2,7 @@
 
 `dorai` is a modular 2-stage ROS 2 audio processing pipeline that captures audio from an array of microphones, enhances the multi-channel signals in real time (beamforming), and transcribes the cleaned speech to text.
 
-`voice_mod` runs the full capture-to-enhancement path in a single node: it auto-detects the microphone array, async-resamples every mic to a common 16 kHz timeline with per-mic clock-drift correction, and runs the `dorai_beamformer.ort` beamformer continuously. Enhancement runs on a real-time sliding window with no added algorithmic delay; only the publish of the clean stream is batched into configurable N-second frames (default 10 s). `stt_mod` then transcribes that clean stream using Vosk (streaming, partials) or OpenAI Whisper via `faster-whisper` (whole-utterance).
+`voice_mod` runs the full capture-to-enhancement path in a single node: it auto-detects the microphone array, async-resamples every mic to a common 16 kHz timeline with per-mic clock-drift correction, and runs the `dorai_beamformer.ort` beamformer continuously. Enhancement runs on a real-time sliding window with no added algorithmic delay; only the publish of the clean stream is batched into configurable N-second frames (default 10 s). `stt_mod` then transcribes that clean stream with NVIDIA Nemotron streaming ASR (NeMo, via `sherpa-onnx`) plus the dorai fine-tuned workshop adapter, publishing streaming partials and punctuated finals.
 
 `doa_mod` runs alongside them and answers a different question — *where* the
 talker is, rather than what they said. It takes the raw array channels, gates
@@ -21,7 +21,7 @@ them on voice activity, and publishes the bearing in degrees.
  [/dorai_clean_audio]                          [/dorai_doa]  (degrees, 0-360)
         v
    +---------+
-   | stt_mod |  Speech-to-Text (Vosk or Whisper)
+   | stt_mod |  Speech-to-Text (NVIDIA Nemotron + dorai adapter)
    +---------+
         |
  [/dorai_transcript]
@@ -60,7 +60,13 @@ See `doa_mod/README.md`.
 3. **Install Python Package Dependencies**:
    Install the required Python packages directly to your user-site location (so they are accessible by the system Python interpreter used by ROS 2):
    ```bash
-   pip3 install --user --break-system-packages onnxruntime vosk numpy scipy sounddevice samplerate faster-whisper 
+   pip3 install --user --break-system-packages onnxruntime numpy scipy sounddevice samplerate sherpa-onnx
+   ```
+
+   **Nemotron STT model**: the default (1120 ms + dorai `mc-ref` adapter) is bundled in `stt_mod/models/`.
+   Other latency profiles/adapters: see [`stt_mod/README.md`](stt_mod/README.md#models). Check that it loads and measure the RTF (no ROS needed):
+   ```bash
+   python3 -m stt_mod.transcribe stt_mod/models/*/test_wavs/*.wav
    ```
 
 4. **Build the Workspace**:
@@ -117,37 +123,20 @@ ros2 run voice_mod voice --ros-args -p publish_raw:=true -p input_latency:=0.05
 
 ### 2. Stage 2: Speech-To-Text (`stt_mod`)
 
-Subscribes to the clean audio topic, transcribes speech using Vosk or OpenAI Whisper, and publishes/prints results:
+Streaming NVIDIA `nemotron-speech-streaming-en-0.6b` (NeMo FastConformer + RNN-T, int8 ONNX via sherpa-onnx), with
+the dorai fine-tuned workshop adapter `mc-ref` baked in; that default model ships inside the package
+(`stt_mod/models/`). It publishes partials and finals:
 ```bash
-ros2 run stt_mod stt
+ros2 launch stt_mod stt.launch.py                          # 1120 ms profile, mc-ref, 2 threads
+ros2 run stt_mod stt --ros-args -p latency_ms:=560 -p num_threads:=4
 ```
+Key parameters: `latency_ms` (80 | 160 | 560 | 1120), `adapter` (mc-ref | mc-das | none), `num_threads`,
+`ep_rule2_sil` (0 = auto per profile). The full table, the measured
+latency/accuracy behind each default, and the adapter bake tool are in [`stt_mod/README.md`](stt_mod/README.md).
 
-#### Common Parameters
-* `--ros-args -p engine:=vosk` (STT engine: `vosk` or `whisper`; default `vosk`)
-* `--ros-args -p input_topic:=/dorai_clean_audio` (Clean audio topic to subscribe to; default `/dorai_clean_audio`)
-* `--ros-args -p output_topic:=/dorai_transcript` (Topic name for final transcripts; default `/dorai_transcript`)
-* `--ros-args -p partial_topic:=/dorai_partial_transcript` (Topic name for real-time partial transcripts; default `/dorai_partial_transcript`)
-* `--ros-args -p debug:=false` (Enable verbose STT engine logs; default `false`)
-
-#### Vosk-Specific Parameters (`engine:=vosk`)
-* `--ros-args -p model_lang:=en-us` (Vosk language model identifier; default `en-us`)
-* `--ros-args -p model_path:=/path/to/vosk-model` (Path to a local Vosk model folder, overrides `model_lang`)
-
-#### Whisper-Specific Parameters (`engine:=whisper`)
-* `--ros-args -p whisper_model:=tiny` (Whisper model size/name, e.g. `tiny`, `tiny.en`, `base`, `small`; default `tiny`)
-* `--ros-args -p whisper_compute_type:=int8` (Quantization compute type, e.g. `int8`, `float16`; default `int8`)
-* `--ros-args -p language:=en` (Language code for transcription, empty string `""` for auto-detect; default `en`)
-* `--ros-args -p whisper_beam_size:=1` (Beam size for decoding; default `1`)
-* `--ros-args -p num_threads:=4` (CTranslate2 CPU threads; default `4`)
-
-*Example — run streaming STT using Vosk (default):*
-```bash
-ros2 run stt_mod stt --ros-args -p engine:=vosk -p model_lang:=en-us
-```
-*Example — run STT using Whisper with a 4-thread CPU pool:*
-```bash
-ros2 run stt_mod stt --ros-args -p engine:=whisper -p whisper_model:=tiny.en -p num_threads:=4
-```
+* On a Pi 4, no profile decodes in real time (1120 ms reaches RTF ≈ 1.7). The node queues audio rather than
+  dropping it and reports `backlog_s` on `/dorai_stt/status`. When it runs on the same Pi as `voice_mod`,
+  start voice_mod with `-p input_latency:=0.25`; at 0.0 the STT load caused capture overflows (see `test/sim_pipeline.sh`).
 
 ---
 
@@ -209,7 +198,8 @@ The audio samples follow the header in interleaved format: `[ch1_s1, ch2_s1, ...
 | `/dorai_clean_audio` | `std_msgs/Float32MultiArray` | Enhanced single-channel 16 kHz speech, published in N-second frames. |
 | `/dorai_raw_audio` | `std_msgs/Float32MultiArray` | Raw multi-channel 16 kHz speech (resampled & filtered), published only if `publish_raw:=true`. |
 | `/dorai_transcript` | `std_msgs/String` | Final transcribed text results. |
-| `/dorai_partial_transcript` | `std_msgs/String` | Real-time partial transcripts (Vosk engine only). |
+| `/dorai_partial_transcript` | `std_msgs/String` | Running hypothesis, updated every encoder chunk. |
+| `/dorai_stt/status` | `std_msgs/String` | JSON: `rtf`, `backlog_s`, `finals`, `lag_median_s`, `model`. |
 | `/voice_mod/diagnostics` | `std_msgs/String` | Per-mic rate, FIFO/backlog, underruns, xruns, and drift ratio. |
 | `/dorai_doa` | `std_msgs/Float32` | Talker bearing in degrees, 0–360, CCW from the array's +x axis. Published only while speech is present. |
 | `/dorai_doa/state` | `std_msgs/Float32MultiArray` | `[elapsed_s, azimuth_deg, sharpness, consistent_frac, speech_flag, seq]`. |

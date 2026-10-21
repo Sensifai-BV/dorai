@@ -318,11 +318,17 @@ def detect_microphones(logger, include_internal=False, max_mics=3,
                   if is_usable_input(d["name"], include_internal=True)]
 
     if mic_name_filter:
+        # An explicit pin is applied to ALL inputs, not just `usable`, so it
+        # overrides the virtual-device exclusion above. This is what lets a
+        # simulation feed the node through an ALSA loopback (snd-aloop:
+        # `aplay` a recording into hw:N,0 and pin "Loopback: PCM (hw:N,1)"),
+        # exercising the real capture -> resample -> beamform -> publish path
+        # with known audio. See test/sim_pipeline.sh.
         needle = mic_name_filter.lower()
-        filtered = [(i, d) for i, d in usable if needle in d["name"].lower()]
+        filtered = [(i, d) for i, d in inputs if needle in d["name"].lower()]
         logger.info(
             f"mic_name_filter='{mic_name_filter}' kept {len(filtered)} of "
-            f"{len(usable)} usable input(s)."
+            f"{len(inputs)} input(s)."
         )
         if filtered:
             usable = filtered

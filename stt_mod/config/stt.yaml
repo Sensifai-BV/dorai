@@ -1,0 +1,17 @@
+# dorai stt_mod defaults. Use with:
+#   ros2 run stt_mod stt --ros-args --params-file $(ros2 pkg prefix stt_mod)/share/stt_mod/config/stt.yaml
+#   ros2 launch stt_mod stt.launch.py
+stt_mod:
+  ros__parameters:
+    latency_ms: 1120        # 80 | 160 | 560 | 1120  (1120 = only profile near real time on a Pi 4)
+    adapter: mc-ref         # mc-ref | mc-das | none  (dorai fine-tuned workshop adapter)
+    num_threads: 2          # Pi 4: 2 is faster than 4 (int8 kernels, no dot-product ISA)
+    block_ms: 200
+    ep_rule1_sil: 2.0
+    ep_rule2_sil: 0.0       # 0 = auto per profile (80 ms: 0.5 s, else 0.8 s); floored at chunk + 0.2 s
+    ep_max_utt: 20.0
+    frame_is_utterance: false
+    backlog_warn_s: 5.0
+    status_period_s: 5.0
+    metrics: false          # true: per-final JSON on /dorai_stt/metrics (SNR est., RTF, lag, CPU)
+    metrics_file: ""        # also append metrics JSON lines here
