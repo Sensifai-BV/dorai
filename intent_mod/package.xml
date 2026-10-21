@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>intent_mod</name>
+  <version>0.1.0</version>
+  <description>
+    Stage 3 of the dorai pipeline: transcript -> robot plan. Deterministic stop/wake gate,
+    then a grammar-constrained llama.cpp model (or a rule fallback) over locations.yaml.
+  </description>
+  <maintainer email="info@sensifai.com">Sensifai</maintainer>
+  <license>None</license>
+
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+  <depend>rcl_interfaces</depend>
+
+  <exec_depend>python3-yaml</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <!-- llama-cpp-python is pip-only and optional: pip install llama-cpp-python (see README).
+       Without it the node runs the rule engine. -->
+
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

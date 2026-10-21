@@ -1,0 +1,80 @@
+# intent_mod world model: named places and carryable objects.
+#
+# The LLM only ever sees `id` and `aliases`. It must answer with an `id` from this
+# file (grammar-enforced), so adding a place here needs NO retraining.
+# task_mod resolves `id` -> pose / AprilTag / equipment.
+#
+#   pose:      map-frame goal for Nav2 (metres, radians)
+#   apriltag:  tag id used for the final docking/alignment fix (optional)
+#   equipment: what is at the place; `meters` lists gauges vision_mod can read.
+#              inspect_meter is only valid where `meters` is non-empty.
+locations:
+  - id: welder_a
+    aliases: [welder a, welding device a, welding machine a, welding station a]
+    pose: {frame: map, x: 4.2, y: 1.5, yaw: 1.57}
+    apriltag: 11
+    equipment: {type: welder, meters: [current, voltage]}
+  - id: welder_b
+    aliases: [welder b, welding device b, welding machine b, welding station b]
+    pose: {frame: map, x: 6.0, y: 1.5, yaw: 1.57}
+    apriltag: 12
+    equipment: {type: welder, meters: [current, voltage]}
+  - id: welder_x
+    aliases: [welder x, welding device x, welding machine x, the big welder]
+    pose: {frame: map, x: 8.1, y: 1.4, yaw: 1.57}
+    apriltag: 13
+    equipment: {type: welder, meters: [current, voltage, gas_flow]}
+  - id: welder_3
+    aliases: [welder three, welding device three, welder number three, welding machine three]
+    pose: {frame: map, x: 4.2, y: -2.0, yaw: -1.57}
+    apriltag: 14
+    equipment: {type: welder, meters: [current]}
+  - id: gas_manifold
+    aliases: [gas manifold, argon manifold, shielding gas station, gas bottles]
+    pose: {frame: map, x: 10.5, y: 0.2, yaw: 0.0}
+    apriltag: 21
+    equipment: {type: gas, meters: [pressure, flow]}
+  - id: compressor
+    aliases: [compressor, air compressor, the compressor room]
+    pose: {frame: map, x: 12.0, y: -3.1, yaw: 3.14}
+    apriltag: 22
+    equipment: {type: compressor, meters: [pressure]}
+  - id: main_panel
+    aliases: [main panel, electrical panel, power panel, the breaker box]
+    pose: {frame: map, x: 0.8, y: -4.0, yaw: -1.57}
+    apriltag: 31
+    equipment: {type: panel, meters: [voltage]}
+  - id: tool_rack
+    aliases: [tool rack, tool wall, the tools]
+    pose: {frame: map, x: 2.0, y: 3.5, yaw: 1.57}
+    apriltag: 41
+    equipment: {type: storage, meters: []}
+  - id: inspection_bay
+    aliases: [inspection bay, inspection table, quality station]
+    pose: {frame: map, x: 7.5, y: -4.2, yaw: -1.57}
+    apriltag: 42
+    equipment: {type: table, meters: []}
+  - id: base
+    aliases: [base, home, home position, start point]
+    pose: {frame: map, x: 0.0, y: 0.0, yaw: 0.0}
+    apriltag: 1
+    equipment: {type: none, meters: []}
+  - id: charging_station
+    aliases: [charging station, charger, dock, charging dock]
+    pose: {frame: map, x: -0.6, y: 0.9, yaw: 3.14}
+    apriltag: 2
+    equipment: {type: charger, meters: []}
+
+objects:
+  - id: hammer
+    aliases: [hammer, the hammer]
+  - id: toolbox
+    aliases: [toolbox, tool box, the toolbox]
+  - id: plate
+    aliases: [plate, the plate, steel plate, the workpiece]
+  - id: wrench
+    aliases: [wrench, spanner, the wrench]
+  - id: welding_rod
+    aliases: [welding rods, rods, electrodes, filler wire]
+  - id: helmet
+    aliases: [helmet, welding helmet, mask]

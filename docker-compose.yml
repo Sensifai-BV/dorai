@@ -81,16 +81,13 @@ services:
     ipc: host        # shared /dev/shm — see note on the voice service
     environment:
       - ROS_DOMAIN_ID=0
-    # Persist downloaded Vosk / Whisper models across restarts.
+    # The default model is inside the image (stt_mod/models). Extra profiles/adapters from the host:
     volumes:
-      - dorai-models:/root/.cache
-    # Default engine is Vosk (streaming + partials). Swap to Whisper with:
-    #   command: ros2 run stt_mod stt --ros-args -p engine:=whisper -p whisper_model:=tiny.en
+      - ${HOME}/dorai/models:/root/.cache/dorai/models:ro
     command: >
-      ros2 run stt_mod stt --ros-args
-      -p engine:=vosk
-      -p model_lang:=en-us
+      ros2 launch stt_mod stt.launch.py
+      latency_ms:=1120
+      adapter:=mc-ref
+      num_threads:=2
     restart: unless-stopped
 
-volumes:
-  dorai-models:
