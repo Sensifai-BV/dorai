@@ -1,0 +1,31 @@
+# mlx_lm LoRA config: Qwen3.5-4B -> dorai intent planner (Apple silicon, bf16).
+#   python intent_mod/train/gen_data.py                       # -> intent_mod/train/data/mlx/{train,valid}.jsonl
+#   python intent_mod/train/lora_throttled.py -- -c intent_mod/train/lora_qwen35_4b.yaml   # -> adapter_path
+#     (mlx_lm.lora wrapper capped at 70% GPU duty / 50% RAM so the Mac stays usable)
+#   python intent_mod/train/export_gguf.py ...                # merge + GGUF + Q4_0 (see README)
+model: Qwen/Qwen3.5-4B
+train: true
+data: intent_mod/train/data/mlx
+fine_tune_type: lora
+num_layers: -1          # every block; LoRA on all linear layers (attention, DeltaNet, MLP)
+lora_parameters:
+  rank: 16
+  scale: 2.0            # alpha 32
+  dropout: 0.05
+batch_size: 2
+grad_accumulation_steps: 2   # effective batch 4 at half the activation memory
+iters: 600              # 1 epoch of 1200 rows; optimizer updates = iters / grad_accumulation_steps = 300
+learning_rate: 1.0e-4
+lr_schedule:
+  name: cosine_decay
+  warmup: 20
+  arguments: [1.0e-4, 300, 1.0e-6]   # counted in optimizer updates, not micro-batches
+mask_prompt: true       # loss on the JSON answer only, not the ~900-token system prompt
+grad_checkpoint: true
+max_seq_length: 2048
+steps_per_report: 20
+steps_per_eval: 200
+val_batches: 10
+save_every: 200
+seed: 0
+adapter_path: models/lora/intent-qwen35-4b-mlx

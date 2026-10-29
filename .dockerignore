@@ -9,6 +9,10 @@ log
 # license, and would bloat the build context with sample wavs.
 lab
 
+# intent_mod training data/scripts and offline eval artifacts: not needed at runtime
+intent_mod/train
+artifacts
+
 # Docker + git noise
 .git
 .gitignore

@@ -2,10 +2,10 @@
 
   cd dorai && python -m pytest intent_mod/test -q
 
-One optional test runs the real LlamaIntentEngine; it is skipped unless a GGUF exists
-under /Users/javad/External/Model/dorai/models/*/*.gguf (or $DORAI_TEST_GGUF).
+One optional test runs the real LlamaIntentEngine; it is skipped unless the default GGUF is
+installed in a models root (or $DORAI_TEST_GGUF). Hugging Face downloads are disabled here
+(autouse fixture); the download tests fake the HTTP layer.
 """
-import glob
 import json
 import os
 import sys
@@ -25,8 +25,17 @@ from intent_mod import engine as eng  # noqa: E402
 from intent_mod import models, node as node_mod, wake  # noqa: E402
 from intent_mod.schema import load_world, validate  # noqa: E402
 
+REAL_HF_DOWNLOAD = models.hf_download
 WORLD = os.path.join(HERE, "..", "config", "locations.yaml")
 LOCS, OBJS = load_world(WORLD)
+
+
+@pytest.fixture(autouse=True)
+def no_network(monkeypatch):
+    """A missing model must never start a real 2.6 GB download from a unit test."""
+    def refuse(*a, **k):
+        raise IOError("network disabled in tests")
+    monkeypatch.setattr(models, "hf_download", refuse)
 
 
 # ------------------------------------------------------------------ helpers
@@ -75,6 +84,7 @@ def msgs(n, key):
     ("Emergency stop!", "estop"), ("e stop", "estop"), ("artaban stop", "stop"),
     ("hey artaban emergency stop", "estop"), ("stop please", "stop"), ("stop moving", "stop"),
     ("stob", "stop"), ("stopp", "stop"), ("halt now", "stop"),
+    ("Arduban stopped", "stop"), ("Artaban stopped.", "stop"),            # ASR spellings of "Artaban stop."
 ])
 def test_is_stop_positive(text, exp):
     assert wake.is_stop(text) == exp
@@ -125,6 +135,34 @@ def test_rule_engine_inspect_meter():
 def test_rule_engine_unknown_place_is_clarify():
     plan, _ = eng.RuleIntentEngine(LOCS, OBJS).parse("go to the paint shop")
     assert plan["steps"][0]["task"] == "clarify" and plan["steps"][0]["reason"] == "unknown_target"
+
+
+# the 10 basic Artaban commands of the partner test sheet, plus the STT spellings seen for them
+@pytest.mark.parametrize("text,step", [
+    ("come here", {"task": "come_here"}),
+    ("go to welding station two", {"task": "goto", "target": "welder_2"}),
+    ("go to welding station 2", {"task": "goto", "target": "welder_2"}),       # digit, was welder_a
+    ("go to wedding station two", {"task": "goto", "target": "welder_2"}),
+    ("turn left", {"task": "turn", "direction": "left"}),
+    ("go back to base", {"task": "goto", "target": "base"}),
+    ("go back to the base", {"task": "goto", "target": "base"}),               # was go_back
+    ("check the meter", {"task": "read_meter"}),
+    ("follow me", {"task": "follow_me"}),
+    ("sit down", {"task": "posture", "pose": "sit"}),
+    ("look at the welding torch", {"task": "look_at", "object": "welding_torch"}),
+    ("start inspection", {"task": "inspection", "state": "start"}),
+    ("move 1.5 meters forward", {"task": "move", "direction": "forward", "meters": 1.5}),
+])
+def test_rule_engine_basic_commands(text, step):
+    plan, _ = eng.RuleIntentEngine(LOCS, OBJS).parse(text)
+    assert plan == {"steps": [step]} and validate(plan, LOCS, OBJS) == []
+
+
+def test_validate_rejects_out_of_enum_values():
+    # Seen live (E6, welding 0 dB): "Both welding state reduced" -> weld state "reduce" was published.
+    assert validate({"steps": [{"task": "weld", "state": "reduce"}]}, LOCS, OBJS)
+    assert validate({"steps": [{"task": "turn", "direction": "up"}]}, LOCS, OBJS)
+    assert validate({"steps": [{"task": "weld", "state": "stop"}]}, LOCS, OBJS) == []
 
 
 def test_make_engine_falls_back_to_rules_when_gguf_missing(tmp_path, monkeypatch):
@@ -306,15 +344,14 @@ def _gguf():
     env = os.environ.get("DORAI_TEST_GGUF")
     if env and os.path.isfile(env):
         return env
-    hits = sorted(glob.glob("/Users/javad/External/Model/dorai/models/*/*.gguf"))
-    pref = [h for h in hits if "lfm25-1.2b" in h and "Q4_K_M" in h]
-    return (pref or hits or [None])[0]
+    return models.find_model(models.DEFAULT_MODEL)                    # deployed: merged LoRA, Q4_0
 
 
-@pytest.mark.skipif(_gguf() is None, reason="no GGUF under /Users/javad/External/Model/dorai/models")
-def test_real_llama_engine_three_utterances():
+@pytest.mark.skipif(_gguf() is None, reason="intent-qwen35-4b-Q4_0.gguf not installed (see models.default_roots)")
+@pytest.mark.parametrize("use_grammar", [False, True])
+def test_real_llama_engine_three_utterances(use_grammar):
     pytest.importorskip("llama_cpp")
-    e = eng.LlamaIntentEngine(_gguf(), LOCS, OBJS, n_threads=4, n_ctx=2048)
+    e = eng.LlamaIntentEngine(_gguf(), LOCS, OBJS, n_threads=4, n_ctx=2048, use_grammar=use_grammar)
     for text in ("go to welding device x for check meter", "come here", "bring me the hammer"):
         plan, lat = e.parse(text)
         assert validate(plan, LOCS, OBJS) == [] or plan["steps"][0]["task"] in ("clarify", "none"), plan
@@ -364,3 +401,71 @@ def test_guard_allows_dock_and_home():
     locs, objs = _world()
     assert check("go home", {"steps": [{"task": "goto", "target": "base"}]}, locs, objs)[1] is None
     assert check("go charge", {"steps": [{"task": "dock"}]}, locs, objs)[1] is None
+
+
+# ------------------------------------------------------------ HF download
+class _Resp:
+    """Minimal urllib response: honours a Range request header like the HF CDN."""
+    def __init__(self, data, req):
+        rng = req.headers.get("Range")
+        start = int(rng.split("=")[1].rstrip("-")) if rng else 0
+        self.status, self._b = (206 if rng else 200), data[start:]
+        self.headers = {"Content-Length": str(len(self._b))}
+
+    def read(self, n):
+        out, self._b = self._b[:n], self._b[n:]
+        return out
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+
+def _fake_hub(monkeypatch, data, sha=None):
+    import hashlib
+    monkeypatch.setattr(models, "_hf_sha256", lambda url, hdr: sha or hashlib.sha256(data).hexdigest())
+    monkeypatch.setattr(models.urllib.request, "urlopen", lambda req, timeout=0: _Resp(data, req))
+
+
+def test_hf_download_resumes_and_verifies(tmp_path, monkeypatch):
+    data = os.urandom(3 * 1024 * 1024 + 17)
+    _fake_hub(monkeypatch, data)
+    (tmp_path / "m.gguf.part").write_bytes(data[:1_000_000])          # interrupted earlier
+    log = rosmock._Logger()
+    p = REAL_HF_DOWNLOAD("org/repo", "m.gguf", str(tmp_path), log=log, chunk=1 << 20)
+    assert open(p, "rb").read() == data and not (tmp_path / "m.gguf.part").exists()
+    assert any("resuming" in m for _, m in log.lines)
+
+
+def test_hf_download_rejects_bad_checksum(tmp_path, monkeypatch):
+    _fake_hub(monkeypatch, b"corrupted", sha="0" * 64)
+    with pytest.raises(IOError, match="sha256 mismatch"):
+        REAL_HF_DOWNLOAD("org/repo", "m.gguf", str(tmp_path), log=rosmock._Logger())
+    assert list(tmp_path.iterdir()) == []                              # no half file left behind
+
+
+def test_resolve_model_sources(tmp_path, monkeypatch):
+    monkeypatch.setattr(models, "default_roots", lambda extra="": [str(tmp_path)])
+    calls = []
+
+    def fake(repo, fname, dest, rev="main", log=None):
+        calls.append((repo, fname, dest, rev))
+        return os.path.join(dest, os.path.basename(fname))
+    monkeypatch.setattr(models, "hf_download", fake)
+    d = str(tmp_path / "dl")
+    # bare name, not installed -> hf_repo/name into models_dir
+    assert models.resolve_model("x.gguf", d, hf_repo="sensifai/dorai-intent-model") == os.path.join(d, "x.gguf")
+    # huggingface.co URL (blob or resolve) -> that repo, revision and file
+    url = "https://huggingface.co/sensifai/dorai-intent-model/blob/main/intent-qwen35-4b-Q4_0.gguf"
+    models.resolve_model(url, d)
+    assert calls == [("sensifai/dorai-intent-model", "x.gguf", d, "main"),
+                     ("sensifai/dorai-intent-model", "intent-qwen35-4b-Q4_0.gguf", d, "main")]
+    # an explicit path that is missing is an error, never a download; download=False stays offline
+    assert models.resolve_model(str(tmp_path / "nope.gguf"), d) is None
+    assert models.resolve_model("y.gguf", d, download=False) is None
+    assert len(calls) == 2
+    # already installed -> no download
+    (tmp_path / "z.gguf").write_bytes(b"x")
+    assert models.resolve_model("z.gguf", d) == str(tmp_path / "z.gguf") and len(calls) == 2

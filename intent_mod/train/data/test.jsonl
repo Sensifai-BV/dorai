@@ -1,0 +1,118 @@
+{"world": "heldout_plant", "text": "Deliver spool of wire to me.", "plan": {"steps": [{"task": "bring", "object": "spool"}]}}
+{"world": "heldout_plant", "text": "Please point at forklift with your camera.", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "heldout_plant", "text": "Is anything broken at the quality lab.", "plan": {"steps": [{"task": "inspect_visual", "target": "quality_lab"}]}}
+{"world": "heldout_plant", "text": "go and eyeball the robot arm cage", "plan": {"steps": [{"task": "inspect_visual", "target": "robot_cell"}]}}
+{"world": "heldout_plant", "text": "check out the steam boiler visually", "plan": {"steps": [{"task": "inspect_visual", "target": "boiler"}]}}
+{"world": "heldout_plant", "text": "please start the weld", "plan": {"steps": [{"task": "weld", "state": "start"}]}}
+{"world": "heldout_plant", "text": "now open your hand", "plan": {"steps": [{"task": "gripper", "state": "open"}]}}
+{"world": "heldout_plant", "text": "Head back to base!", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "heldout_plant", "text": "Look over at vernier.", "plan": {"steps": [{"task": "look_at", "object": "caliper"}]}}
+{"world": "heldout_plant", "text": "proceed to the raw material rack", "plan": {"steps": [{"task": "goto", "target": "material_store"}]}}
+{"world": "heldout_plant", "text": "Uh stay and go top up your battery and proceed to measurement room.", "plan": {"steps": [{"task": "wait"}, {"task": "dock"}, {"task": "goto", "target": "quality_lab"}]}}
+{"world": "heldout_plant", "text": "check out the mezzanine visually", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "heldout_plant", "text": "what's welding station eight reading on the meter", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_8"}]}}
+{"world": "heldout_plant", "text": "pause the inspection", "plan": {"steps": [{"task": "inspection", "state": "stop"}]}}
+{"world": "heldout_plant", "text": "um i'll be back after lunch", "plan": {"steps": [{"task": "none"}]}}
+{"world": "heldout_plant", "text": "uh begin inspection and after that dock after that pause the inspection", "plan": {"steps": [{"task": "inspection", "state": "start"}, {"task": "dock"}, {"task": "inspection", "state": "stop"}]}}
+{"world": "heldout_plant", "text": "um turn up the radio", "plan": {"steps": [{"task": "none"}]}}
+{"world": "heldout_plant", "text": "normal speed", "plan": {"steps": [{"task": "set_speed", "speed": "normal"}]}}
+{"world": "heldout_plant", "text": "end the inspection round and after that check welding device k for damage and what number is on the meter", "plan": {"steps": [{"task": "inspection", "state": "stop"}, {"task": "inspect_visual", "target": "welder_k"}, {"task": "read_meter"}]}}
+{"world": "heldout_plant", "text": "Artaban stop welding.", "plan": {"steps": [{"task": "weld", "state": "stop"}]}}
+{"world": "heldout_plant", "text": "how many temperature is paint booth showing", "plan": {"steps": [{"task": "inspect_meter", "target": "paint_booth"}]}}
+{"world": "heldout_plant", "text": "um lunch is at twelve", "plan": {"steps": [{"task": "none"}]}}
+{"world": "heldout_plant", "text": "now what number is on the meter", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "heldout_plant", "text": "give me the temperature at the spray booth after that how many temperature is the boiler room showing", "plan": {"steps": [{"task": "inspect_meter", "target": "paint_booth"}, {"task": "inspect_meter", "target": "boiler"}]}}
+{"world": "heldout_plant", "text": "Hey artaban i need hacksaw bring it.", "plan": {"steps": [{"task": "bring", "object": "hacksaw"}]}}
+{"world": "heldout_plant", "text": "pick up the mig torch", "plan": {"steps": [{"task": "pick", "object": "mig_torch"}]}}
+{"world": "heldout_plant", "text": "so i need you at mezzanine", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "heldout_plant", "text": "the welding fumes are bad today", "plan": {"steps": [{"task": "none"}]}}
+{"world": "heldout_plant", "text": "okay go back to base", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "heldout_plant", "text": "Nice job on that seam!", "plan": {"steps": [{"task": "none"}]}}
+{"world": "heldout_plant", "text": "point at spool of wire with your camera", "plan": {"steps": [{"task": "look_at", "object": "spool"}]}}
+{"world": "heldout_plant", "text": "deliver wire spool to me", "plan": {"steps": [{"task": "bring", "object": "spool"}]}}
+{"world": "heldout_plant", "text": "take a seat", "plan": {"steps": [{"task": "posture", "pose": "sit"}]}}
+{"world": "heldout_plant", "text": "how many temp is spray booth showing", "plan": {"steps": [{"task": "inspect_meter", "target": "paint_booth"}]}}
+{"world": "heldout_plant", "text": "artaban could you roll over to quality lab", "plan": {"steps": [{"task": "goto", "target": "quality_lab"}]}}
+{"world": "heldout_plant", "text": "time to charge go dock", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "heldout_plant", "text": "swing by welder seven and read gauges", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_7"}]}}
+{"world": "heldout_plant", "text": "So approach me then pick spool of wire up.", "plan": {"steps": [{"task": "come_here"}, {"task": "pick", "object": "spool"}]}}
+{"world": "heldout_plant", "text": "Give me the pressure at parking lot.", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "heldout_plant", "text": "now deliver coffee mug to me", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "heldout_plant", "text": "Check the meter on the garden!", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "heldout_plant", "text": "go top up your battery", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "heldout_plant", "text": "please pick up rubber mallet and after that go recharge your battery", "plan": {"steps": [{"task": "pick", "object": "mallet"}, {"task": "dock"}]}}
+{"world": "heldout_plant", "text": "now travel to paint booth", "plan": {"steps": [{"task": "goto", "target": "paint_booth"}]}}
+{"world": "heldout_plant", "text": "stick with me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "heldout_plant", "text": "deliver rubber mallet to me", "plan": {"steps": [{"task": "bring", "object": "mallet"}]}}
+{"world": "heldout_plant", "text": "okay go at normal speed", "plan": {"steps": [{"task": "set_speed", "speed": "normal"}]}}
+{"world": "heldout_plant", "text": "i need you to lie down after that go read the gauges over at the backup power", "plan": {"steps": [{"task": "posture", "pose": "lie_down"}, {"task": "inspect_meter", "target": "generator"}]}}
+{"world": "heldout_plant", "text": "Can you go back please?", "plan": {"steps": [{"task": "go_back"}]}}
+{"world": "heldout_plant", "text": "the shipment is late again", "plan": {"steps": [{"task": "none"}]}}
+{"world": "heldout_plant", "text": "move back one meter", "plan": {"steps": [{"task": "move", "direction": "backward", "meters": 1}]}}
+{"world": "heldout_plant", "text": "Take the visor.", "plan": {"steps": [{"task": "pick", "object": "face_shield"}]}}
+{"world": "heldout_plant", "text": "turn your lights on and after that read out that gauge", "plan": {"steps": [{"task": "lights", "state": "on"}, {"task": "read_meter"}]}}
+{"world": "heldout_plant", "text": "hold on to the hacksaw", "plan": {"steps": [{"task": "hold", "object": "hacksaw"}]}}
+{"world": "heldout_plant", "text": "so return to your previous spot", "plan": {"steps": [{"task": "go_back"}]}}
+{"world": "heldout_plant", "text": "Approach me.", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "heldout_plant", "text": "proceed to the tig welder", "plan": {"steps": [{"task": "goto", "target": "welder_k"}]}}
+{"world": "heldout_plant", "text": "i need you to begin the weld", "plan": {"steps": [{"task": "weld", "state": "start"}]}}
+{"world": "heldout_plant", "text": "swing by tig welder and read the gauges", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_k"}]}}
+{"world": "heldout_plant", "text": "Hey artaban uh return to home position.", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "heldout_plant", "text": "Come to where i am after that is anything broken at robot cell and then return home.", "plan": {"steps": [{"task": "come_here"}, {"task": "inspect_visual", "target": "robot_cell"}, {"task": "goto", "target": "base"}]}}
+{"world": "heldout_plant", "text": "I want you over at boiler and after that look over at face shield?", "plan": {"steps": [{"task": "goto", "target": "boiler"}, {"task": "look_at", "object": "face_shield"}]}}
+{"world": "heldout_plant", "text": "go to backup power and then stay here", "plan": {"steps": [{"task": "goto", "target": "generator"}, {"task": "wait"}]}}
+{"world": "heldout_plant", "text": "Stick with me.", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "heldout_plant", "text": "can you travel to welding device 8", "plan": {"steps": [{"task": "goto", "target": "welder_8"}]}}
+{"world": "heldout_plant", "text": "so travel to bathroom", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "heldout_plant", "text": "uh turn left please", "plan": {"steps": [{"task": "turn", "direction": "left"}]}}
+{"world": "heldout_plant", "text": "turn left", "plan": {"steps": [{"task": "turn", "direction": "left"}]}}
+{"world": "heldout_plant", "text": "nice job on that seam", "plan": {"steps": [{"task": "none"}]}}
+{"world": "heldout_plant", "text": "hold vernier", "plan": {"steps": [{"task": "hold", "object": "caliper"}]}}
+{"world": "heldout_plant", "text": "how many amperage is welding machine seven showing and after that stay", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_7"}, {"task": "wait"}]}}
+{"world": "heldout_plant", "text": "What's welding machine seven reading on the meter.", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_7"}]}}
+{"world": "heldout_plant", "text": "Take a reading at the mezzanine.", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "heldout_plant", "text": "deliver the coffee mug to me", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "heldout_plant", "text": "what number is on the meter and after that come here please", "plan": {"steps": [{"task": "read_meter"}, {"task": "come_here"}]}}
+{"world": "heldout_plant", "text": "i want you over at steam boiler", "plan": {"steps": [{"task": "goto", "target": "boiler"}]}}
+{"world": "heldout_plant", "text": "uh point at the hacksaw with your camera", "plan": {"steps": [{"task": "look_at", "object": "hacksaw"}]}}
+{"world": "heldout_plant", "text": "okay inspect diesel generator", "plan": {"steps": [{"task": "inspect_visual", "target": "generator"}]}}
+{"world": "heldout_plant", "text": "uh hold your position", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "heldout_plant", "text": "give me the volts at the welding device seven", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_7"}]}}
+{"world": "heldout_plant", "text": "Step back three meters!", "plan": {"steps": [{"task": "move", "direction": "backward", "meters": 3}]}}
+{"world": "heldout_plant", "text": "Could you please could you bring vernier over.", "plan": {"steps": [{"task": "bring", "object": "caliper"}]}}
+{"world": "heldout_plant", "text": "Um approach me.", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "heldout_plant", "text": "hey resume inspection", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "heldout_plant", "text": "hey artaban grab the printer", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "heldout_plant", "text": "start inspection at diesel generator", "plan": {"steps": [{"task": "inspect_visual", "target": "generator"}]}}
+{"world": "heldout_plant", "text": "Could you please hold on to mig torch?", "plan": {"steps": [{"task": "hold", "object": "mig_torch"}]}}
+{"world": "heldout_plant", "text": "head back to base", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "heldout_plant", "text": "Make your way to the paint booth.", "plan": {"steps": [{"task": "goto", "target": "paint_booth"}]}}
+{"world": "heldout_plant", "text": "could you please go to the robot arm cage", "plan": {"steps": [{"task": "goto", "target": "robot_cell"}]}}
+{"world": "heldout_plant", "text": "um face left and get me spool of wire", "plan": {"steps": [{"task": "turn", "direction": "left"}, {"task": "bring", "object": "spool"}]}}
+{"world": "heldout_plant", "text": "report status and then end the inspection round", "plan": {"steps": [{"task": "report", "what": "status"}, {"task": "inspection", "state": "stop"}]}}
+{"world": "heldout_plant", "text": "get over here then see if anything is wrong at welding device eight", "plan": {"steps": [{"task": "come_here"}, {"task": "inspect_visual", "target": "welder_8"}]}}
+{"world": "heldout_plant", "text": "so go top up your battery", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "heldout_plant", "text": "lights off and after that plug yourself in", "plan": {"steps": [{"task": "lights", "state": "off"}, {"task": "dock"}]}}
+{"world": "heldout_plant", "text": "travel to the diesel generator", "plan": {"steps": [{"task": "goto", "target": "generator"}]}}
+{"world": "heldout_plant", "text": "dock and aim your camera at the hacksaw then proceed to the robot cell", "plan": {"steps": [{"task": "dock"}, {"task": "look_at", "object": "hacksaw"}, {"task": "goto", "target": "robot_cell"}]}}
+{"world": "heldout_plant", "text": "Could you roll over to the welding device eight!", "plan": {"steps": [{"task": "goto", "target": "welder_8"}]}}
+{"world": "heldout_plant", "text": "artaban lower your arm", "plan": {"steps": [{"task": "arm", "state": "lower"}]}}
+{"world": "heldout_plant", "text": "swing by welding station eight and read the gauges", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_8"}]}}
+{"world": "heldout_plant", "text": "please head to the charging dock then what's backup power reading on the meter", "plan": {"steps": [{"task": "dock"}, {"task": "inspect_meter", "target": "generator"}]}}
+{"world": "heldout_plant", "text": "Um could you roll over to the measurement room?", "plan": {"steps": [{"task": "goto", "target": "quality_lab"}]}}
+{"world": "heldout_plant", "text": "um give me the volts at backup power", "plan": {"steps": [{"task": "inspect_meter", "target": "generator"}]}}
+{"world": "heldout_plant", "text": "okay walk over to the boiler room", "plan": {"steps": [{"task": "goto", "target": "boiler"}]}}
+{"world": "heldout_plant", "text": "can you what number is on the meter", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "heldout_plant", "text": "Read the dial and after that take caliper!", "plan": {"steps": [{"task": "read_meter"}, {"task": "pick", "object": "caliper"}]}}
+{"world": "heldout_plant", "text": "face left", "plan": {"steps": [{"task": "turn", "direction": "left"}]}}
+{"world": "heldout_plant", "text": "please is it break time yet", "plan": {"steps": [{"task": "none"}]}}
+{"world": "heldout_plant", "text": "what does the meter on the generator say", "plan": {"steps": [{"task": "inspect_meter", "target": "generator"}]}}
+{"world": "heldout_plant", "text": "How many temperature is spray booth showing.", "plan": {"steps": [{"task": "inspect_meter", "target": "paint_booth"}]}}
+{"world": "heldout_plant", "text": "get over to me", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "heldout_plant", "text": "uh i'll be back after lunch", "plan": {"steps": [{"task": "none"}]}}
+{"world": "heldout_plant", "text": "swing by the welder k and read the gauges", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_k"}]}}
+{"world": "heldout_plant", "text": "uh do a visual check of steel stock", "plan": {"steps": [{"task": "inspect_visual", "target": "material_store"}]}}
+{"world": "heldout_plant", "text": "Kill the lights after that is anything broken at robotic welding cell!", "plan": {"steps": [{"task": "lights", "state": "off"}, {"task": "inspect_visual", "target": "robot_cell"}]}}
+{"world": "heldout_plant", "text": "Scratch that.", "plan": {"steps": [{"task": "cancel"}]}}
+{"world": "heldout_plant", "text": "What's conference room reading on the meter?", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "heldout_plant", "text": "Start the inspection?", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}

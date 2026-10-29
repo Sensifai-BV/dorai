@@ -16,15 +16,22 @@ STT_FIX = [("wedding", "welding"), ("welling", "welding"), ("metre", "meter"), (
 CONNECT = r"\b(?:and then|and after that|after that|then|and)\b"
 FILLER = {"please", "okay", "hey", "uh", "um", "now", "thanks", "right", "can", "you", "the", "a", "to", "me",
           "of", "on", "at", "for", "go", "over", "i", "need", "want", "and"}
+DIGITS = ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
 NUMW = {"half a": 0.5, "one and a half": 1.5, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
         "seven": 7, "eight": 8, "nine": 9, "ten": 10}
+DIST = r"(half a|one and a half|one|two|three|four|five|six|seven|eight|nine|ten|\d+(?:\.\d+)?) meters?"
+
+
+def spell_digits(t):
+    """'welding station 2' -> 'welding station two' (aliases are spelled); '1.5 meters' is left alone."""
+    return re.sub(r"(?<![\d.])(\d)(?!\.?\d)", lambda m: DIGITS[int(m.group(1))], t)
 
 
 def _norm(t):
-    t = " " + t.lower() + " "
+    t = " " + spell_digits(t.lower()) + " "
     for a, b in STT_FIX:
         t = re.sub(rf"\b{a}\b", b, t)
-    return " ".join(re.sub(r"[^a-z0-9' ]", " ", t).split())
+    return " ".join(re.sub(r"(?!(?<=\d)\.(?=\d))[^a-z0-9' ]", " ", t).split())   # keep '1.5'
 
 
 def _best(text, table, thr=0.82):
@@ -69,11 +76,30 @@ class RuleParser:
     def clause(self, c):
         has = lambda *ws: any(re.search(rf"\b{w}\b", c) for w in ws)  # noqa: E731
         # --- navigation-like tasks with a place
-        meter = has("meter", "meters", "gauge", "gauges", "reading")
+        dist = re.search(DIST, c)                       # "two meters forward" is a distance, not a gauge
+        meter = has("meter", "meters", "gauge", "gauges", "reading") and not dist
         visual = has("inspect", "look", "visual", "visually", "damage", "see if") and not meter
         nav = has("go", "goes", "head", "walk", "move to", "navigate", "get over", "take yourself", "at")
         if has("charge", "charger", "charging", "recharge", "dock yourself", "plug yourself"):
             return {"task": "dock"}
+        if has("back to base", "back to the base", "back home", "return to base", "return to the base",
+               "return home", "go home", "head home"):
+            return {"task": "goto", "target": "base"}
+        # --- posture, inspection round, look at an object
+        if has("sit", "sit down", "take a seat"):
+            return {"task": "posture", "pose": "sit"}
+        if has("stand up", "get up", "stand"):
+            return {"task": "posture", "pose": "stand"}
+        if has("lie down", "lay down"):
+            return {"task": "posture", "pose": "lie_down"}
+        if has("patrol", "rounds", "inspection round") or \
+                (has("inspection") and has("start", "begin", "stop", "end", "finish", "resume")
+                 and not _best(re.sub(r"\binspection\b", "", c), self.locs)):
+            return {"task": "inspection", "state": "stop" if has("stop", "end", "finish") else "start"}
+        if has("look at", "look over at", "show me", "point the camera at"):
+            o = _best(c, self.objs)
+            if o and not _best(c, self.locs):
+                return {"task": "look_at", "object": o}
         if meter or visual or (nav and not has("forward", "back", "backward", "ahead", "reverse", "meters", "meter")):
             tgt = _best(c, self.locs)
             if tgt == "charging_station":
@@ -89,6 +115,8 @@ class RuleParser:
             if meter or visual or has("go to", "head to", "move to", "navigate to", "walk over to", "get over to"):
                 rest = [w for w in c.split() if w not in FILLER and w not in
                         ("check", "meter", "gauge", "inspect", "read", "go", "head", "walk", "navigate")]
+                if meter and not [w for w in rest if w not in ("meters", "gauges", "reading", "this", "that", "what", "says", "is", "it")]:
+                    return {"task": "read_meter"}
                 return {"task": "clarify", "reason": "unknown_target" if rest else "unclear"}
         # --- motion
         if has("come here", "come over", "come to me", "over here", "get over here", "come closer", "walk to me"):
@@ -98,7 +126,7 @@ class RuleParser:
         if has("turn", "rotate", "face", "spin"):
             d = "left" if has("left") else "right" if has("right") else "around" if has("around") else None
             return {"task": "turn", "direction": d} if d else {"task": "clarify", "reason": "unclear"}
-        m = re.search(r"(half a|one and a half|one|two|three|four|five|six|seven|eight|nine|ten|\d+(?:\.\d+)?) meters?", c)
+        m = dist
         if m and has("forward", "ahead", "back", "backward", "reverse", "move", "drive", "step", "go"):
             v = NUMW.get(m.group(1)) or float(m.group(1))
             back = has("back up", "move back", "reverse", "backward")

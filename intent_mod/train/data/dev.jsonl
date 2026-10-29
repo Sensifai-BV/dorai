@@ -1,0 +1,150 @@
+{"world": "sample_shop", "text": "never mind", "plan": {"steps": [{"task": "cancel"}]}}
+{"world": "sample_shop", "text": "start inspection at electrical panel", "plan": {"steps": [{"task": "inspect_visual", "target": "main_panel"}]}}
+{"world": "sample_shop", "text": "okay check the welding device three meter", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_3"}]}}
+{"world": "sample_shop", "text": "have a look at plate", "plan": {"steps": [{"task": "look_at", "object": "plate"}]}}
+{"world": "sample_shop", "text": "get yourself to wedding device a", "plan": {"steps": [{"task": "goto", "target": "welder_a"}]}}
+{"world": "sample_shop", "text": "do a visual check of the old shed", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "sample_shop", "text": "lay down", "plan": {"steps": [{"task": "posture", "pose": "lie_down"}]}}
+{"world": "sample_shop", "text": "okay check", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "sample_shop", "text": "head over to welder a", "plan": {"steps": [{"task": "goto", "target": "welder_a"}]}}
+{"world": "sample_shop", "text": "please do it", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "sample_shop", "text": "sit down and then rotate left", "plan": {"steps": [{"task": "posture", "pose": "sit"}, {"task": "turn", "direction": "left"}]}}
+{"world": "sample_shop", "text": "could you please back to your home position", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "sample_shop", "text": "could you please did you see the game last night", "plan": {"steps": [{"task": "none"}]}}
+{"world": "sample_shop", "text": "go charge", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "sample_shop", "text": "read meter at air compressor for me after that roll ahead 1 meter", "plan": {"steps": [{"task": "inspect_meter", "target": "compressor"}, {"task": "move", "direction": "forward", "meters": 1}]}}
+{"world": "sample_shop", "text": "read the display and back to the last place", "plan": {"steps": [{"task": "read_meter"}, {"task": "go_back"}]}}
+{"world": "sample_shop", "text": "Open your hand.", "plan": {"steps": [{"task": "gripper", "state": "open"}]}}
+{"world": "sample_shop", "text": "drive forward one meter", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 1}]}}
+{"world": "sample_shop", "text": "Boss is coming tomorrow.", "plan": {"steps": [{"task": "none"}]}}
+{"world": "sample_shop", "text": "take it over there", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "sample_shop", "text": "go inspect the welder one", "plan": {"steps": [{"task": "inspect_visual", "target": "welder_1"}]}}
+{"world": "sample_shop", "text": "please go to welder number three now", "plan": {"steps": [{"task": "goto", "target": "welder_3"}]}}
+{"world": "sample_shop", "text": "now drive to the mezzanine", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "sample_shop", "text": "i need you to have a look around the welding machine one and after that grab the filler wire", "plan": {"steps": [{"task": "inspect_visual", "target": "welder_1"}, {"task": "pick", "object": "welding_rod"}]}}
+{"world": "sample_shop", "text": "how charged are you", "plan": {"steps": [{"task": "report", "what": "battery"}]}}
+{"world": "sample_shop", "text": "i need you to stay and after that go back to base and hold the welding gun", "plan": {"steps": [{"task": "wait"}, {"task": "goto", "target": "base"}, {"task": "hold", "object": "welding_torch"}]}}
+{"world": "sample_shop", "text": "i need you at the garden", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "sample_shop", "text": "walk over to welding device three", "plan": {"steps": [{"task": "goto", "target": "welder_3"}]}}
+{"world": "sample_shop", "text": "you need a recharge go dock", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "sample_shop", "text": "artaban please go inspect wedding station two", "plan": {"steps": [{"task": "inspect_visual", "target": "welder_2"}]}}
+{"world": "sample_shop", "text": "strike an arc", "plan": {"steps": [{"task": "weld", "state": "start"}]}}
+{"world": "sample_shop", "text": "Take a reading at main panel and check gauge here?", "plan": {"steps": [{"task": "inspect_meter", "target": "main_panel"}, {"task": "read_meter"}]}}
+{"world": "sample_shop", "text": "What's the reading.", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "sample_shop", "text": "stay behind me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "sample_shop", "text": "hold on to spanner after that stop patrolling", "plan": {"steps": [{"task": "hold", "object": "wrench"}, {"task": "inspection", "state": "stop"}]}}
+{"world": "sample_shop", "text": "go back to base", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "sample_shop", "text": "read the gauge", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "sample_shop", "text": "cancel", "plan": {"steps": [{"task": "cancel"}]}}
+{"world": "sample_shop", "text": "okay how charged are you", "plan": {"steps": [{"task": "report", "what": "battery"}]}}
+{"world": "sample_shop", "text": "now lie down", "plan": {"steps": [{"task": "posture", "pose": "lie_down"}]}}
+{"world": "sample_shop", "text": "Have a look at plate and after that stand up.", "plan": {"steps": [{"task": "look_at", "object": "plate"}, {"task": "posture", "pose": "stand"}]}}
+{"world": "sample_shop", "text": "go to the", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "sample_shop", "text": "I need you to take a picture of boiler room!", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "sample_shop", "text": "go charge yourself up", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "sample_shop", "text": "um go to the welder one and check the meter", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_1"}]}}
+{"world": "sample_shop", "text": "stop patrolling", "plan": {"steps": [{"task": "inspection", "state": "stop"}]}}
+{"world": "sample_shop", "text": "sit down please", "plan": {"steps": [{"task": "posture", "pose": "sit"}]}}
+{"world": "sample_shop", "text": "yeah do it", "plan": {"steps": [{"task": "confirm", "answer": "yes"}]}}
+{"world": "sample_shop", "text": "uh go over by the", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "sample_shop", "text": "Cancel that!", "plan": {"steps": [{"task": "cancel"}]}}
+{"world": "sample_shop", "text": "hey artaban okay lunch is at twelve", "plan": {"steps": [{"task": "none"}]}}
+{"world": "sample_shop", "text": "lights off", "plan": {"steps": [{"task": "lights", "state": "off"}]}}
+{"world": "sample_shop", "text": "Artaban grab spanner?", "plan": {"steps": [{"task": "pick", "object": "wrench"}]}}
+{"world": "sample_shop", "text": "grab mask", "plan": {"steps": [{"task": "pick", "object": "helmet"}]}}
+{"world": "sample_shop", "text": "start your rounds", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "sample_shop", "text": "slow down after that take filler wire", "plan": {"steps": [{"task": "set_speed", "speed": "slow"}, {"task": "pick", "object": "welding_rod"}]}}
+{"world": "sample_shop", "text": "read the dial", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "sample_shop", "text": "Can you read the meter at the power panel for me.", "plan": {"steps": [{"task": "inspect_meter", "target": "main_panel"}]}}
+{"world": "sample_shop", "text": "Back to normal speed then what does the meter on the welder one say.", "plan": {"steps": [{"task": "set_speed", "speed": "normal"}, {"task": "inspect_meter", "target": "welder_1"}]}}
+{"world": "sample_shop", "text": "okay back to your home position", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "sample_shop", "text": "Take a picture of the lab downstairs?", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "sample_shop", "text": "Start the weld!", "plan": {"steps": [{"task": "weld", "state": "start"}]}}
+{"world": "sample_shop", "text": "Close the gripper!", "plan": {"steps": [{"task": "gripper", "state": "close"}]}}
+{"world": "sample_shop", "text": "hey artaban i need you to how are you doing", "plan": {"steps": [{"task": "report", "what": "status"}]}}
+{"world": "sample_shop", "text": "normal speed", "plan": {"steps": [{"task": "set_speed", "speed": "normal"}]}}
+{"world": "sample_shop", "text": "Go to elevator for check meter?", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "sample_shop", "text": "end the weld", "plan": {"steps": [{"task": "weld", "state": "stop"}]}}
+{"world": "sample_shop", "text": "the new guy starts monday", "plan": {"steps": [{"task": "none"}]}}
+{"world": "sample_shop", "text": "Head over to welding station two.", "plan": {"steps": [{"task": "goto", "target": "welder_2"}]}}
+{"world": "sample_shop", "text": "get me my jacket", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "sample_shop", "text": "can you turn up the radio", "plan": {"steps": [{"task": "none"}]}}
+{"world": "sample_shop", "text": "Swing left.", "plan": {"steps": [{"task": "turn", "direction": "left"}]}}
+{"world": "sample_shop", "text": "Show me the hammer.", "plan": {"steps": [{"task": "look_at", "object": "hammer"}]}}
+{"world": "sample_shop", "text": "Take a look at car keys?", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "sample_shop", "text": "Finish welding!", "plan": {"steps": [{"task": "weld", "state": "stop"}]}}
+{"world": "sample_shop", "text": "can you forklift needs new tyres", "plan": {"steps": [{"task": "none"}]}}
+{"world": "sample_shop", "text": "Come to me?", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "sample_shop", "text": "Yeah do it!", "plan": {"steps": [{"task": "confirm", "answer": "yes"}]}}
+{"world": "sample_shop", "text": "check the gauges at the welding device x", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_x"}]}}
+{"world": "sample_shop", "text": "I need you to look over the big welder for problems and go sit?", "plan": {"steps": [{"task": "inspect_visual", "target": "welder_x"}, {"task": "posture", "pose": "sit"}]}}
+{"world": "sample_shop", "text": "hold your position", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "sample_shop", "text": "lie down", "plan": {"steps": [{"task": "posture", "pose": "lie_down"}]}}
+{"world": "sample_shop", "text": "Hey cancel the last task.", "plan": {"steps": [{"task": "cancel"}]}}
+{"world": "sample_shop", "text": "so drive forward 4 meters", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 4}]}}
+{"world": "sample_shop", "text": "Take a reading at compressor.", "plan": {"steps": [{"task": "inspect_meter", "target": "compressor"}]}}
+{"world": "sample_shop", "text": "so go inspect welder a", "plan": {"steps": [{"task": "inspect_visual", "target": "welder_a"}]}}
+{"world": "sample_shop", "text": "I need you at welder 2!", "plan": {"steps": [{"task": "goto", "target": "welder_2"}]}}
+{"world": "sample_shop", "text": "so go dock yourself", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "sample_shop", "text": "Uh go over by the!", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "sample_shop", "text": "um that one", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "sample_shop", "text": "sit down", "plan": {"steps": [{"task": "posture", "pose": "sit"}]}}
+{"world": "sample_shop", "text": "begin the weld", "plan": {"steps": [{"task": "weld", "state": "start"}]}}
+{"world": "sample_shop", "text": "My shift ends at five!", "plan": {"steps": [{"task": "none"}]}}
+{"world": "sample_shop", "text": "can you rotate right after that get yourself to argon manifold and wait here", "plan": {"steps": [{"task": "turn", "direction": "right"}, {"task": "goto", "target": "gas_manifold"}, {"task": "wait"}]}}
+{"world": "sample_shop", "text": "come here after that go to welding station two and read the amperage and after that check gas bottles meter", "plan": {"steps": [{"task": "come_here"}, {"task": "inspect_meter", "target": "welder_2"}, {"task": "inspect_meter", "target": "gas_manifold"}]}}
+{"world": "sample_shop", "text": "go to charging station", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "sample_shop", "text": "that one", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "sample_shop", "text": "bring the welding torch here", "plan": {"steps": [{"task": "bring", "object": "welding_torch"}]}}
+{"world": "sample_shop", "text": "hey turn left please", "plan": {"steps": [{"task": "turn", "direction": "left"}]}}
+{"world": "sample_shop", "text": "go back home", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "sample_shop", "text": "Go back to base and then bring me plate then give me a status update?", "plan": {"steps": [{"task": "goto", "target": "base"}, {"task": "bring", "object": "plate"}, {"task": "report", "what": "status"}]}}
+{"world": "sample_shop", "text": "I need you to go recharge your battery?", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "sample_shop", "text": "go back where you came from", "plan": {"steps": [{"task": "go_back"}]}}
+{"world": "sample_shop", "text": "hey artaban that weld looks good to me", "plan": {"steps": [{"task": "none"}]}}
+{"world": "sample_shop", "text": "i need you to drive forward five meters", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 5}]}}
+{"world": "sample_shop", "text": "hey artaban read the meter", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "sample_shop", "text": "Please take a reading at argon manifold.", "plan": {"steps": [{"task": "inspect_meter", "target": "gas_manifold"}]}}
+{"world": "sample_shop", "text": "turn right please", "plan": {"steps": [{"task": "turn", "direction": "right"}]}}
+{"world": "sample_shop", "text": "no that's wrong", "plan": {"steps": [{"task": "confirm", "answer": "no"}]}}
+{"world": "sample_shop", "text": "I need you at quality station then go stand next to the big welder.", "plan": {"steps": [{"task": "goto", "target": "inspection_bay"}, {"task": "goto", "target": "welder_x"}]}}
+{"world": "sample_shop", "text": "could you please begin the inspection round", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "sample_shop", "text": "now the forklift needs new tyres", "plan": {"steps": [{"task": "none"}]}}
+{"world": "sample_shop", "text": "um start welding", "plan": {"steps": [{"task": "weld", "state": "start"}]}}
+{"world": "sample_shop", "text": "can you read the display and then keep following me", "plan": {"steps": [{"task": "read_meter"}, {"task": "follow_me"}]}}
+{"world": "sample_shop", "text": "go look at the big welder", "plan": {"steps": [{"task": "inspect_visual", "target": "welder_x"}]}}
+{"world": "sample_shop", "text": "bring me the wrench", "plan": {"steps": [{"task": "bring", "object": "wrench"}]}}
+{"world": "sample_shop", "text": "Stay here.", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "sample_shop", "text": "what's the reading", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "sample_shop", "text": "could you please can somebody call maintenance", "plan": {"steps": [{"task": "none"}]}}
+{"world": "sample_shop", "text": "go home", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "sample_shop", "text": "so go inspect parking lot", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "sample_shop", "text": "Stay behind me.", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "sample_shop", "text": "return to base and then get up", "plan": {"steps": [{"task": "goto", "target": "base"}, {"task": "posture", "pose": "stand"}]}}
+{"world": "sample_shop", "text": "go over by welding device two", "plan": {"steps": [{"task": "goto", "target": "welder_2"}]}}
+{"world": "sample_shop", "text": "make your way to welding station a", "plan": {"steps": [{"task": "goto", "target": "welder_a"}]}}
+{"world": "sample_shop", "text": "Come to where i am!", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "sample_shop", "text": "stop the weld now", "plan": {"steps": [{"task": "weld", "state": "stop"}]}}
+{"world": "sample_shop", "text": "Hey point your camera at toolbox then grab the wrench.", "plan": {"steps": [{"task": "look_at", "object": "toolbox"}, {"task": "pick", "object": "wrench"}]}}
+{"world": "sample_shop", "text": "can you look over cooling tower for problems", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "sample_shop", "text": "head over to inspection table", "plan": {"steps": [{"task": "goto", "target": "inspection_bay"}]}}
+{"world": "sample_shop", "text": "rotate right", "plan": {"steps": [{"task": "turn", "direction": "right"}]}}
+{"world": "sample_shop", "text": "Keep following me and come closer?", "plan": {"steps": [{"task": "follow_me"}, {"task": "come_here"}]}}
+{"world": "sample_shop", "text": "Um take a reading at the welder x?", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_x"}]}}
+{"world": "sample_shop", "text": "Read the gauge at power panel?", "plan": {"steps": [{"task": "inspect_meter", "target": "main_panel"}]}}
+{"world": "sample_shop", "text": "Could you please finish welding.", "plan": {"steps": [{"task": "weld", "state": "stop"}]}}
+{"world": "sample_shop", "text": "tell me what the meter says", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "sample_shop", "text": "Open the gripper and then get me the hammer?", "plan": {"steps": [{"task": "gripper", "state": "open"}, {"task": "bring", "object": "hammer"}]}}
+{"world": "sample_shop", "text": "stop patrolling then start welding", "plan": {"steps": [{"task": "inspection", "state": "stop"}, {"task": "weld", "state": "start"}]}}
+{"world": "sample_shop", "text": "negative", "plan": {"steps": [{"task": "confirm", "answer": "no"}]}}
+{"world": "sample_shop", "text": "come to me and then check the meter on welding station one", "plan": {"steps": [{"task": "come_here"}, {"task": "inspect_meter", "target": "welder_1"}]}}
+{"world": "sample_shop", "text": "can you check welding station b meter after that what is your battery level and after that open your hand", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_b"}, {"task": "report", "what": "battery"}, {"task": "gripper", "state": "open"}]}}
+{"world": "sample_shop", "text": "okay check the gauges at welding device three", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_3"}]}}
+{"world": "sample_shop", "text": "read the meter", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "sample_shop", "text": "Now read the display and after that return to base.", "plan": {"steps": [{"task": "read_meter"}, {"task": "goto", "target": "base"}]}}
+{"world": "sample_shop", "text": "Go to the compressor and check the meter and after that go over by the welder x!", "plan": {"steps": [{"task": "inspect_meter", "target": "compressor"}, {"task": "goto", "target": "welder_x"}]}}
+{"world": "sample_shop", "text": "bring me the mask", "plan": {"steps": [{"task": "bring", "object": "helmet"}]}}
+{"world": "sample_shop", "text": "Hey walk over to welding machine x.", "plan": {"steps": [{"task": "goto", "target": "welder_x"}]}}
+{"world": "sample_shop", "text": "turn right and come to me now", "plan": {"steps": [{"task": "turn", "direction": "right"}, {"task": "come_here"}]}}
+{"world": "sample_shop", "text": "can you move it there", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "sample_shop", "text": "turn off lights and then wait", "plan": {"steps": [{"task": "lights", "state": "off"}, {"task": "wait"}]}}

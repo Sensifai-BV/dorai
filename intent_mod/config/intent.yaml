@@ -4,10 +4,13 @@
 intent_mod:
   ros__parameters:
     engine: auto            # auto (LLM if the GGUF is found, else rules) | llm (fail if missing) | rules
-    model: LFM2.5-1.2B-Instruct-Q4_K_M.gguf     # base GGUF (698 MB)
-    lora: intent-lfm25-1.2b-lora-f16.gguf       # dorai fine-tuned intent adapter (21 MB)
+    model: intent-qwen35-4b-Q4_0.gguf           # Qwen3.5-4B + dorai Artaban LoRA merged, Q4_0 (2.6 GB; train/)
+    lora: ""                                    # runtime adapter not needed (merged); slower on ARM
+    use_grammar: false                          # 0.43 vs 0.63 s/command (VM, 4 threads), same accuracy; validate()+guard keep it safe
     grounding_guard: true                       # 'did you mean X?' when the plan names an unsaid place
-    models_dir: ""          # extra models root searched first
+    models_dir: ""          # extra models root searched first; downloads go here ("" = ~/dorai/models)
+    hf_repo: sensifai/dorai-intent-model        # model missing locally -> downloaded from here at startup
+    auto_download: true                         # false: never touch the network (engine auto -> rules)
     num_threads: 2
     n_ctx: 2048
     locations_file: ""      # "" = share/intent_mod/config/locations.yaml

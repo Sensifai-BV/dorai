@@ -68,7 +68,7 @@ def strip_wake(text, wake_word="artaban", max_edits=2):
 
 # ----------------------------------------------------------------- stop words
 def _is_stop_word(t):
-    return t in ("stop", "stopp", "stops") or (
+    return t in ("stop", "stopp", "stops", "stopped") or (     # "stopped": ASR spelling of "stop."
         len(t) >= 4 and t[0] == "s" and lev(t, "stop") <= 1 and t not in ("step", "shop", "stoop", "slop"))
 
 
