@@ -22,10 +22,14 @@ TASKS = {
     "goto":           {"target": "LOCATION"},
     "inspect_meter":  {"target": "LOCATION"},   # go there + read + speak the gauge(s)
     "inspect_visual": {"target": "LOCATION"},   # go there + look/photo + report
+    "read_meter":     {},                       # read the gauge in front of the robot (no place named)
+    "inspection":     {"state": ["start", "stop"]},   # the inspection round over all stations
+    "look_at":        {"object": "OBJECT"},     # point the camera at an object and describe it
     "dock":           {},                       # go charge
     "come_here":      {},                       # walk to the talker (doa bearing)
     "follow_me":      {},
     "wait":           {},
+    "posture":        {"pose": ["sit", "stand", "lie_down"]},
     "go_back":        {},                       # return to previous pose
     "turn":           {"direction": ["left", "right", "around"]},
     "move":           {"direction": ["forward", "backward"], "meters": "NUMBER"},
@@ -49,10 +53,14 @@ TASK_HELP = {
     "goto": "go to a place",
     "inspect_meter": "go to a place and read its meter/gauge aloud",
     "inspect_visual": "go to a place and visually inspect it",
+    "read_meter": "read the meter/gauge right here (no place named)",
+    "inspection": "start/stop the inspection round",
+    "look_at": "look at an object",
     "dock": "go to the charger and charge",
     "come_here": "come to the speaker",
     "follow_me": "follow the speaker",
     "wait": "stay / wait here",
+    "posture": "sit down / stand up / lie down",
     "go_back": "go back to the previous position",
     "turn": "turn left/right/around",
     "move": "drive forward/backward N meters",
@@ -145,7 +153,7 @@ def system_prompt(locs, objs, with_task_help=True, fewshot=False):
     for i, o in objs.items():
         L.append(f"- {i}: {', '.join(o.get('aliases', []))}")
     L.append("Rules: use only ids listed above. If a place or object is not listed, "
-             "answer a single clarify step. 'check the meter/gauge' means inspect_meter. "
+             "answer a single clarify step. 'check the meter/gauge at a place' means inspect_meter; with no place it means read_meter. "
              "Text may contain speech-recognition errors.")
     if fewshot:
         L.append("Use the fewest steps that do what was asked. Examples:")
@@ -167,6 +175,9 @@ def validate(plan, locs, objs):
             continue
         if set(s) - {"task"} != set(TASKS[t]):
             errs.append(f"{t}: bad args {sorted(s)}")
+        for k, spec in TASKS[t].items():            # enums: the grammar is off by default (use_grammar)
+            if isinstance(spec, list) and k in s and s[k] not in spec:
+                errs.append(f"{t}: bad {k} {s[k]!r}")
         if "target" in s and s["target"] not in locs:
             errs.append(f"{t}: unknown target {s['target']}")
         if "object" in s and s["object"] not in objs:

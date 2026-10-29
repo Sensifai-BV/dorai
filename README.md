@@ -215,7 +215,7 @@ indefinitely.
 
 ## Acoustic Simulator (Lab)
 
-The workspace includes an offline, MATLAB-based physical acoustic simulator inside the [lab/](file:///Users/javad/Projects/dorai/dorai/lab) directory. 
+The workspace includes an offline, MATLAB-based physical acoustic simulator inside the [lab/](lab) directory. 
 
 ![Acoustic Simulator](lab/img.png)
 

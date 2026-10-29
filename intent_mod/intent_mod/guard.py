@@ -14,14 +14,14 @@ known one (the boiler).
 import difflib
 import re
 
-from .rules import STT_FIX
+from .rules import STT_FIX, spell_digits
 
 GENERIC = {"the", "a", "an", "room", "machine", "device", "station", "number", "unit", "cell", "area"}
 THRESH = 0.80
 
 
 def _norm(t):
-    t = " " + t.lower() + " "
+    t = " " + spell_digits(t.lower()) + " "
     for a, b in STT_FIX:
         t = re.sub(rf"\b{a}\b", b, t)
     return " ".join(re.sub(r"[^a-z0-9 ]", " ", t).split())

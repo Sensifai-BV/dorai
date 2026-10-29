@@ -19,6 +19,16 @@ locations:
     pose: {frame: map, x: 6.0, y: 1.5, yaw: 1.57}
     apriltag: 12
     equipment: {type: welder, meters: [current, voltage]}
+  - id: welder_1
+    aliases: [welder one, welding device one, welding machine one, welding station one]
+    pose: {frame: map, x: 4.2, y: 4.0, yaw: 1.57}
+    apriltag: 15
+    equipment: {type: welder, meters: [current, voltage]}
+  - id: welder_2
+    aliases: [welder two, welding device two, welding machine two, welding station two]
+    pose: {frame: map, x: 6.0, y: 4.0, yaw: 1.57}
+    apriltag: 16
+    equipment: {type: welder, meters: [current, voltage]}
   - id: welder_x
     aliases: [welder x, welding device x, welding machine x, the big welder]
     pose: {frame: map, x: 8.1, y: 1.4, yaw: 1.57}
@@ -78,3 +88,5 @@ objects:
     aliases: [welding rods, rods, electrodes, filler wire]
   - id: helmet
     aliases: [helmet, welding helmet, mask]
+  - id: welding_torch
+    aliases: [welding torch, torch, welding gun, the torch]

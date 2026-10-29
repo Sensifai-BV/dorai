@@ -16,7 +16,7 @@ import logging
 import threading
 import time
 
-from .models import DEFAULT_MODEL, find_model
+from .models import DEFAULT_MODEL, HF_REPO, find_model, resolve_model
 from .rules import RuleParser
 from .schema import plan_schema, system_prompt
 
@@ -45,8 +45,8 @@ _SENT = "\u2063UTTERANCE\u2063"
 
 def split_template(llm, system):
     """Render the GGUF's own chat template around a sentinel -> (prefix, suffix) text.
-    Works for LFM2/LFM2.5, Gemma 4 and Qwen3.5 templates; reasoning templates get an
-    empty think block (no-think mode)."""
+    Written for the Qwen3.5 template (other GGUF chat templates render the same way);
+    reasoning templates get an empty think block (no-think mode)."""
     import re
 
     import jinja2
@@ -69,16 +69,17 @@ class LlamaIntentEngine:
 
     The system prompt (task list + places + objects) is prefilled ONCE per world and its
     model state snapshotted; each utterance restores the snapshot and decodes only the
-    user turn. This matters on hybrid/recurrent models (LFM2) where llama.cpp cannot
-    rewind to a shared prefix: measured TTFT 1.3 s -> 0.08 s on a 4-thread CPU.
+    user turn. This matters on hybrid/recurrent models (Qwen3.5's Gated DeltaNet layers)
+    where llama.cpp cannot rewind to a shared prefix and would re-prefill ~730 tokens.
     """
     name = "llm"
 
-    def __init__(self, model_path, locs, objs, n_threads=2, n_ctx=2048, lora_path=None, max_tokens=200):
+    def __init__(self, model_path, locs, objs, n_threads=2, n_ctx=2048, lora_path=None, max_tokens=200, use_grammar=False):
         from llama_cpp import Llama                       # lazy: optional dependency
         self.model_path = model_path
         self.model = model_path.rsplit("/", 1)[-1]
         self.max_tokens = int(max_tokens)
+        self.use_grammar = bool(use_grammar)   # Pi 4: grammar sampling costs ~1-3 s/command; validate()+guard keep it safe
         self._lock = threading.Lock()                     # llama.cpp contexts are not thread-safe
         kw = {"lora_path": lora_path} if lora_path else {}
         self.llm = Llama(model_path=model_path, n_ctx=int(n_ctx), n_threads=int(n_threads),
@@ -106,7 +107,7 @@ class LlamaIntentEngine:
             self.llm.load_state(self.state)
             full = self.llm.tokenize((self.pre_txt + text + self.post_txt).encode(), add_bos=True, special=True)
             raw, n = "", 0
-            for tok in self.llm.generate(full[len(self.pre):], temp=0.0, grammar=self.grammar, reset=False):
+            for tok in self.llm.generate(full[len(self.pre):], temp=0.0, grammar=self.grammar if self.use_grammar else None, reset=False):
                 if tok == self.llm.token_eos() or n >= self.max_tokens:
                     break
                 raw += self.llm.detokenize([tok]).decode("utf-8", "ignore")
@@ -134,9 +135,10 @@ def make_engine(cfg, log=None):
     if mode == "rules":
         return RuleIntentEngine(locs, objs)
     name = cfg.get("model") or DEFAULT_MODEL
-    path = find_model(name, cfg.get("models_dir", ""))
+    path = resolve_model(name, cfg.get("models_dir", ""), hf_repo=cfg.get("hf_repo", HF_REPO),
+                         download=bool(cfg.get("auto_download", True)), log=log)
     if path is None:
-        msg = f"intent model '{name}' not found in any models root"
+        msg = f"intent model '{name}' not found in any models root and not downloadable"
         if mode == "llm":
             raise FileNotFoundError(msg)
         log.warning(msg + " - falling back to the rule engine")
@@ -145,7 +147,8 @@ def make_engine(cfg, log=None):
         lora = cfg.get("lora") or ""
         lora_path = find_model(lora, cfg.get("models_dir", "")) if lora else None
         return LlamaIntentEngine(path, locs, objs, n_threads=cfg.get("num_threads", 2),
-                                 n_ctx=cfg.get("n_ctx", 2048), lora_path=lora_path)
+                                 n_ctx=cfg.get("n_ctx", 2048), lora_path=lora_path,
+                                 use_grammar=bool(cfg.get("use_grammar", False)))
     except Exception as e:  # noqa: BLE001  (ImportError, bad GGUF, OOM ...)
         if mode == "llm":
             raise

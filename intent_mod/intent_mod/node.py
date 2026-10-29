@@ -42,7 +42,7 @@ from std_msgs.msg import Float32, String
 
 from . import wake
 from .engine import make_engine
-from .models import DEFAULT_LORA, DEFAULT_MODEL
+from .models import DEFAULT_LORA, DEFAULT_MODEL, HF_REPO
 from .guard import check as guard_check
 from .schema import load_world, validate
 
@@ -56,14 +56,17 @@ PARAMS = {
     "status_topic": ("/dorai_intent/status", "JSON status"),
     "locations_file": ("", "world file; '' = package share config/locations.yaml"),
     "engine": ("auto", "auto | llm | rules"),
-    "model": (DEFAULT_MODEL, "GGUF file name (or absolute path)"),
-    "models_dir": ("", "extra models root searched first"),
+    "model": (DEFAULT_MODEL, "GGUF file name, absolute path, or huggingface.co file URL"),
+    "models_dir": ("", "extra models root searched first; downloads go here ('' = ~/dorai/models)"),
+    "hf_repo": (HF_REPO, "Hugging Face repo to download `model` from when no root has it"),
+    "auto_download": (True, "download a missing model from Hugging Face at startup ($HF_TOKEN for a private repo)"),
     "num_threads": (2, "llama.cpp threads"),
     "n_ctx": (2048, "llama.cpp context size"),
     "require_wake": (True, "only act on utterances addressed to the wake word (stop always works)"),
     "wake_word": ("artaban", "robot name"),
     "wake_max_edits": (2, "max Levenshtein edits when matching the wake word"),
-    "lora": (DEFAULT_LORA, "optional GGUF LoRA adapter file name (e.g. intent-lfm25-1.2b-lora-f16.gguf)"),
+    "lora": (DEFAULT_LORA, "optional GGUF LoRA adapter file name (normally empty: the default model has it merged)"),
+    "use_grammar": (False, "JSON-schema grammar during decoding (off: faster on ARM; plans are validated anyway)"),
     "grounding_guard": (True, "ask 'did you mean X?' if the plan names a place/object the speaker did not say"),
     "status_period_s": (5.0, "status topic period"),
     "debug": (False, "verbose logging"),
@@ -107,7 +110,7 @@ class IntentNode(Node):
         t0 = time.time()
         self.engine = make_engine({
             "locs": self.locs, "objs": self.objs, "engine": p["engine"], "model": p["model"],
-            "models_dir": p["models_dir"], "num_threads": int(p["num_threads"]), "lora": p.get("lora", ""),
+            "models_dir": p["models_dir"], "hf_repo": p["hf_repo"], "auto_download": bool(p["auto_download"]), "num_threads": int(p["num_threads"]), "lora": p.get("lora", ""), "use_grammar": p.get("use_grammar", False),
             "n_ctx": int(p["n_ctx"])}, log=log)
 
         self.pub_stop = self.create_publisher(String, p["stop_topic"], 10)

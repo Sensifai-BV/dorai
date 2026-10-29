@@ -1,14 +1,15 @@
-# dorai pipeline — two ROS 2 nodes from one image.
+# dorai pipeline — ROS 2 nodes from one image.
 #
-#   voice : mic-array capture + beamformer  -> /dorai_clean_audio
-#   stt   : subscribes to clean audio       -> /dorai_transcript
+#   voice  : mic-array capture + beamformer  -> /dorai_clean_audio
+#   stt    : subscribes to clean audio       -> /dorai_transcript
+#   intent : transcript -> plan (Qwen3.5-4B) -> /dorai_plan, /dorai_say, /dorai_stop
 #
 # Both use host networking so ROS 2 DDS discovery works between them (and with
 # `ros2 topic echo` on the host) with zero extra config.
 #
 #   docker compose build
-#   docker compose up            # both nodes
-#   docker compose up stt        # transcription only (no mic needed)
+#   docker compose up            # voice + stt + intent
+#   docker compose up stt intent # transcription + intent only (no mic needed)
 #
 services:
   voice:
@@ -91,3 +92,24 @@ services:
       num_threads:=2
     restart: unless-stopped
 
+  # Intent. On first start it downloads intent-qwen35-4b-Q4_0.gguf (2.6 GB) from
+  # huggingface.co/sensifai/dorai-intent-model into ${HOME}/dorai/models on the host
+  # (read-write mount), so later starts are offline. A GGUF already in that folder
+  # is used as is. Pin another file: model:=<name | /abs/path.gguf | huggingface.co URL>.
+  # Private repo: export HF_TOKEN on the host. Offline robot: auto_download:=false.
+  intent:
+    build: .
+    image: dorai:latest
+    network_mode: host
+    ipc: host        # shared /dev/shm — see note on the voice service
+    environment:
+      - ROS_DOMAIN_ID=0
+      - HF_TOKEN=${HF_TOKEN:-}
+    volumes:
+      - ${HOME}/dorai/models:/root/dorai/models
+    command: >
+      ros2 launch intent_mod intent.launch.py
+      models_dir:=/root/dorai/models
+      require_wake:=true
+      num_threads:=2
+    restart: unless-stopped
