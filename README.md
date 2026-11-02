@@ -1,8 +1,11 @@
 # dorai — ROS 2 Mic-Array Speech Pipeline
 
-`dorai` is a modular 2-stage ROS 2 audio processing pipeline that captures audio from an array of microphones, enhances the multi-channel signals in real time (beamforming), and transcribes the cleaned speech to text.
+`dorai` is a modular 3-stage ROS 2 speech pipeline. It captures audio from an array of microphones, enhances the multi-channel signals in real time (beamforming), transcribes the cleaned speech to text, and turns each spoken command for the **Artaban** robot into a validated JSON plan.
 
-`voice_mod` runs the full capture-to-enhancement path in a single node: it auto-detects the microphone array, async-resamples every mic to a common 16 kHz timeline with per-mic clock-drift correction, and runs the `dorai_beamformer.ort` beamformer continuously. Enhancement runs on a real-time sliding window with no added algorithmic delay; only the publish of the clean stream is batched into configurable N-second frames (default 10 s). `stt_mod` then transcribes that clean stream with NVIDIA Nemotron streaming ASR (NeMo, via `sherpa-onnx`) plus the dorai fine-tuned workshop adapter, publishing streaming partials and punctuated finals.
+`voice_mod` runs the full capture-to-enhancement path in a single node: it auto-detects the microphone array, async-resamples every mic to a common 16 kHz timeline with per-mic clock-drift correction, and runs the `dorai_beamformer.ort` beamformer continuously. Enhancement runs on a real-time sliding window with no added algorithmic delay; only the publish of the clean stream is batched into configurable N-second frames (default 10 s). `stt_mod` then transcribes that clean stream with NVIDIA Nemotron streaming ASR (NeMo, via `sherpa-onnx`) plus the dorai fine-tuned workshop adapter, publishing streaming partials and punctuated finals. `intent_mod` reads those finals and does three things:
+- It sends stop commands straight to `/dorai_stop`, without waiting for the model.
+- It drops speech that isn't addressed to "Artaban".
+- It turns each command into a small JSON plan with **Qwen3.5-4B fine-tuned (LoRA) on Artaban commands**, run as a GGUF through llama.cpp. The model is downloaded from Hugging Face on first start.
 
 `doa_mod` runs alongside them and answers a different question — *where* the
 talker is, rather than what they said. It takes the raw array channels, gates
@@ -25,6 +28,12 @@ them on voice activity, and publishes the bearing in degrees.
    +---------+
         |
  [/dorai_transcript]
+        v
+  +------------+
+  | intent_mod |  stop gate + wake word + Qwen3.5-4B LoRA (GGUF)
+  +------------+  -> validated JSON plan
+        |
+ [/dorai_plan]  [/dorai_say]  [/dorai_stop]
 ```
 
 `voice_mod` and `doa_mod` both want the microphone, and two processes cannot
@@ -55,7 +64,7 @@ See `doa_mod/README.md`.
    ```
 
 2. **Clone/Copy Modules**:
-   Place the pipeline package directories (`voice_mod`, `stt_mod`, `doa_mod`) directly inside your workspace. The `doa/` directory is the DoA research tree, not a ROS package — leave it out of the workspace.
+   Place the pipeline package directories (`voice_mod`, `stt_mod`, `intent_mod`, `doa_mod`) directly inside your workspace. The `doa/` directory is the DoA research tree, not a ROS package — leave it out of the workspace.
 
 3. **Install Python Package Dependencies**:
    Install the required Python packages directly to your user-site location (so they are accessible by the system Python interpreter used by ROS 2):
@@ -67,6 +76,18 @@ See `doa_mod/README.md`.
    Other latency profiles/adapters: see [`stt_mod/README.md`](stt_mod/README.md#models). Check that it loads and measure the RTF (no ROS needed):
    ```bash
    python3 -m stt_mod.transcribe stt_mod/models/*/test_wavs/*.wav
+   ```
+
+   **Intent LLM runtime** (intent_mod). Use 0.3.36 or newer, the first release with Qwen3.5 support. It builds from source on ARM, which takes several minutes on a Pi. Without it, intent_mod falls back to its rule parser:
+   ```bash
+   CMAKE_BUILD_PARALLEL_LEVEL=4 pip3 install --user --break-system-packages "llama-cpp-python>=0.3.36" jinja2
+   ```
+
+   **Intent model**: `intent-qwen35-4b-Q4_0.gguf` (2.6 GB) lives at
+   [huggingface.co/sensifai/dorai-intent-model](https://huggingface.co/sensifai/dorai-intent-model).
+   You don't need to fetch it by hand: the first `intent_mod` start downloads it into `~/dorai/models/`. The download resumes after an interruption and is checked against its sha256. For an offline robot, copy the file there beforehand:
+   ```bash
+   mkdir -p ~/dorai/models && hf download sensifai/dorai-intent-model intent-qwen35-4b-Q4_0.gguf --local-dir ~/dorai/models
    ```
 
 4. **Build the Workspace**:
@@ -138,9 +159,67 @@ latency/accuracy behind each default, and the adapter bake tool are in [`stt_mod
   dropping it and reports `backlog_s` on `/dorai_stt/status`. When it runs on the same Pi as `voice_mod`,
   start voice_mod with `-p input_latency:=0.25`; at 0.0 the STT load caused capture overflows (see `test/sim_pipeline.sh`).
 
+### 3. Stage 3: Intent (`intent_mod`)
+
+Turns each final transcript into an Artaban plan:
+```
+"Artaban, go to welding station two and check the meter"
+  -> /dorai_plan {"steps":[{"task":"inspect_meter","target":"welder_2"}]}
+```
+```bash
+ros2 launch intent_mod intent.launch.py                       # wake word required, model auto-downloaded on first start
+ros2 launch intent_mod intent.launch.py require_wake:=false   # every transcript is a command
+ros2 topic pub --once /dorai_transcript std_msgs/String "{data: 'Artaban look at the welding torch'}"
+ros2 topic echo /dorai_plan
+```
+
+**How a transcript is handled:**
+1. **Stop gate.** "Artaban stop", "halt" and "e-stop" go to `/dorai_stop` immediately, even while the model is busy. A stop never goes through the LLM.
+2. **Wake word.** With `require_wake:=true` (default), speech not addressed to "Artaban" is ignored. The matcher tolerates STT misspellings such as "Arteban".
+3. **Model.** The LLM writes a JSON plan using only the tasks, places and objects in `config/locations.yaml`. New places need no retraining.
+4. **Checks.** `schema.validate()` checks every task, argument, enum value, place and object. The grounding guard asks "did you mean X?" when the plan names a place nobody said.
+5. **Output.** Unclear or unknown requests become a spoken question on `/dorai_say`, not a guessed action.
+
+**Tasks:**
+- **Movement:** goto, come_here, follow_me, turn, move, go_back, wait, posture (sit / stand / lie down), dock, set_speed
+- **Inspection:** inspect_meter, inspect_visual, read_meter, inspection start/stop, look_at
+- **Tools:** weld, gripper, arm, pick, bring, hold, lights
+- **Dialogue:** report, cancel, confirm, clarify, none
+
+#### intent_mod Parameters
+
+| Parameter | Default | Description |
+| :--- | :--- | :--- |
+| `engine` | `auto` | `auto` (LLM if the model loads, else rules), `llm` (fail if missing), `rules`. |
+| `model` | `intent-qwen35-4b-Q4_0.gguf` | File name (searched in the model roots), absolute path, or huggingface.co file URL. |
+| `models_dir` | `""` | Extra model root searched first; downloads go here (`""` = `~/dorai/models`). |
+| `hf_repo` | `sensifai/dorai-intent-model` | Where a missing model is downloaded from. A private repo needs `$HF_TOKEN`. |
+| `auto_download` | `true` | `false` never touches the network; a missing model then falls back to rules. |
+| `require_wake` | `true` | Only act on speech addressed to `wake_word` (`artaban`). Stop always works. |
+| `num_threads` | `2` | llama.cpp threads. |
+| `use_grammar` | `false` | JSON-grammar-constrained decoding: slower, and same accuracy with this model. |
+| `grounding_guard` | `true` | Ask "did you mean X?" instead of acting on an unsaid place. |
+| `locations_file` | `""` | The site's places and objects (default: package `config/locations.yaml`). |
+
+*Example — pin a local file and stay offline:*
+```bash
+ros2 launch intent_mod intent.launch.py model:=/data/models/intent-qwen35-4b-Q4_0.gguf auto_download:=false
+```
+
+**Accuracy.** These are exact-plan matches on test sets the model never saw in training:
+
+| Engine | Dev | Test | Paraphrase |
+| :--- | ---: | ---: | ---: |
+| Qwen3.5-4B LoRA (this model) | 98.0 % | 98.3 % | 92.6 % |
+| Rule fallback | 69 % | 51 % | 46 % |
+
+**Live test.** voice_mod → stt_mod → intent_mod in a simulated welding shop: 10/10 commands right on exact text, and 85 % right on clean speech. In welding noise the losses come from STT. Intent latency was about 0.5 s on an M4-class VM; Pi 4 latency is not measured yet.
+
+Rebuilding the model and the full details are in [`intent_mod/README.md`](intent_mod/README.md).
+
 ---
 
-### 3. Direction of Arrival (`doa_mod`)
+### 4. Direction of Arrival (`doa_mod`)
 
 Publishes the talker bearing. Needs the **raw** array channels on one clock, so
 it either owns the device or reads `voice_mod`'s raw tap.
@@ -200,6 +279,10 @@ The audio samples follow the header in interleaved format: `[ch1_s1, ch2_s1, ...
 | `/dorai_transcript` | `std_msgs/String` | Final transcribed text results. |
 | `/dorai_partial_transcript` | `std_msgs/String` | Running hypothesis, updated every encoder chunk. |
 | `/dorai_stt/status` | `std_msgs/String` | JSON: `rtf`, `backlog_s`, `finals`, `lag_median_s`, `model`. |
+| `/dorai_plan` | `std_msgs/String` | JSON `{"text", "plan": {"steps": [...]}, "bearing_deg", "engine", "latency_s", "stamp"}`; validated, actionable plans only. |
+| `/dorai_say` | `std_msgs/String` | Question or refusal to speak (unclear command, unknown place, "did you mean X?"). |
+| `/dorai_stop` | `std_msgs/String` | `stop` or `estop`, published immediately on a stop command. |
+| `/dorai_intent/status` | `std_msgs/String` | JSON: engine, model, plan/clarify/stop counts, mean latency, queue depth. |
 | `/voice_mod/diagnostics` | `std_msgs/String` | Per-mic rate, FIFO/backlog, underruns, xruns, and drift ratio. |
 | `/dorai_doa` | `std_msgs/Float32` | Talker bearing in degrees, 0–360, CCW from the array's +x axis. Published only while speech is present. |
 | `/dorai_doa/state` | `std_msgs/Float32MultiArray` | `[elapsed_s, azimuth_deg, sharpness, consistent_frac, speech_flag, seq]`. |
