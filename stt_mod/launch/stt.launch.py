@@ -1,4 +1,4 @@
-"""ros2 launch stt_mod stt.launch.py [latency_ms:=1120] [adapter:=mc-ref] [num_threads:=2] [metrics:=true] [metrics_file:=/tmp/stt_metrics.jsonl]"""
+"""ros2 launch stt_mod stt.launch.py [engine:=whisper|nemotron] [whisper_model:=...] [vad:=neural|energy|none] [latency_ms:=1120] [adapter:=mc-ref] [num_threads:=2] [metrics:=true] [metrics_file:=/tmp/stt_metrics.jsonl]"""
 import os
 
 from ament_index_python.packages import get_package_share_directory
@@ -10,7 +10,8 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     cfg = os.path.join(get_package_share_directory("stt_mod"), "config", "stt.yaml")
-    args = [("latency_ms", "1120"), ("adapter", "mc-ref"), ("num_threads", "2"),
+    args = [("engine", "whisper"), ("whisper_model", ""), ("vad", "neural"),
+            ("latency_ms", "1120"), ("adapter", "mc-ref"), ("num_threads", "2"),
             ("models_dir", ""), ("metrics", "false"), ("metrics_file", ""), ("debug", "false")]
     return LaunchDescription(
         [DeclareLaunchArgument(k, default_value=v) for k, v in args] + [

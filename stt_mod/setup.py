@@ -21,6 +21,7 @@ setup(
     name=package_name,
     version="0.2.0",
     packages=[package_name],
+    package_data={package_name: ["vad_gated.onnx"]},      # neural VAD of the Whisper utterance gate
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
         ("share/" + package_name, ["package.xml", "README.md"]),
@@ -31,8 +32,8 @@ setup(
     zip_safe=True,
     maintainer="Sensifai",
     maintainer_email="info@sensifai.com",
-    description="dorai Stage 2: streaming speech-to-text with NVIDIA Nemotron "
-                "0.6B (NeMo, sherpa-onnx) + dorai fine-tuned adapters.",
+    description="dorai Stage 2: speech-to-text with the dorai fine-tuned Whisper "
+                "(VAD-gated) or NVIDIA Nemotron 0.6B, both through sherpa-onnx.",
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [

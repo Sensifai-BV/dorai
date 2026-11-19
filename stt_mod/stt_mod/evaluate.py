@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Offline evaluation of the stt_mod engine: WER, speed, latency and SNR.
 
-Decodes a manifest with exactly the streaming path the node uses
-(NemotronStreamer fed in voice_mod-like frames, endpoint finals), for one or
-more latency profiles / adapters, optionally with noise mixed in at given
-SNRs, and reports per condition x configuration:
+Decodes a manifest with exactly the path the node uses (frames as voice_mod
+publishes them; Whisper behind the VAD gate with --engine whisper, or the
+Nemotron streamer with its endpoint finals), for the Whisper model or for one
+or more Nemotron latency profiles / adapters, optionally with noise mixed in
+at given SNRs, and reports per condition x configuration:
 
   WER, CER, WER without an out-of-vocabulary name (--name), empty-transcript
   rate, end-of-speech -> final lag (audio time), decode RTF (compute time /
@@ -16,6 +17,7 @@ absolute), text and optional condition. No ROS needed.
 
   ros2 run stt_mod evaluate --manifest data/manifest.jsonl --latency-ms 80 160 560 1120 --out eval_out
   python3 -m stt_mod.evaluate --manifest m.jsonl --adapter mc-ref none --noise welding/*.wav --snr 0 5 10
+  python3 -m stt_mod.evaluate --manifest m.jsonl --engine whisper nemotron --name artaban
 """
 from __future__ import annotations
 
@@ -28,8 +30,9 @@ import time
 import numpy as np
 
 from .metrics import LevelMeter, SystemProbe, score, speech_end_s
-from .models import auto_rule2, find_model
+from .models import auto_rule2, default_roots, find_model, find_whisper_model
 from .streamer import NemotronStreamer
+from .whisper import WhisperStreamer, find_vad_model
 from .transcribe import read_wav_16k
 
 FS = 16000
@@ -101,6 +104,9 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--manifest", required=True)
     ap.add_argument("--out", default="eval_out")
+    ap.add_argument("--engine", nargs="+", default=["nemotron"], choices=("whisper", "nemotron"))
+    ap.add_argument("--whisper-model", default="", help="Whisper export name; default: newest dorai fine-tune")
+    ap.add_argument("--vad", default="neural", choices=("neural", "energy", "none"))
     ap.add_argument("--latency-ms", type=int, nargs="+", default=[1120])
     ap.add_argument("--adapter", nargs="+", default=["mc-ref"])
     ap.add_argument("--models-dir", default="")
@@ -140,12 +146,26 @@ def main(argv=None):
     probe = SystemProbe()
     out_rows = []
     fh = open(os.path.join(a.out, "utterances.jsonl"), "w")
-    for lat in a.latency_ms:
-        for ad in a.adapter:
-            d, lat_, ad_ = find_model(lat, ad, models_dir=a.models_dir)
-            cfg = f"{lat_}ms/{ad_}"
+    configs = []
+    if "whisper" in a.engine:
+        configs.append(("whisper", None, None))
+    if "nemotron" in a.engine:
+        configs += [("nemotron", lat, ad) for lat in a.latency_ms for ad in a.adapter]
+    for engine, lat, ad in configs:
+        if True:
             t0 = time.time()
-            s = NemotronStreamer(d, num_threads=a.threads, rule2_sil=auto_rule2(lat_))
+            if engine == "whisper":
+                d, name = find_whisper_model(a.whisper_model, models_dir=a.models_dir)
+                vad, vad_model = a.vad, ""
+                if vad == "neural":
+                    vad_model = find_vad_model("", d, default_roots(a.models_dir))
+                    vad = vad if vad_model else "energy"
+                s = WhisperStreamer(d, num_threads=a.threads, vad=vad, vad_model=vad_model)
+                lat_, ad_, cfg = 0, name, f"whisper/{vad}"
+            else:
+                d, lat_, ad_ = find_model(lat, ad, models_dir=a.models_dir)
+                cfg = f"{lat_}ms/{ad_}"
+                s = NemotronStreamer(d, num_threads=a.threads, rule2_sil=auto_rule2(lat_))
             print(f"== {cfg}: {len(items)} utterances (load {time.time() - t0:.1f}s, rule2 {s.rule2_sil:.2f}s)", flush=True)
             for k, (uid, cond, text, x, snr) in enumerate(items):
                 finals, comp, dur = decode(s, x, a.frame_s, a.gap_s)

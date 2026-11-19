@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""Offline check of the stt_mod engine on WAV files (no ROS needed).
+"""Offline check of the stt_mod engines on WAV files (no ROS needed).
 
-Runs the same NemotronStreamer as the node, feeding each file the way
-voice_mod frames arrive, and prints finals and the real-time factor. Use it to check models load on a machine, measure RTF on the Pi, and
-A/B the latency profiles and adapters.
+Runs the same engine as the node (Whisper behind the VAD gate by default, or
+the Nemotron streamer), feeding each file the way voice_mod frames arrive,
+and prints finals and the real-time factor. Use it to check models load on a
+machine, measure RTF on the Pi, and A/B engines, latency profiles and adapters.
 
   ros2 run stt_mod transcribe clean.wav
+  python3 -m stt_mod.transcribe --engine nemotron --latency-ms 1120 clean.wav
+  python3 -m stt_mod.transcribe --vad none one_command.wav        # whole file = one utterance
   python3 -m stt_mod.transcribe --latency-ms 560 --adapter mc-ref a.wav b.wav
   python3 -m stt_mod.transcribe --frame-s 5 --threads 2 long.wav   # voice_mod framing
 """
@@ -18,8 +21,10 @@ import wave
 
 import numpy as np
 
-from .models import auto_rule2, default_roots, find_model, list_models
+from .models import (auto_rule2, default_roots, find_model, find_whisper_model, list_models,
+                     list_whisper_models)
 from .streamer import NemotronStreamer
+from .whisper import WhisperStreamer, find_vad_model
 
 
 def read_wav_16k(path):
@@ -44,6 +49,10 @@ def read_wav_16k(path):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("wavs", nargs="*")
+    ap.add_argument("--engine", default="whisper", choices=("whisper", "nemotron"))
+    ap.add_argument("--whisper-model", default="", help="Whisper export name; default: newest dorai fine-tune")
+    ap.add_argument("--vad", default="neural", choices=("neural", "energy", "none"))
+    ap.add_argument("--vad-model", default="")
     ap.add_argument("--latency-ms", type=int, default=1120)
     ap.add_argument("--adapter", default="mc-ref")
     ap.add_argument("--rule2", type=float, default=0.0, help="0 = auto per latency profile")
@@ -56,13 +65,26 @@ def main(argv=None):
     ap.add_argument("--json", action="store_true", help="one JSON line per final")
     a = ap.parse_args(argv)
     if a.list or not a.wavs:
+        for name, p in list_whisper_models(default_roots(a.models_dir)):
+            print(f"whisper   {name}  {p}")
         for lat, ad, p in list_models(default_roots(a.models_dir)):
-            print(f"{lat:5d} ms  {ad:7s}  {p}")
+            print(f"nemotron  {lat:5d} ms  {ad:7s}  {p}")
         return
-    d, lat, ad = find_model(a.latency_ms, a.adapter, a.model_dir, a.models_dir)
     t0 = time.time()
-    s = NemotronStreamer(d, num_threads=a.threads, rule2_sil=a.rule2 or auto_rule2(lat))
-    print(f"model {lat} ms / {ad}: {d} (load {time.time() - t0:.1f}s)")
+    if a.engine == "whisper":
+        d, name = find_whisper_model(a.whisper_model, a.model_dir, a.models_dir)
+        vad, vad_model = a.vad, ""
+        if vad == "neural":
+            vad_model = find_vad_model(a.vad_model, d, default_roots(a.models_dir))
+            if not vad_model:
+                print("vad_gated.onnx not found: using the energy gate")
+                vad = "energy"
+        s = WhisperStreamer(d, num_threads=a.threads, vad=vad, vad_model=vad_model)
+        print(f"model whisper / {name}, vad {vad}: {d} (load {time.time() - t0:.1f}s)")
+    else:
+        d, lat, ad = find_model(a.latency_ms, a.adapter, a.model_dir, a.models_dir)
+        s = NemotronStreamer(d, num_threads=a.threads, rule2_sil=a.rule2 or auto_rule2(lat))
+        print(f"model {lat} ms / {ad}: {d} (load {time.time() - t0:.1f}s)")
     for path in a.wavs:
         x = read_wav_16k(path)
         fr = int(a.frame_s * 16000) or len(x)

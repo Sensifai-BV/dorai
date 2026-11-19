@@ -1,21 +1,35 @@
 #!/bin/bash
-# Download the dorai Nemotron + mc-ref models from the Hugging Face Hub.
-#   bash stt_mod/scripts/download_models.sh                      # 1120 ms -> ~/dorai/models
-#   LATENCIES="1120 560" DEST=stt_mod/models bash stt_mod/scripts/download_models.sh
-#   ADAPTER_RAW=1 ...   also fetch the raw adapter (adapter/mc-ref/adapter.safetensors)
+# Download the dorai models from the Hugging Face Hub: https://huggingface.co/sensifai/dorai
+#
+#   bash stt_mod/scripts/download_models.sh                      # Whisper + Nemotron -> ~/dorai/models
+#   MODELS=whisper bash stt_mod/scripts/download_models.sh       # only the default STT engine's model (1.0 GB)
+#   MODELS="whisper nemotron intent" bash stt_mod/scripts/download_models.sh     # also intent_mod's GGUF (2.6 GB)
+#   DEST=/data/models bash stt_mod/scripts/download_models.sh    # then run the nodes with -p models_dir:=/data/models
+#
+# The files keep the repo's layout under DEST; stt_mod and intent_mod look there on their own:
+#   stt-model/whisper-finetuned/sherpa-onnx-whisper-large-v3-turbo-dorai-artaban/   Whisper large-v3-turbo, dorai fine-tune (int8)
+#   stt-model/nemo-finetuned/                                                       Nemotron 0.6B, 1120 ms, mc-ref adapter (int8)
+#   intent-model/intent-qwen35-4b-Q4_0.gguf                                         Qwen3.5-4B intent model
 set -euo pipefail
-REPO_ID=${REPO_ID:-sensifai/dorai-nemotron-speech-0.6b-mc-ref-onnx}
-LATENCIES=${LATENCIES:-1120}
+REPO_ID=${REPO_ID:-sensifai/dorai}
+MODELS=${MODELS:-${ENGINES:-whisper nemotron}}
 DEST=${DEST:-$HOME/dorai/models}
+WHISPER=stt-model/whisper-finetuned
+WHISPER_DIR=sherpa-onnx-whisper-large-v3-turbo-dorai-artaban
 command -v hf >/dev/null || python3 -m pip install --user --break-system-packages -q -U huggingface_hub
 mkdir -p "$DEST"
-INC=(--include SHA256SUMS --include README.md --include NOTICE.txt --include LICENSE.txt)
-for L in $LATENCIES; do INC+=(--include "sherpa-onnx-nemotron-speech-streaming-en-0.6b-${L}ms-int8-2026-04-25-dorai-mc-ref/*"); done
-[ "${ADAPTER_RAW:-0}" = 1 ] && INC+=(--include "adapter/*")
-# hf takes ONE pattern per --include (several after one flag are read as file names)
+INC=()            # hf takes ONE pattern per --include (several after one flag are read as file names)
+for M in $MODELS; do
+  case "$M" in
+    whisper)  INC+=(--include "$WHISPER/$WHISPER_DIR/*" --include "$WHISPER/SHA256SUMS") ;;
+    nemotron) INC+=(--include "stt-model/nemo-finetuned/*") ;;
+    intent)   INC+=(--include "intent-model/*") ;;
+    *) echo "unknown model '$M' (whisper | nemotron | intent)" >&2; exit 2 ;;
+  esac
+done
 hf download "$REPO_ID" "${INC[@]}" --local-dir "$DEST"
-cd "$DEST"
-PAT=$(for L in $LATENCIES; do printf '%s|' "en-0.6b-${L}ms-int8"; done); PAT=${PAT%|}
-grep -E -e "$PAT" SHA256SUMS | shasum -a 256 -c --quiet && echo "checksums OK"
-ls -d sherpa-onnx-nemotron-*-dorai-mc-ref
-echo "stt_mod finds these automatically if DEST is ~/dorai/models or stt_mod/models (else -p models_dir:=$DEST)"
+case " $MODELS " in *" whisper "*)
+  (cd "$DEST/$WHISPER" && grep -F -e "$WHISPER_DIR/" SHA256SUMS | shasum -a 256 -c --quiet && echo "whisper checksums OK") ;;
+esac
+(cd "$DEST" && ls -d "$WHISPER/$WHISPER_DIR" stt-model/nemo-finetuned intent-model/*.gguf 2>/dev/null) || true
+echo "stt_mod and intent_mod find these on their own if DEST is ~/dorai/models (else -p models_dir:=$DEST)"

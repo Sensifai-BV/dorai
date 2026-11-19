@@ -1,55 +1,84 @@
-# stt_mod — streaming speech-to-text (NVIDIA Nemotron) for ROS 2
+# stt_mod — speech-to-text (fine-tuned Whisper, or NVIDIA Nemotron) for ROS 2
 
-Stage 2 of the dorai pipeline. It runs NVIDIA
-[`nemotron-speech-streaming-en-0.6b`](https://huggingface.co/nvidia/nemotron-speech-streaming-en-0.6b)
-(cache-aware FastConformer + RNN-T, NeMo, 600 M params) as int8 ONNX through
-[sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx) on the CPU. The dorai
-fine-tuned workshop adapter **mc-ref** is baked into the encoder, and that
-default model ships inside the package (`stt_mod/models/`).
+Stage 2 of the dorai pipeline. Two engines, both int8 ONNX through
+[sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx) on the CPU, chosen with `engine`:
+
+| `engine` | Model | How it decodes |
+| :--- | :--- | :--- |
+| `whisper` (default) | Whisper large-v3-turbo with the dorai command fine-tune (LoRA merged) | The clean stream is cut into utterances by a VAD gate; each utterance is decoded once, when the talker stops. No partial hypotheses. |
+| `nemotron` | NVIDIA [`nemotron-speech-streaming-en-0.6b`](https://huggingface.co/nvidia/nemotron-speech-streaming-en-0.6b) (cache-aware FastConformer + RNN-T, 600 M params) with the dorai workshop adapter **mc-ref** baked into the encoder | Streaming, partial hypotheses, its own endpointing. Ships inside the package (`stt_mod/models/`). |
 
 ```
-/dorai_clean_audio ──► stt_mod ──► /dorai_partial_transcript   running hypothesis (every encoder chunk)
-                               ├─► /dorai_transcript           final per endpoint (punctuated)
-                               └─► /dorai_stt/status           JSON: rtf, backlog_s, finals, lag_median_s
+/dorai_clean_audio ──► stt_mod ──► /dorai_partial_transcript   running hypothesis (Nemotron only)
+                               ├─► /dorai_transcript           final per utterance (punctuated)
+                               └─► /dorai_stt/status           JSON: model, rtf, backlog_s, finals, lag_median_s
 ```
 
 ```bash
-ros2 launch stt_mod stt.launch.py                       # defaults: 1120 ms, mc-ref, 2 threads
-ros2 run stt_mod stt --ros-args -p latency_ms:=560 -p num_threads:=4      # Mac / x86
-ros2 run stt_mod stt --ros-args -p adapter:=none        # stock NVIDIA model
+ros2 launch stt_mod stt.launch.py                       # defaults: Whisper behind the VAD gate, 2 threads
+ros2 run stt_mod stt --ros-args -p engine:=nemotron     # the streaming engine (1120 ms, mc-ref)
+ros2 run stt_mod stt --ros-args -p engine:=nemotron -p latency_ms:=560 -p num_threads:=4      # Mac / x86
+ros2 run stt_mod stt --ros-args -p engine:=nemotron -p adapter:=none        # stock NVIDIA model
 ```
+
+If the Whisper export is not installed, the node logs an error and runs
+Nemotron instead (`engine_fallback:=false` makes it fail instead).
+
+### The VAD gate (Whisper)
+
+Whisper is handed only what the gate passes. That is what keeps noise from
+becoming text: given 20 s of workshop noise with nobody speaking, the
+fine-tuned model wrote a complete command, while behind the gate nothing is
+decoded at all. `vad`:
+
+* `neural` (default): the neural VAD model `vad_gated.onnx`, run by
+  sherpa-onnx. The file ships inside the package (`stt_mod/stt_mod/`); it is
+  the same model as doa_mod's `vad.onnx`. Without it the node warns and uses
+  `energy`.
+* `energy`: level gate with an adaptive noise floor, hysteresis, 0.3 s
+  pre-roll and hangover. Needs no file, but also passes loud non-speech.
+* `none`: every incoming frame is one utterance (only for a front end that
+  already publishes one utterance per frame).
+
+An utterance ends after `vad_min_silence_s` (0.6 s) of silence, so a transcript
+appears that long after the last word plus the decoding time. A transcript
+that cannot belong to the length of its utterance (a repetition loop) is cut
+back to the last whole sentence (`max_words_per_s`).
 
 ## Models
 
-**Download (Artaban team).** The fine-tuned models are on the Hugging Face Hub at
-[`sensifai/dorai-nemotron-speech-0.6b-mc-ref-onnx`](https://huggingface.co/sensifai/dorai-nemotron-speech-0.6b-mc-ref-onnx)
-(1120/560/160/80 ms, mc-ref baked in; NVIDIA Open Model License):
+**Download.** All dorai models are in one Hugging Face repo,
+[`sensifai/dorai`](https://huggingface.co/sensifai/dorai/tree/main):
+
+| Path in the repo | Size | What |
+| :--- | ---: | :--- |
+| `stt-model/whisper-finetuned/sherpa-onnx-whisper-large-v3-turbo-dorai-artaban/` | 1.0 GB | Whisper large-v3-turbo with the dorai command fine-tune: `turbo-encoder.int8.onnx`, `turbo-decoder.int8.onnx`, `turbo-tokens.txt` |
+| `stt-model/whisper-finetuned/adapter/step-3000/` | 8 MB | the LoRA adapter itself (PEFT), for further training |
+| `stt-model/nemo-finetuned/` | 0.67 GB | Nemotron 0.6B, 1120 ms profile, `mc-ref` adapter baked in (NVIDIA Open Model License): `encoder.int8.onnx`, `decoder.int8.onnx`, `joiner.int8.onnx`, `tokens.txt`, `dorai_adapter.json`, `test_wavs/` |
+| `intent-model/intent-qwen35-4b-Q4_0.gguf` | 2.6 GB | intent_mod's model (it downloads this itself on first start) |
 
 ```bash
-bash stt_mod/scripts/download_models.sh                         # 1120 ms -> ~/dorai/models, checksums verified
-LATENCIES="1120 560" DEST=stt_mod/models bash stt_mod/scripts/download_models.sh
+bash stt_mod/scripts/download_models.sh                         # Whisper + Nemotron -> ~/dorai/models, Whisper checksums verified
+MODELS=whisper bash stt_mod/scripts/download_models.sh          # only the default engine's model
+MODELS="whisper nemotron intent" bash stt_mod/scripts/download_models.sh     # everything, for an offline robot
+DEST=/data/models bash stt_mod/scripts/download_models.sh       # elsewhere; then run the node with -p models_dir:=/data/models
+hf download sensifai/dorai --local-dir ~/dorai/models           # the same thing by hand: the whole repo
 ```
 
-The encoder file (653 MB) is above GitHub's 100 MB limit, so keep
-`stt_mod/models/**/*.onnx` out of the git push. Add it to `.gitignore`, or use
-Git LFS.
+Nothing is bundled in the package: without a download the node has no model
+and says where to get one. The files keep the repo's layout under the models
+root (`~/dorai/models/stt-model/...`), and the node finds them there: every
+root is also searched under `stt-model/` and `stt-model/whisper-finetuned/`,
+and `nemo-finetuned/` is recognised by its `dorai_adapter.json`. The neural
+VAD of the utterance gate (`vad_gated.onnx`) is not on the Hub; it ships in
+the package source.
 
+A model directory copied into `stt_mod/models/` is installed with the package
+(`setup.py` -> `share/stt_mod/models/`; a symlink with `colcon build
+--symlink-install`) and is found too. The encoders are far above GitHub's
+100 MB file limit: keep them out of git.
 
-The default model is bundled in the package, so `ros2 run stt_mod stt` works
-with no download:
-
-```
-stt_mod/models/sherpa-onnx-nemotron-speech-streaming-en-0.6b-1120ms-int8-2026-04-25-dorai-mc-ref/
-    encoder.int8.onnx (653 MB, adapter baked in)  decoder.int8.onnx  joiner.int8.onnx
-    tokens.txt  dorai_adapter.json (adapter provenance + encoder sha256)  test_wavs/
-```
-
-`setup.py` installs it to `share/stt_mod/models/`; with `colcon build
---symlink-install` that is a symlink, not a copy. The Docker image gets it
-through `COPY stt_mod`. The 653 MB encoder exceeds GitHub's 100 MB file
-limit, so track `stt_mod/models/**/*.onnx` with Git LFS if you commit it.
-
-Other profiles and adapters are looked up, in order, in `models_dir`,
+Only the 1120 ms Nemotron profile is published. Other profiles and adapters are looked up, in order, in `models_dir`,
 `$DORAI_MODELS_DIR`, `stt_mod/models` (or `share/stt_mod/models`),
 `~/dorai/models` and `/root/.cache/dorai/models`. The first root that holds
 the requested model wins. To add one, download the stock export and bake the
@@ -154,9 +183,21 @@ same model decoded offline on the Mac.
 
 | Parameter | Default | Meaning |
 | :--- | :--- | :--- |
-| `latency_ms` | `1120` | encoder chunk / profile: 80, 160, 560, 1120 |
-| `adapter` | `mc-ref` | `mc-ref`, `mc-das`, `none` |
-| `models_dir` / `model_dir` | `""` | extra search root / explicit model dir (overrides the two above) |
+| `engine` | `whisper` | `whisper` or `nemotron` |
+| `engine_fallback` | `true` | Whisper export missing: run Nemotron instead of failing |
+| `whisper_model` | `""` | Whisper export directory name or its tail; empty = newest dorai fine-tune found |
+| `language` | `en` | Whisper language |
+| `vad` | `neural` | utterance gate in front of Whisper: `neural`, `energy`, `none` |
+| `vad_model` | `""` | neural VAD file; empty = `vad_gated.onnx` shipped in the package |
+| `vad_threshold` | `0.5` | speech probability threshold of the neural VAD |
+| `vad_min_silence_s` | `0.6` | silence that ends an utterance |
+| `vad_min_speech_s` | `0.25` | shorter utterances are dropped |
+| `vad_max_utt_s` | `15.0` | an utterance is cut here |
+| `vad_pre_roll_s` | `0.3` | audio kept before the detected start of an utterance (the detector fires after the first sounds) |
+| `max_words_per_s` | `5.0` | transcripts longer than speech allows are cut |
+| `latency_ms` | `1120` | Nemotron encoder chunk / profile: 80, 160, 560, 1120 |
+| `adapter` | `mc-ref` | Nemotron: `mc-ref`, `mc-das`, `none` |
+| `models_dir` / `model_dir` | `""` | extra search root / explicit model dir (overrides the model choice of the engine) |
 | `num_threads` | `2` | onnxruntime threads (2 is fastest on a Pi 4) |
 | `block_ms` | `200` | feed granularity |
 | `ep_rule2_sil` | `0` (auto) | trailing silence after text that ends an utterance; floored at chunk + 0.2 s |

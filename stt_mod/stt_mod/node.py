@@ -1,14 +1,25 @@
 #!/usr/bin/env python3
 """stt_mod — Stage 2 of the dorai speech pipeline (ROS 2 node ``stt_mod``).
 
-NVIDIA nemotron-speech-streaming-en-0.6b (cache-aware FastConformer + RNN-T,
-NeMo) running through sherpa-onnx on the CPU, optionally with a dorai
-fine-tuned encoder adapter baked into the ONNX encoder (see bake_adapter.py).
+Two engines, both through sherpa-onnx on the CPU (``engine``):
+
+  whisper   (default) Whisper large-v3-turbo with the dorai command fine-tune.
+            Not a streaming model: the clean stream is cut into utterances by a
+            VAD gate (vad_gated.onnx) and each utterance is decoded once (see whisper.py). Audio
+            the gate does not pass is never decoded, so noise produces no text.
+  nemotron  NVIDIA nemotron-speech-streaming-en-0.6b (cache-aware FastConformer
+            + RNN-T), optionally with a dorai fine-tuned encoder adapter baked
+            into the ONNX encoder (see bake_adapter.py). Streaming, with partial
+            hypotheses and its own endpointing.
+
+If the Whisper model is not installed the node says so and, unless
+``engine_fallback`` is false, runs Nemotron instead.
 
 Topics
   in   /dorai_clean_audio        std_msgs/Float32MultiArray  [capture_s, 16000, 1, seq, samples...]
                                  (layout.data_offset = 4), from voice_mod
-  out  /dorai_partial_transcript std_msgs/String  running hypothesis (one update per encoder chunk)
+  out  /dorai_partial_transcript std_msgs/String  running hypothesis (one update per encoder chunk;
+                                                  Nemotron only)
        /dorai_transcript         std_msgs/String  final text per endpoint (punctuated, capitalised)
        /dorai_stt/status         std_msgs/String  JSON {rtf, backlog_s, finals, model, ...}
        /dorai_stt/metrics        std_msgs/String  JSON per final (only with metrics:=true): blind
@@ -16,7 +27,7 @@ Topics
                                  CPU temperature/clock/load (see metrics.py); also appended to
                                  metrics_file if set. Offline WER/CER: `ros2 run stt_mod evaluate`.
 
-Latency profiles (``latency_ms`` = encoder chunk of the installed export):
+Nemotron latency profiles (``latency_ms`` = encoder chunk of the installed export):
    80 / 160 ms  lowest delay, needs a fast CPU (Mac/x86; not a Pi 4)
    560 ms       balanced; the chunk the dorai adapters were trained at
   1120 ms       highest throughput — the only profile near real time on a Pi 4
@@ -45,8 +56,9 @@ except ImportError:  # very old rclpy / test mocks
 from std_msgs.msg import Float32MultiArray, String
 
 from .metrics import LevelMeter, SystemProbe
-from .models import auto_rule2, find_model
+from .models import auto_rule2, default_roots, find_model, find_whisper_model
 from .streamer import NemotronStreamer
+from .whisper import WhisperStreamer, find_vad_model
 
 FS = 16000
 
@@ -57,7 +69,21 @@ PARAMS = {
     "partial_topic": ("/dorai_partial_transcript", "running hypothesis"),
     "status_topic": ("/dorai_stt/status", "JSON status"),
     "metrics_topic": ("/dorai_stt/metrics", "JSON metrics per final (metrics:=true)"),
-    # model
+    # engine
+    "engine": ("whisper", "whisper (fine-tuned Whisper, VAD-gated; default) | nemotron (streaming)"),
+    "engine_fallback": (True, "whisper model missing -> run nemotron instead of failing"),
+    # whisper
+    "whisper_model": ("", "Whisper export directory name or its tail; '' = newest dorai fine-tune"),
+    "language": ("en", "Whisper language"),
+    "vad": ("neural", "utterance gate in front of Whisper: neural | energy | none"),
+    "vad_model": ("", "neural VAD file; '' = vad_gated.onnx shipped in this package"),
+    "vad_threshold": (0.5, "speech probability threshold of the neural VAD"),
+    "vad_min_silence_s": (0.6, "s of silence that ends an utterance"),
+    "vad_min_speech_s": (0.25, "shorter utterances are dropped"),
+    "vad_max_utt_s": (15.0, "s, an utterance is cut here (Whisper sees at most 30 s)"),
+    "vad_pre_roll_s": (0.3, "s of audio kept before the detected start of an utterance"),
+    "max_words_per_s": (5.0, "a transcript with more words than this per second of speech is cut"),
+    # nemotron
     "latency_ms": (1120, "encoder chunk / latency profile: 80 | 160 | 560 | 1120"),
     "adapter": ("mc-ref", "fine-tuned dorai adapter: mc-ref (default) | mc-das | none"),
     "models_dir": ("", "extra models root searched first"),
@@ -91,19 +117,24 @@ class SttNode(Node):
         self.p = p
         log = self.get_logger()
 
-        model_dir, lat, adapter = find_model(p["latency_ms"], p["adapter"],
-                                             p["model_dir"], p["models_dir"])
-        log.info(f"Loading Nemotron {lat} ms, adapter={adapter}: {model_dir} "
-                 f"(threads={int(p['num_threads'])})")
         t0 = time.time()
-        self.asr = NemotronStreamer(
-            model_dir, num_threads=int(p["num_threads"]), block_ms=int(p["block_ms"]),
-            rule1_sil=float(p["ep_rule1_sil"]),
-            rule2_sil=float(p["ep_rule2_sil"]) or auto_rule2(lat),
-            max_utt=float(p["ep_max_utt"]), tail_pad_s=float(p["tail_pad_s"]),
-            frame_is_utterance=bool(p["frame_is_utterance"]),
-            log=log.info if p["debug"] else None)
-        self.model_tag = f"nemotron-0.6b/{lat}ms/{adapter}"
+        engine = str(p["engine"]).strip().lower()
+        if engine not in ("whisper", "nemotron"):
+            raise ValueError(f"engine must be whisper or nemotron, not {p['engine']!r}")
+        self.asr = None
+        if engine == "whisper":
+            try:
+                self.asr, self.model_tag, ready = self._make_whisper(p, log)
+            except FileNotFoundError as e:
+                if not bool(p["engine_fallback"]):
+                    raise
+                log.error(f"{e} Falling back to engine=nemotron (engine_fallback:=false to fail instead).")
+                engine = "nemotron"
+                # model_dir, if set, named a Whisper export: let Nemotron search the roots
+                self.asr, self.model_tag, ready = self._make_nemotron(dict(p, model_dir=""), log)
+        if self.asr is None:
+            self.asr, self.model_tag, ready = self._make_nemotron(p, log)
+        self.engine = engine
 
         self.pub = self.create_publisher(String, p["output_topic"], 10)
         self.partial_pub = self.create_publisher(String, p["partial_topic"], 10)
@@ -130,9 +161,48 @@ class SttNode(Node):
         self.sub = self.create_subscription(
             Float32MultiArray, p["input_topic"], self._on_audio, 50)
         self.create_timer(float(p["status_period_s"]), self._status)
-        log.info(f"Nemotron ready in {time.time() - t0:.1f}s — {self.model_tag}, "
-                 f"rule2={self.asr.rule2_sil:.2f}s, partials every {int(lat)} ms; "
-                 f"{p['input_topic']} -> {p['output_topic']}")
+        log.info(f"{ready} in {time.time() - t0:.1f}s; {p['input_topic']} -> {p['output_topic']}")
+
+    # -------------------------------------------------------------- engines
+    def _make_whisper(self, p, log):
+        model_dir, name = find_whisper_model(p["whisper_model"], p["model_dir"], p["models_dir"])
+        vad = "none" if bool(p["frame_is_utterance"]) else str(p["vad"]).strip().lower()
+        vad = "neural" if vad == "silero" else vad
+        vad_model = ""
+        if vad == "neural":
+            vad_model = find_vad_model(p["vad_model"], model_dir, default_roots(p["models_dir"]))
+            if not vad_model:
+                log.warning("vad:=neural but vad_gated.onnx was not found (package, model dir, models roots, "
+                            "doa_mod); using the energy gate, which also passes loud non-speech.")
+                vad = "energy"
+        log.info(f"Loading Whisper {name}: {model_dir} (threads={int(p['num_threads'])}, vad={vad}"
+                 f"{' ' + vad_model if vad_model else ''})")
+        asr = WhisperStreamer(
+            model_dir, num_threads=int(p["num_threads"]), vad=vad, vad_model=vad_model,
+            vad_threshold=float(p["vad_threshold"]), min_silence_s=float(p["vad_min_silence_s"]),
+            min_speech_s=float(p["vad_min_speech_s"]), max_utt_s=float(p["vad_max_utt_s"]),
+            pre_roll_s=float(p["vad_pre_roll_s"]),
+            language=str(p["language"]), max_words_per_s=float(p["max_words_per_s"]),
+            frame_is_utterance=bool(p["frame_is_utterance"]), log=log.info if p["debug"] else None)
+        tag = "whisper/" + name[len("sherpa-onnx-whisper-"):] if name.startswith("sherpa-onnx-whisper-") else "whisper/" + name
+        return asr, tag, (f"Whisper ready — {tag}, vad={asr.vad_kind}, an utterance ends after "
+                          f"{asr.rule2_sil:.2f}s of silence, no partials")
+
+    def _make_nemotron(self, p, log):
+        model_dir, lat, adapter = find_model(p["latency_ms"], p["adapter"],
+                                             p["model_dir"], p["models_dir"])
+        log.info(f"Loading Nemotron {lat} ms, adapter={adapter}: {model_dir} "
+                 f"(threads={int(p['num_threads'])})")
+        asr = NemotronStreamer(
+            model_dir, num_threads=int(p["num_threads"]), block_ms=int(p["block_ms"]),
+            rule1_sil=float(p["ep_rule1_sil"]),
+            rule2_sil=float(p["ep_rule2_sil"]) or auto_rule2(lat),
+            max_utt=float(p["ep_max_utt"]), tail_pad_s=float(p["tail_pad_s"]),
+            frame_is_utterance=bool(p["frame_is_utterance"]),
+            log=log.info if p["debug"] else None)
+        tag = f"nemotron-0.6b/{lat}ms/{adapter}"
+        return asr, tag, (f"Nemotron ready — {tag}, rule2={asr.rule2_sil:.2f}s, "
+                          f"partials every {int(lat)} ms")
 
     # ------------------------------------------------------------ ROS input
     def _on_audio(self, msg):
@@ -232,7 +302,8 @@ class SttNode(Node):
         if b > float(self.p["backlog_warn_s"]):
             self.get_logger().warning(
                 f"STT is behind real time: {b:.1f}s audio queued (RTF {st['rtf']}). "
-                "Use latency_ms:=1120, num_threads:=2, or run stt_mod on a faster host.",
+"Give it more threads (num_threads), use engine:=nemotron latency_ms:=1120, "
+                "or run stt_mod on a faster host.",
                 throttle_duration_sec=10.0)
         elif self.p["debug"]:
             self.get_logger().info(json.dumps(st))
