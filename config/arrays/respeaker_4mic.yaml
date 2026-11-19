@@ -1,0 +1,68 @@
+name: respeaker_4mic_dorai
+
+array:
+  type: circular
+  dimensions: 3
+  num_mics: 4
+
+  radius_m: 0.032
+  center_m: [0.0, 0.0, 1.0]
+
+  # Capsules at 45 / 135 / 225 / 315 deg, counter-clockwise from +X, in channel
+  # order. This is the geometry doa_mod has built in (radius_mm 32, channels
+  # 1..4) and the one validated on the 2026-08-12 hardware session. The first
+  # draft of this file had them on the axes (90 / 0 / 270 / 180 deg); with that
+  # table the simulator and doa_mod would disagree by a mirror, which no offset
+  # corrects. Still to be confirmed against the board revision on the robot.
+  microphones:
+    - channel: 1
+      position_m: [0.022627, 0.022627, 0.0]
+
+    - channel: 2
+      position_m: [-0.022627, 0.022627, 0.0]
+
+    - channel: 3
+      position_m: [-0.022627, -0.022627, 0.0]
+
+    - channel: 4
+      position_m: [0.022627, -0.022627, 0.0]
+
+audio:
+  sample_rate: 16000
+  channels: 4
+  sample_format: float32
+  interleaved: true
+
+acoustics:
+  speed_of_sound: 343.0
+  temperature_c: 20.0
+  air_absorption: false
+
+simulation:
+  mode: shoebox
+
+  room_dimensions_m: [6.0, 5.0, 3.0]
+
+  rt60_s: 0.4
+  max_order: 12
+
+  seed: 42
+
+ros2:
+  raw_topic: /dorai_raw_audio
+
+  message_type: std_msgs/Float32MultiArray
+
+  publish_rate: 16000
+  frame_duration_ms: 20
+
+dorai:
+  doa:
+    radius_mm: 32.0
+    channels: [1, 2, 3, 4]
+
+  voice:
+    max_mics: 4
+    requested_rate: 16000
+    publish_raw: true
+

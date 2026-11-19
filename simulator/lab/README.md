@@ -30,13 +30,13 @@ The physical scene is configured based on the following specific parameters:
 
 ### 5. Signal Processing & Enhancement
 * **Sampling Rate**: $16\,\text{kHz}$ (required by the ONNX model).
-* **Enhancement Engine**: The noisy microphone array signals (`mic[M, L]`) are processed by the fp32 spatial filter model `../ros2/voice_mod` to recover single-channel clean speech (`clean[L]`).
+* **Enhancement Engine**: The noisy microphone array signals (`mic[M, L]`) are processed by the fp32 spatial filter model `../../ros2/voice_mod` to recover single-channel clean speech (`clean[L]`).
 
 ---
 
 ## How to Run
 
-To run the simulator, execute the setup and launcher script from the `lab/` folder:
+To run the simulator, execute the setup and launcher script from the `` folder:
 
 ```bash
 ./run_dorai.sh
@@ -44,7 +44,7 @@ To run the simulator, execute the setup and launcher script from the `lab/` fold
 
 ### Script Execution Steps
 1. **Base Python Verification**: Checks for Python 3 on your system path.
-2. **Virtual Environment**: Creates a local Python virtual environment inside the lab folder at `lab/.pyenv` to keep dependencies self-contained.
+2. **Virtual Environment**: Creates a local Python virtual environment inside the lab folder at `` to keep dependencies self-contained.
 3. **Dependency Installation**: Installs the required Python packages (`onnxruntime`, `numpy`, `soundfile`) inside the virtual environment.
 4. **MATLAB Launch**: Configures MATLAB's `pyenv` to use the virtual environment interpreter and executes `run_simulation.m` via MATLAB in batch mode, launching the interactive GUI.
 

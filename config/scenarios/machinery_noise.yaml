@@ -1,0 +1,8 @@
+# Workshop with two noise sources in different places: welding and machinery,
+# each 5 dB below the commands (together about 2 dB below).
+room: factory
+robot: {place: open}
+talker: {commands: 6, distance_m: [1.0, 4.0]}
+noise:
+  - {file: simulator/lab/wavs/welding.wav, snr_db: 5}
+  - {file: simulator/lab/wavs/factory.wav, snr_db: 5}

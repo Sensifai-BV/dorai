@@ -1,0 +1,10 @@
+# Lab / small workshop. Measured RT60 about 0.6 s.
+size_m: [7.0, 5.5, 3.0]
+materials:
+  east: plasterboard
+  west: brickwork
+  north: glass_window
+  south: plasterboard
+  floor: linoleum_on_concrete
+  ceiling: ceiling_perforated_gypsum_board
+scatter: 0.25

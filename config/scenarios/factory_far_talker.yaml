@@ -1,0 +1,6 @@
+# The talker calls from across the workshop (4 to 7 m): reverberation dominates.
+room: factory
+robot: {place: open}
+talker: {commands: 6, distance_m: [4.0, 7.0]}
+noise:
+  - {file: simulator/lab/wavs/factory.wav, snr_db: 10}

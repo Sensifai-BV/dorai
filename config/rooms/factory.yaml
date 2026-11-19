@@ -1,0 +1,10 @@
+# Concrete factory hall. Measured RT60 about 1.2 s.
+size_m: [12.0, 9.0, 4.5]
+materials:
+  east: rough_concrete
+  west: brickwork
+  north: rough_concrete
+  south: wooden_door
+  floor: concrete_floor
+  ceiling: ceiling_metal_panel
+scatter: 0.25

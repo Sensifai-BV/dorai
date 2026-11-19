@@ -1,0 +1,6 @@
+# The hard one: welding 5 dB louder than the commands, robot parked at a wall.
+room: factory
+robot: {place: wall}
+talker: {commands: 6, distance_m: [1.0, 3.0]}
+noise:
+  - {file: simulator/lab/wavs/welding.wav, snr_db: -5}

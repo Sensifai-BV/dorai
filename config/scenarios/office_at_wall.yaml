@@ -1,0 +1,6 @@
+# Small office, the robot parked 0.4 m from a wall: the wall's reflection arrives
+# 2 ms after the direct sound and almost as loud.
+room: office
+robot: {place: wall}
+talker: {commands: 6, distance_m: [1.0, 3.0]}
+noise: []

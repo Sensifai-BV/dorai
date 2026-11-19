@@ -1,0 +1,3 @@
+# Level 1: free field. No reflections at all; the size only bounds where things may stand.
+size_m: [10.0, 10.0, 4.0]
+anechoic: true

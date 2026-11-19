@@ -1,0 +1,19 @@
+# The command library for generated speech (simulator/module/sim/tts.py).
+# The text is kept with every rendered command, so recognition and intent can be
+# scored against it.
+wake_word: Artaban
+voices: [Samantha, Daniel, Karen, Alex]       # macOS `say` voices; missing ones are skipped
+rates_wpm: [165, 185]
+commands:
+  - {id: CMD001, text: "Artaban, stop."}
+  - {id: CMD002, text: "Artaban, come here."}
+  - {id: CMD003, text: "Artaban, go to welding station two."}
+  - {id: CMD004, text: "Artaban, go back to base."}
+  - {id: CMD005, text: "Artaban, start inspection."}
+  - {id: CMD006, text: "Artaban, stop the inspection."}
+  - {id: CMD007, text: "Artaban, stand up."}
+  - {id: CMD008, text: "Artaban, sit down."}
+  - {id: CMD009, text: "Artaban, follow me."}
+  - {id: CMD010, text: "Artaban, check the gas pressure."}
+  - {id: CMD011, text: "Artaban, go to the door."}
+  - {id: CMD012, text: "Artaban, charge the battery."}

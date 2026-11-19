@@ -1,0 +1,7 @@
+# Welding starts in the middle of the session (after 12 s): what the modules do
+# when the noise field changes while they run.
+room: factory
+robot: {place: open}
+talker: {commands: 6, distance_m: [1.0, 4.0]}
+noise:
+  - {file: simulator/lab/wavs/welding.wav, snr_db: 0, from_s: 12.0}

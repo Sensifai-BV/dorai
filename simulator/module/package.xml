@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>sim</name>
+  <version>0.1.0</version>
+  <description>
+    Simulated microphone arrays for the dorai pipeline. Renders what the robot's
+    microphones would record in a room (pyroomacoustics: image sources, ray-traced
+    reverberation, real noise recordings) and plays it into the ROS graph as
+    virtual microphones, together with the truth to score every module against.
+  </description>
+  <maintainer email="info@sensifai.com">Sensifai</maintainer>
+  <license>None</license>
+
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+
+  <!-- pip: numpy scipy soundfile pyyaml; pyroomacoustics only for rendering
+       (the virtual microphone node plays scenes that are already rendered). -->
+  <exec_depend>python3-numpy</exec_depend>
+
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

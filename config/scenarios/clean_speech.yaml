@@ -1,0 +1,5 @@
+# A furnished lab, nobody else around: the easy case every module must pass.
+room: workshop
+robot: {place: open}
+talker: {commands: 6, distance_m: [1.0, 4.0]}
+noise: []

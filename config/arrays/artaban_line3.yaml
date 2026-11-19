@@ -1,0 +1,14 @@
+# The robot's three microphones for voice_mod: in a line along its back, 10 cm apart
+# (simulator/lab/config/default.m, and what dorai_beamformer.ort was exported for).
+# A line cannot give a bearing; doa_mod refuses this geometry by design.
+name: artaban_line3
+array:
+  type: linear
+  num_mics: 3
+  microphones:
+    - {channel: 1, position_m: [-0.10, 0.0, 0.0]}
+    - {channel: 2, position_m: [0.00, 0.0, 0.0]}
+    - {channel: 3, position_m: [0.10, 0.0, 0.0]}
+audio:
+  sample_rate: 16000
+  channels: 3

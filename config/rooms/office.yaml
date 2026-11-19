@@ -1,0 +1,10 @@
+# Small furnished office. Measured from the rendered impulse responses: RT60 about 0.5 s.
+size_m: [4.2, 3.4, 2.6]
+materials:            # names from pyroomacoustics' absorption database
+  east: plasterboard
+  west: plasterboard
+  north: glass_window
+  south: wooden_door
+  floor: carpet_thin
+  ceiling: ceiling_fissured_tile
+scatter: 0.25         # walls of a used room are not mirrors

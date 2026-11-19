@@ -1,0 +1,8 @@
+# Level 2: image sources only, one flat absorption for all walls, set from a target RT60
+# (Sabine). The RT60 actually reached is measured from the impulse responses and written
+# to truth.json; it is not assumed. Override rt60_s per scenario: room: {name: rt60, rt60_s: 0.6}
+size_m: [6.0, 5.0, 3.0]
+rt60_s: 0.4
+max_order: 17
+ray_tracing: false
+scatter: 0.0
