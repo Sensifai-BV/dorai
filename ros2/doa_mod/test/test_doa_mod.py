@@ -86,7 +86,7 @@ def test_vendored_core_matches_research_tree():
     doa/score_session.py to confirm the numbers still hold, then re-copy.
     """
     for name in ('doa_core.py', 'vad.py', 'vad.onnx'):
-        research = os.path.join(_REPO, 'doa', name)
+        research = os.path.join(os.path.dirname(_REPO), 'simulator', 'doa', name)
         vendored = os.path.join(_PKG, name)
         if not os.path.isfile(research):
             pytest.skip(f"research tree not present: {research}")
@@ -702,3 +702,43 @@ def test_node_flags_a_late_channel_on_the_topic():
                    for lv, m in node.get_logger().records if lv == 'warn')
     finally:
         node.shutdown()
+
+
+# ---------------------------------------------------------------------------
+# 10. what the simulated rooms showed (simulator/module, pyroomacoustics)
+# ---------------------------------------------------------------------------
+def test_a_new_utterance_does_not_start_from_the_last_talker():
+    """After a pause the first bearings must belong to who speaks now. The pool
+    used to keep the previous talker at full weight across any pause."""
+    pos = dc.array_positions()
+    def first_bearing(gap_s):
+        est = D.BearingEstimator(pos, gate=D.SpeechGate('energy'), utterance_gap_s=gap_s)
+        est.gate = lambda block: bool(np.abs(block).max() > 1e-4)
+        est.gate.last_prob = 1.0
+        for k in range(40):
+            est.push(plane_wave(40.0, pos, seed=k))
+        for _ in range(60):                                   # 1.9 s of silence
+            est.push(np.zeros((4, D.BLOCK)))
+        for k in range(3):                                    # the next talker's first 0.1 s
+            est.push(plane_wave(220.0, pos, seed=100 + k))
+        return est.bearing()[0]
+    assert abs(wrap180(first_bearing(0.0) - 40.0)) < 30.0, "the old behaviour was expected to stay on the old talker"
+    assert abs(wrap180(first_bearing(0.8) - 220.0)) <= 8.0
+
+
+def test_neural_gate_clears_its_state_while_nobody_speaks():
+    """Run for ever, the recurrent state goes deaf in a reverberant room (53 of
+    144 simulated commands got no speech frame). It is cleared every reset_s
+    of non-speech, and never while speech is being detected."""
+    gate = D.SpeechGate('off')
+    gate.mode, gate._vad = 'neural', _SpyVAD()
+    gate._reset_hops = int(round(2.0 * FS / D.HOP))
+    block = np.zeros((4, D.BLOCK))
+    gate._vad.process_chunk = lambda audio: 0.1
+    for _ in range(gate._reset_hops * 3 + 5):
+        gate(block)
+    assert gate.n_resets == 3
+    gate._vad.process_chunk = lambda audio: 0.9
+    for _ in range(gate._reset_hops * 2):
+        gate(block)
+    assert gate.n_resets == 3, "the state was cleared in the middle of speech"

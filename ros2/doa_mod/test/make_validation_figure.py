@@ -37,7 +37,7 @@ rosmock.install()
 
 import doa as D                                                    # noqa: E402
 import doa_core as dc                                              # noqa: E402
-from replay_session import read_take, wrap180, TASK2               # noqa: E402
+from replay_session import read_take, TASK2               # noqa: E402
 
 FOCAL, ENERGY, OFF, LIVEDOA, TRUTHC = (
     '#c1440e', '#4c72b0', '#8c8c8c', '#55a868', '#333333')

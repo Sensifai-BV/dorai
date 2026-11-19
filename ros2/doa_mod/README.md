@@ -71,6 +71,44 @@ python3 test/replay_session.py          # ~4 min, writes doa_mod_scores.csv
 python3 test/make_validation_figure.py  # writes doa_mod_validation.png
 ```
 
+### In simulation and on other real recordings (2026-11-19)
+
+Simulated with `simulator/module` (pyroomacoustics), scored by
+`experiments/doa_benchmark.py` against pyroomacoustics' own SRP-PHAT and MUSIC,
+which are told when each command is spoken; the node detects it itself.
+
+| Condition | doa_mod | SRP-PHAT | MUSIC |
+| :--- | ---: | ---: | ---: |
+| Free field, 8 azimuths (0, 45, ... 315°), 2 m | 0.0° | 0.1° | 0.0° |
+| Rooms, RT60 0.2 / 0.6 / 1.0 s (target), quiet, MAE | 0.1 / 2.7 / 3.5° | 0.3 / 1.7 / 2.2° | 1.2 / 3.4 / 2.9° |
+| Welding from one point, RT60 0.4 s, SNR 20 / 0 / −10 dB, MAE | 23 / 38 / 61° | 28 / 41 / 59° | 1.4 / 4.1 / 4.1° |
+
+* The coordinate convention and channel map agree with the simulator in all
+  eight directions.
+* **Directional noise is the weak point**, and it is the method's, not the
+  node's: PHAT gives every frequency the same vote, so the bins the noise owns
+  outvote the speech even at 20 dB. MUSIC over the whole command does not have
+  this problem in that idealised test (perfect microphones, image sources
+  only). In the more realistic scenes (wall materials, ray-traced tail, 1 mm
+  and 0.5 dB microphone errors, a talker who moves between commands, the node's
+  own gate) a MUSIC pool inside the node was only slightly better: 78 % of
+  last bearings within 15° against 75 %. No estimator change was made on that
+  evidence; a whole-utterance covariance is the thing to try next.
+* **`subtract_noise` should stay off in rooms.** It helped in free field and
+  made things worse with reverberation (65 % within 15° against 75 %).
+* Two faults found this way are fixed in the node: the neural gate going deaf
+  on a long stream (`vad_reset_s`; 54 of 144 simulated commands had no bearing,
+  now 1) and the first bearings of a command pointing at the previous talker
+  (`utterance_gap_s`; first bearing within 15°: 17 % -> 62 %).
+
+Real recordings, LOCATA corpus (`experiments/locata_doa.py`), four equatorial
+capsules of the Eigenmike as a planar array: median error 13.7° over 708
+bearings (loudspeaker standing still 10.5°, walking talker 19°, walking talker
+with moving array 8.7°). pyroomacoustics' SRP-PHAT and MUSIC show the same
++13° to +20° offsets on the static recordings, so this is the capsules sitting
+on a rigid sphere (and the rooms), not the node. It is not a statement about
+the ReSpeaker.
+
 ## Geometry — read this before deploying
 
 The default is the ReSpeaker 4-Mic Array: `ch1..ch4` at 45/135/225/315°,
@@ -147,7 +185,11 @@ gate and is refused with `vad_mode:=off`.
 | `vad_hangover_ms` | `800` | how long publishing outlives the last speech frame |
 | `avg_tc` | `0.5` | pooling time constant, s. Longer = steadier, slower |
 | `subtract_noise` | `false` | subtract a stationary interferer; needs a gate |
-| `publish_period` | `0.2` | seconds between bearings |
+| `vad_reset_s` | `2.0` | neural gate: clear the model's state this often while nobody speaks; 0 = never |
+| `utterance_gap_s` | `0.8` | a pause this long ends an utterance; the next one starts a new pool; 0 = one pool for ever |
+| `max_lag_s` | `1.0` | how far the worker may fall behind before it skips to the newest audio (and reports it) |
+| `timing_warn_us` | `0` | plane-wave misfit above which channel timing is reported as suspect; 0 = 10 % of the array's largest delay |
+| `publish_period` | `0.2` | seconds between bearings, in audio time |
 | `publish_human` | `true` | also publish `/dorai_doa/human` for `ros2 topic echo` |
 
 `avg_tc` is the main accuracy/latency dial: longer pools more frames and is
@@ -164,11 +206,30 @@ ros2 run voice_mod voice --ros-args -p publish_raw:=true
 ros2 run doa_mod  doa   --ros-args -p source:=topic
 ```
 
-The topic path is only trustworthy when `voice_mod` is driving a **single
-multichannel device**. When it is driving N separate USB microphones, each
-channel has been through its own asynchronous resampler with a drift trim — a
-per-channel time-varying delay, which is exactly what TDOA reads as a bearing
-change.
+Every frame of the topic is analysed, whatever the publisher's frame length,
+and bearings are published at the same cadence of audio time. Long frames make
+a bearing late, not wrong: with `voice_mod`'s default `publish_interval` of
+10 s a bearing is up to 10 s old (the node says so once); use
+`-p publish_interval:=0.1` for a live bearing.
+
+**The raw tap of `voice_mod` is not a DoA input on the robot as it is built
+now.** `voice_mod` opens every microphone as its own device, each with its own
+clock and resampler, aligned by time stamps that are good to about a
+millisecond; this array reads tens of microseconds (one sample of lateness on
+one channel is 15 degrees). The robot's three microphones are also in a line,
+which gives no bearing at all, and `doa_mod` refuses that geometry.
+`voice_mod` reports how its channels are clocked on `<topic>/sync`; with
+several devices and drift correction on, `doa_mod` warns
+(`THE BEARING IS NOT TRUSTWORTHY`), marks `/dorai_doa/human` with
+`CHANNEL TIMING SUSPECT` and shows `timing=SEPARATE-CLOCKS` in its diagnostics
+line. With four or more microphones it also checks the audio itself
+(`timing=ok(misfit 5us)` / `SUSPECT`): a late channel leaves a plane-wave
+misfit, 25 us for one sample against 3-14 us when aligned (simulated rooms).
+That check cannot see every fault; a pass is not proof.
+
+For a bearing, open the ReSpeaker directly (`source:=mic`), or in simulation
+use the one-device topic of the virtual microphones:
+`-p source:=topic -p input_topic:=/dorai_sim/array`.
 
 ## Why one device, one clock
 
@@ -202,11 +263,11 @@ aperture has a ~130° main lobe anyway.
 ## Tests
 
 ```bash
-python3 -m pytest test/test_doa_mod.py -v     # 27 tests, no ROS needed
+python3 -m pytest test/test_doa_mod.py -v     # 48 tests, no ROS needed
 ```
 
 `doa_core.py`, `vad.py` and `vad.onnx` are **vendored byte-identical** from
-`doa/` — a ROS package cannot reach outside its own directory at build time.
+`../../simulator/doa` — a ROS package cannot reach outside its own directory at build time.
 `test_vendored_core_matches_research_tree` checksums them and fails if the
-copies fork. To change the estimator: edit it in `doa/`, re-run
-`doa/score_session.py` to confirm the numbers still hold, then re-copy.
+copies fork. To change the estimator: edit it in `../../simulator/doa`, re-run
+`../../simulator/doa` to confirm the numbers still hold, then re-copy.
