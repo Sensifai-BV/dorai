@@ -6,32 +6,40 @@ A single ROS 2 node that runs the full capture-to-enhancement path:
 
     mic array (N mics, USB/other)
         -> per-mic clock-drift-corrected async resample to 16 kHz
-        -> dorai_beamformer.ort multichannel beamformer (continuous overlap-add)
-        -> single slow AGC for a steady STT level
+        -> dorai_beamformer.ort multichannel beamformer
+        -> one slow AGC for a steady STT level
         -> clean single-channel speech
         -> published on /dorai_clean_audio in N-second frames (default 10 s)
 
-Enhancement runs continuously via overlap-add: a `enh_window`-second analysis
-window slides by `enh_hop` seconds across the *continuous* stream, each window
-is enhanced with full context and Hann-overlap-added, so the reconstruction is
-seamless (bit-identical no matter how the input is chunked). Publishing is
-batched into `publish_interval`-second frames only so stt_mod receives larger,
-cheaper chunks — it introduces no boundary artifact. Added algorithmic latency
-is one analysis window (`enh_window`, default 2 s).
+The model file decides how the beamformer is driven:
 
-Why this shape (see ContinuousEnhancer): the model is a whole-signal enhancer
-that (a) peak-normalises its output regardless of input scale and (b) leaves
-uncompensated samples at each window edge. The previous path enhanced disjoint
-publish frames and concatenated them, injecting a step ('knock') at every join,
-and set level by grabbing each frame's peak — which, given (a), only pumped
-loudness and amplified noise between frames. Overlap-add fixes the knock; the
-slow gated AGC fixes the level.
+  * A streaming model (the shipped dorai_beamformer.ort: one 512-sample block
+    per microphone plus a state tensor in, the enhanced block and the next
+    state out) is fed block by block by StreamingEnhancer. Everything the model
+    knows about the scene travels in the state, so the output is continuous by
+    construction and lags the input by the model's 24 ms. A streaming model is
+    built for one microphone count; the node refuses a mismatch.
+  * A whole-signal model (the previous dorai_beamformer.ort, kept working for
+    `-p model_path:=...`) goes through ContinuousEnhancer: an `enh_window`-second
+    window slides by `enh_hop` seconds over the continuous stream, each window
+    is enhanced and Hann-overlap-added. Added latency: one window (2 s).
+
+Publishing is batched into `publish_interval`-second frames only so that
+stt_mod receives larger, cheaper messages; it introduces no boundary artifact.
+
+A beamformer needs the delays between the channels to stand still. Two parts
+of this file exist for that: at start-up the FIFOs are aligned by the capture
+time of their newest samples (prime_offsets), and the clock-drift loop keeps
+the capture time at the head of every FIFO equal (lock_channels) instead of
+comparing FIFO lengths, which jump by a whole block whenever a device's
+callback lands.
 
 Design properties:
   * Audio callbacks only append to bounded, per-channel locked ring buffers,
     keeping the PortAudio thread responsive.
-  * A single dedicated worker thread does resample + inference + publish, so
-    the ROS executor is never blocked by ONNX.
+  * A dedicated worker thread resamples and assembles aligned blocks; inference
+    and publishing run on a second thread, so neither the ROS executor nor the
+    capture path is ever blocked by ONNX.
   * Per-mic asynchronous sample-rate conversion with a closed-loop ratio trim
     keeps the independent USB ADC clocks locked to one 16 kHz master timeline.
   * All buffers are bounded (drop-oldest); a stalled mic degrades gracefully to
@@ -58,8 +66,11 @@ try:
 except Exception:
     pass
 
+import signal
+
 import rclpy
 from rclpy.node import Node
+from rclpy.signals import SignalHandlerOptions
 from std_msgs.msg import Float32MultiArray, MultiArrayDimension, String
 
 import sounddevice as sd
@@ -73,16 +84,31 @@ BLOCK_MS = 100                    # worker tick period (ms)
 BLOCK_S = BLOCK_MS / 1000.0
 L_OUT = OUTPUT_RATE * BLOCK_MS // 1000          # output samples/block/ch (1600)
 
-# dorai_beamformer.ort is a whole-signal model driven by a continuous
-# overlap-add sliding window (see ContinuousEnhancer). WINDOW_SIZE is only the
-# dummy length used to warm the ONNX session up before real audio arrives.
+# For a whole-signal model driven by the overlap-add sliding window (see
+# ContinuousEnhancer), WINDOW_SIZE is the dummy length used to warm the ONNX
+# session up before real audio arrives.
 WINDOW_SIZE = 3200
 
 # Asynchronous-resampler drift control.
 TARGET_BLOCKS = 2                 # steady-state out-FIFO depth (blocks)
 TARGET_OUT = TARGET_BLOCKS * L_OUT
-RATIO_TRIM_KP = 0.05              # proportional gain of the drift loop
 RATIO_TRIM_MAX = 0.02            # clamp |ratio correction| to +/-2 %
+# The drift loop works on capture time, not on FIFO length. Each device hands
+# over its audio in 100 ms callbacks that land at arbitrary moments relative to
+# the worker tick, so at any tick the FIFO lengths differ by up to a whole
+# block for reasons that have nothing to do with clock drift; a loop that
+# reads lengths (as this one used to) answers that with ratio changes of up to
+# 2 % and moves the channels against each other by tens of samples per tick.
+# That is harmless for a whole-signal enhancer and ruinous for a beamformer,
+# which needs the delays between channels to stand still. What must be equal
+# across channels is the capture time of the sample at the head of each FIFO,
+# and that does not jump when a callback lands.
+DRIFT_SMOOTH_S = 5.0             # smoothing of the head-time error (capture stamps jitter by ~1 ms)
+DRIFT_TAU_S = 15.0               # proportional part: an error decays with this time constant
+DRIFT_INT_TAU_S = 135.0          # integral part: removes the standing error of a constant clock offset
+                                 #   (9 x DRIFT_TAU_S: well damped; 2 x gave a slow oscillation)
+DRIFT_FAST_S = 0.002             # errors beyond this (a dropped block, start-up) ...
+DRIFT_FAST_TAU_S = 3.0           # ... are pulled in with this time constant
 
 # Buffer bounds (overflow protection). Normal FIFO depth sits at TARGET_OUT;
 # this ceiling is only a safety net that absorbs bursts of stalled worker
@@ -91,6 +117,38 @@ MAX_IN_SECONDS = 2.0              # max input backlog per mic (s)
 MAX_OUT_BLOCKS = 16              # max resampled FIFO depth (blocks, ~1.6 s)
 
 DIAG_PERIOD_S = 5.0
+
+# AGC (see ContinuousEnhancer._agc)
+AGC_ABOVE_FLOOR = 10.0 ** (8.0 / 20.0)     # a segment counts as speech when it is 8 dB above the background level
+AGC_FLOOR_RISE_DB_S = 1.0                  # how fast the background estimate (a running minimum) creeps up
+AGC_BELOW_PEAK = 10.0 ** (-20.0 / 20.0)    # ... and within 20 dB of the loudest recent segment
+AGC_PEAK_TC_S = 5.0                        # release of that peak hold
+AGC_LIMIT_RMS = 0.2                        # no segment is published above this RMS (-14 dBFS)
+AGC_LIMIT_RAMP_S = 0.005                   # the limiter's gain moves over this long at a segment start
+AGC_SEGMENT_N = OUTPUT_RATE // 10          # the AGC works on 0.1 s segments (or the driver's hop, if shorter)
+
+
+def prime_offsets(ends, block=L_OUT, snap=0.010 * OUTPUT_RATE):
+    """Per channel, how many 16 kHz samples its FIFO ends later than the
+    earliest-ending one, from the capture time of each FIFO's newest sample.
+
+    Devices that deliver their blocks together (one clock, or one device split
+    into channels) differ by whole capture blocks only, and a time stamp is
+    good to a millisecond or so, not to a sample: an offset within `snap`
+    samples of a whole number of blocks is taken as exactly that many blocks,
+    which keeps such devices sample-aligned. Any other offset is the measured
+    one, to the nearest sample (independent devices: as good as the stamps).
+    Without stamps for every channel the offsets are zero (the old behaviour).
+    """
+    if any(e is None for e in ends):
+        return [0] * len(ends)
+    first = min(ends)
+    out = []
+    for e in ends:
+        d = (e - first) * OUTPUT_RATE
+        k = round(d / block)
+        out.append(int(k * block) if abs(d - k * block) <= snap else int(round(d)))
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -162,9 +220,13 @@ class MicChannel:
         self.in_buf = np.zeros(0, dtype=np.float32)     # raw capture samples
         self.out_fifo = np.zeros(0, dtype=np.float32)   # resampled 16 kHz
         self.last_capture_mono = None
+        self.in_end_mono = None        # capture time of the newest sample in in_buf
+        self.fifo_end_mono = None      # ... and of the newest sample in out_fifo
 
         self.resampler = Resampler(self.sample_rate, OUTPUT_RATE)
         self.ratio_scale = 1.0
+        self.drift_err = 0.0           # smoothed head-time error against the other channels (s)
+        self.drift_int = 0.0           # integral part of the ratio correction
         self.max_in = int(self.sample_rate * MAX_IN_SECONDS)
         self.max_out = MAX_OUT_BLOCKS * L_OUT
 
@@ -200,6 +262,7 @@ class MicChannel:
                 self.in_buf = self.in_buf[-self.max_in:]
                 self.in_overflows += 1
             self.last_capture_mono = capture_mono
+            self.in_end_mono = capture_mono + len(samples) / float(self.sample_rate)
 
     def resample_in(self):
         """Resample everything captured since the last tick into the 16 kHz
@@ -208,6 +271,8 @@ class MicChannel:
         with self.lock:
             x = self.in_buf
             self.in_buf = np.zeros(0, dtype=np.float32)
+            if x.size:
+                self.fifo_end_mono = self.in_end_mono
 
         y = self.resampler.process(x, self.ratio_scale)
         if y.size and self.hpf_b is not None:
@@ -221,16 +286,33 @@ class MicChannel:
             self.out_fifo = self.out_fifo[-self.max_out:]
             self.out_overflows += 1
 
-    def update_ratio(self, ref_len):
-        """Trim the resample ratio to pull this channel's FIFO toward the
-        cross-channel reference, locking the independent USB clocks to each
-        other. Absolute FIFO depth is regulated by the consumer, not here, so
-        a uniform offset shared by all channels leaves the ratio at 1.0."""
+    def head_time(self):
+        """Capture time of the sample at the head of the FIFO (the next one to
+        be popped), or None before any audio has arrived."""
+        if self.fifo_end_mono is None:
+            return None
+        return self.fifo_end_mono - len(self.out_fifo) / float(OUTPUT_RATE)
+
+    def update_ratio(self, err_s, dt=BLOCK_S):
+        """Trim the resample ratio so that this channel's head sample has the
+        same capture time as the other channels' (`err_s` = this channel's head
+        time minus the cross-channel mean, in seconds). A head that is later
+        than the others means the channel has too few samples for the time it
+        covers: the ratio goes up. Absolute FIFO depth is regulated by the
+        consumer, not here; the errors of all channels sum to zero, so the
+        corrections do too."""
         if not self.resampler.variable:
             return
-        err = (len(self.out_fifo) - ref_len) / float(TARGET_OUT)
-        corr = max(-RATIO_TRIM_MAX, min(RATIO_TRIM_MAX, -RATIO_TRIM_KP * err))
-        self.ratio_scale = 1.0 + corr
+        a = math.exp(-dt / DRIFT_SMOOTH_S)
+        self.drift_err = a * self.drift_err + (1.0 - a) * err_s
+        e = self.drift_err
+        # The integral sees at most DRIFT_FAST_S of error, so a transient (a lost
+        # block) cannot wind it up.
+        self.drift_int += max(-DRIFT_FAST_S, min(DRIFT_FAST_S, e)) * dt / (DRIFT_TAU_S * DRIFT_INT_TAU_S)
+        self.drift_int = max(-RATIO_TRIM_MAX, min(RATIO_TRIM_MAX, self.drift_int))
+        fast = math.copysign(max(0.0, abs(e) - DRIFT_FAST_S), e) / DRIFT_FAST_TAU_S
+        corr = e / DRIFT_TAU_S + fast + self.drift_int
+        self.ratio_scale = 1.0 + max(-RATIO_TRIM_MAX, min(RATIO_TRIM_MAX, corr))
 
     def fifo_len(self):
         return len(self.out_fifo)
@@ -299,6 +381,20 @@ def choose_rate(device: int, requested_rate=None, channels=1) -> int:
         except Exception:
             continue
     return default_rate
+
+
+def lock_channels(mics, dt=BLOCK_S):
+    """One step of the drift loop: pull every channel's head sample toward the
+    mean capture time of all heads. Returns the head-time errors in seconds
+    (None until every channel has delivered audio)."""
+    heads = [ch.head_time() for ch in mics]
+    if len(mics) < 2 or any(h is None for h in heads):
+        return None
+    ref = sum(heads) / len(heads)
+    errs = [h - ref for h in heads]
+    for ch, e in zip(mics, errs):
+        ch.update_ratio(e, dt)
+    return errs
 
 
 def detect_microphones(logger, include_internal=False, max_mics=3,
@@ -475,13 +571,57 @@ class ContinuousEnhancer:
         self.ceil = float(out_ceiling)
 
     def _agc(self, ready):
+        """Slow AGC toward `tgt`, driven by speech only, with a separate limiter.
+
+        The first version set the gain from every segment above an absolute
+        gate and held it constant per segment. An enhancer that cleans the
+        pauses leaves residue that is far below the speech but still above that
+        gate; following it drove the gain to its maximum in every pause and the
+        next word into the ceiling, and constant gain per segment meant steps
+        of up to 16 dB at the old driver's 1 s segment edges. Now:
+          * A segment moves the slow gain only if it stands out from the
+            background (8 dB above a running minimum of the segment level that
+            creeps up by 1 dB/s) and is within 20 dB of the loudest recent
+            segment (peak hold, 5 s release). Steady noise, cleaned pauses and
+            the first seconds of a stream therefore leave the gain alone; a
+            bang holds the gate shut for about 2 s, not for half a minute.
+          * The slow gain is ramped across the segment, never stepped.
+          * A limiter, separate from the slow gain and never feeding back into
+            it, keeps every segment at or under `AGC_LIMIT_RMS`; its gain moves
+            over the first 5 ms of a segment.
+          * All of this runs on 0.1 s segments whatever the driver's hop is.
+            With the old driver's 1 s segments running speech has no pauses to
+            measure a background against, and the gain would never move.
+        """
         out = np.empty(len(ready), dtype=np.float32)
-        for s in range(0, len(ready), self.hop):
-            seg = ready[s:s + self.hop]
+        floor = getattr(self, "agc_floor", None)
+        peak = getattr(self, "agc_peak", 0.0)
+        lim_prev = getattr(self, "agc_lim", 1.0)
+        hop = min(self.hop, AGC_SEGMENT_N)
+        alpha = self.alpha ** (hop / float(self.hop))          # the same time constant on the shorter segment
+        seg_s = hop / float(self.fs)
+        floor_up = 10.0 ** (AGC_FLOOR_RISE_DB_S * seg_s / 20.0)
+        peak_decay = float(np.exp(-seg_s / AGC_PEAK_TC_S))
+        ramp_n = max(1, int(AGC_LIMIT_RAMP_S * self.fs))
+        for s in range(0, len(ready), hop):
+            seg = ready[s:s + hop]
             rms = float(np.sqrt((seg ** 2).mean() + 1e-12))
-            g_inst = min(self.tgt / rms, self.max_gain) if rms > self.gate else self.g
-            self.g = self.alpha * self.g + (1.0 - self.alpha) * g_inst
-            out[s:s + len(seg)] = np.clip(seg * self.g, -self.ceil, self.ceil)
+            whole = len(seg) * 4 >= hop                         # a short tail says little about the level
+            if whole:
+                floor = rms if floor is None else min(rms, floor * floor_up)
+                peak = max(rms, peak * peak_decay)
+            active = (whole and floor is not None and rms > self.gate
+                      and rms >= AGC_ABOVE_FLOOR * floor and rms >= AGC_BELOW_PEAK * peak)
+            g_inst = min(self.tgt / rms, self.max_gain) if active else self.g
+            g_new = alpha * self.g + (1.0 - alpha) * g_inst
+            gain = np.linspace(self.g, g_new, len(seg), endpoint=False)
+            lim_new = min(1.0, AGC_LIMIT_RMS / (rms * max(self.g, g_new)))
+            lim = np.full(len(seg), lim_new)
+            k = min(ramp_n, len(seg))
+            lim[:k] = np.linspace(lim_prev, lim_new, k, endpoint=False)
+            out[s:s + len(seg)] = np.clip(seg * gain * lim, -self.ceil, self.ceil)
+            self.g, lim_prev = g_new, lim_new
+        self.agc_floor, self.agc_peak, self.agc_lim = floor, peak, lim_prev
         return out
 
     def _consume(self):
@@ -529,6 +669,136 @@ class ContinuousEnhancer:
         return self._agc(r) if len(r) else np.zeros(0, dtype=np.float32)
 
 
+class StreamingEnhancer:
+    """Driver for a *stateful streaming* enhancement model (QWise 2).
+
+    Such a model takes one block of new samples per microphone together with a
+    state tensor and returns the enhanced block and the next state:
+
+        mic   float32 [M, 512]     state float32 [S]   (zeros start a stream)
+        clean float32 [512]        state_next float32 [S]
+
+    Everything the model has learned about the scene travels in the state, so
+    there is no analysis window to slide and nothing to overlap-add: the audio
+    is simply fed through in 512-sample blocks and comes out continuous, with
+    the model's fixed algorithmic delay (384 samples, 24 ms) instead of
+    `enh_window` seconds. The output is in input units (the model does not
+    normalise level), so the same slow gated AGC as ContinuousEnhancer sets the
+    level for STT.
+
+    Same interface as ContinuousEnhancer (push / flush), same threading rule:
+    drive it from one thread.
+    """
+
+    def __init__(self, model_path, num_threads, logger, fs=OUTPUT_RATE,
+                 agc_target_rms=0.06, agc_tc_s=2.0, agc_max_gain=15.0,
+                 agc_gate_rms=3e-3, out_ceiling=0.99, agc_hop=L_OUT):
+        so = ort.SessionOptions()
+        so.log_severity_level = 3
+        so.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+        if num_threads and num_threads > 0:
+            so.intra_op_num_threads = int(num_threads)
+            so.inter_op_num_threads = 1
+        self.sess = ort.InferenceSession(
+            model_path, sess_options=so, providers=["CPUExecutionProvider"])
+        ins = self.sess.get_inputs()
+        self.in_name, self.state_name = ins[0].name, ins[1].name
+        self.n_mics, self.block = int(ins[0].shape[0]), int(ins[0].shape[1])
+        self.state_size = int(ins[1].shape[0])
+        meta = self.sess.get_modelmeta().custom_metadata_map or {}
+        # Algorithmic delay of the model: its STFT overlap (n_fft - hop).
+        self.latency = int(meta.get("latency_samples", 384))
+        self.algorithm = meta.get("algorithm", "?")
+        self.logger = logger
+        self.fs = int(fs)
+        self.hop = int(agc_hop)                    # AGC update grid only
+        self.g = 1.0
+        self.tgt = float(agc_target_rms)
+        self.alpha = float(np.exp(-self.hop / (agc_tc_s * self.fs)))
+        self.max_gain = float(agc_max_gain)
+        self.gate = float(agc_gate_rms)
+        self.ceil = float(out_ceiling)
+        self.failures = 0
+        self.reset()
+
+    @staticmethod
+    def accepts(model_path):
+        """True when the file is a streaming model (audio block + state inputs)."""
+        try:
+            so = ort.SessionOptions()
+            so.log_severity_level = 3
+            ins = ort.InferenceSession(
+                model_path, sess_options=so, providers=["CPUExecutionProvider"]).get_inputs()
+        except Exception:
+            return False
+        return len(ins) == 2 and len(ins[0].shape) == 2 and len(ins[1].shape) == 1
+
+    def reset(self):
+        """Start a new stream: forget the scene and the pending samples."""
+        self.state = np.zeros(self.state_size, dtype=np.float32)
+        self.inbuf = np.zeros((self.n_mics, 0), dtype=np.float32)
+        self.skip = self.latency                   # drop the model's start-up delay once
+        self.owed = 0                              # input samples not yet returned
+
+    def warmup(self):
+        dummy = np.zeros((self.n_mics, self.block), dtype=np.float32)
+        state = np.zeros(self.state_size, dtype=np.float32)
+        for _ in range(2):
+            _, state = self.sess.run(None, {self.in_name: dummy, self.state_name: state})
+
+    _agc = ContinuousEnhancer._agc                 # the same slow gated AGC
+
+    def _run_blocks(self):
+        out = []
+        while self.inbuf.shape[1] >= self.block:
+            blk = np.ascontiguousarray(self.inbuf[:, :self.block])
+            self.inbuf = self.inbuf[:, self.block:]
+            try:
+                y, self.state = self.sess.run(
+                    None, {self.in_name: blk, self.state_name: self.state})
+                y = np.asarray(y, dtype=np.float64).reshape(-1)
+                if not np.isfinite(y).all():
+                    raise FloatingPointError("non-finite output")
+            except Exception as e:     # never let inference kill the stream
+                self.failures += 1
+                self.logger.error(
+                    f"Inference failed ({e}); stream state reset", throttle_duration_sec=2.0)
+                self.state = np.zeros(self.state_size, dtype=np.float32)
+                y = np.zeros(self.block)
+            out.append(y)
+        if not out:
+            return np.zeros(0)
+        y = np.concatenate(out)
+        if self.skip:                              # align output with input once
+            drop = min(self.skip, len(y))
+            y, self.skip = y[drop:], self.skip - drop
+        return y
+
+    def push(self, mc):
+        """Feed raw [M, n] 16 kHz audio; return the clean samples that are
+        finished. Output lags input by less than one block plus the model's
+        delay (under 56 ms); flush() returns the rest."""
+        mc = np.asarray(mc, dtype=np.float32)
+        self.inbuf = np.concatenate([self.inbuf, mc], axis=1)
+        self.owed += mc.shape[1]
+        y = self._run_blocks()
+        self.owed -= len(y)
+        return self._agc(y) if len(y) else np.zeros(0, dtype=np.float32)
+
+    def flush(self):
+        """Drain the tail on shutdown: feed silence until every input sample
+        has come out."""
+        if self.owed <= 0:
+            return np.zeros(0, dtype=np.float32)
+        need = self.owed + self.skip - self.inbuf.shape[1]
+        pad = need + (-(self.inbuf.shape[1] + need)) % self.block
+        self.inbuf = np.concatenate(
+            [self.inbuf, np.zeros((self.n_mics, max(pad, 0)), np.float32)], axis=1)
+        y = self._run_blocks()[:self.owed]
+        self.owed = 0
+        return self._agc(y) if len(y) else np.zeros(0, dtype=np.float32)
+
+
 # ---------------------------------------------------------------------------
 # ROS 2 node.
 # ---------------------------------------------------------------------------
@@ -571,6 +841,10 @@ class VoiceMod(Node):
         # Speech high-pass cutoff (Hz) per mic. Raise toward ~200 if low-freq
         # rumble from cheap USB mics still dominates; 0 disables.
         self.declare_parameter("hpf_hz", 150.0, dyn)
+        # Clock-drift correction between the microphones (each USB device has
+        # its own crystal). Leave on for separate devices; switch off only when
+        # all channels come from one clock (a simulation through snd-aloop).
+        self.declare_parameter("drift_correction", True)
         # Continuous overlap-add enhancement window / hop (seconds). The model
         # is a whole-signal enhancer, so a longer window gives it more context
         # and tracks the offline reference more closely, at the cost of added
@@ -618,6 +892,7 @@ class VoiceMod(Node):
         self.publish_raw = bool(gp("publish_raw").value)
         self.raw_topic = gp("raw_topic").value
         self.hpf_hz = float(gp("hpf_hz").value)
+        self.drift_correction = bool(gp("drift_correction").value)
         self.enh_window = float(gp("enh_window").value)
         self.enh_hop = float(gp("enh_hop").value)
         self.agc_target_rms = float(gp("agc_target_rms").value)
@@ -647,29 +922,56 @@ class VoiceMod(Node):
         ]
         self.num_channels = len(self.mics)
 
-        self.beam = Beamformer(model_path, num_threads, self.get_logger())
-        self.beam.warmup(self.num_channels)
-        self.get_logger().info(
-            f"dorai_beamformer.ort ready ({self.num_channels}ch) via {self.beam.in_name}"
-            f"->{self.beam.out_name}"
-        )
+        # The model file decides the driver. A streaming model (audio block +
+        # state, e.g. QWise 2) is fed block by block and needs no analysis
+        # window; a whole-signal model (dorai_beamformer.ort) goes through the
+        # overlap-add sliding window. Either way self.enhancer has push()/flush()
+        # and is driven only from the publisher thread (_pub_loop / _flush).
+        self.streaming = StreamingEnhancer.accepts(model_path)
+        if self.streaming:
+            self.beam = None
+            self.enhancer = StreamingEnhancer(
+                model_path, num_threads, self.get_logger(), fs=OUTPUT_RATE,
+                agc_target_rms=self.agc_target_rms, agc_tc_s=self.agc_tc_s,
+                agc_max_gain=self.agc_max_gain, agc_gate_rms=self.agc_gate_rms,
+            )
+            if self.enhancer.n_mics != self.num_channels:
+                raise RuntimeError(
+                    f"{model_path} is built for {self.enhancer.n_mics} microphone(s) but "
+                    f"{self.num_channels} were opened. A streaming model is exported per "
+                    f"microphone count: export one for {self.num_channels}, or set max_mics.")
+            self.enhancer.warmup()
+            self.get_logger().info(
+                f"Streaming enhancer ready ({self.num_channels}ch, algorithm "
+                f"{self.enhancer.algorithm}): block={self.enhancer.block} samples, "
+                f"state={self.enhancer.state_size}, model delay "
+                f"{1000.0 * self.enhancer.latency / OUTPUT_RATE:.0f} ms; "
+                f"AGC target_rms={self.agc_target_rms:.3f} tc={self.agc_tc_s:.1f}s "
+                f"max_gain={self.agc_max_gain:.1f} gate={self.agc_gate_rms:.4f}"
+            )
+        else:
+            self.beam = Beamformer(model_path, num_threads, self.get_logger())
+            self.beam.warmup(self.num_channels)
+            self.get_logger().info(
+                f"dorai_beamformer.ort ready ({self.num_channels}ch) via {self.beam.in_name}"
+                f"->{self.beam.out_name}"
+            )
 
-        # Continuous overlap-add enhancer wrapping the per-window model call.
-        # Driven only from the publisher thread (_pub_loop / _flush), so it
-        # needs no lock. enh_hop is clamped to <= enh_window.
-        win = max(1, int(round(self.enh_window * OUTPUT_RATE)))
-        hop = max(1, int(round(min(self.enh_hop, self.enh_window) * OUTPUT_RATE)))
-        self.enhancer = ContinuousEnhancer(
-            self.beam.run, win=win, hop=hop, fs=OUTPUT_RATE,
-            agc_target_rms=self.agc_target_rms, agc_tc_s=self.agc_tc_s,
-            agc_max_gain=self.agc_max_gain, agc_gate_rms=self.agc_gate_rms,
-        )
-        self.get_logger().info(
-            f"Continuous overlap-add enhancer: win={win / OUTPUT_RATE:.2f}s "
-            f"hop={hop / OUTPUT_RATE:.2f}s (latency +{win / OUTPUT_RATE:.2f}s), "
-            f"AGC target_rms={self.agc_target_rms:.3f} tc={self.agc_tc_s:.1f}s "
-            f"max_gain={self.agc_max_gain:.1f} gate={self.agc_gate_rms:.4f}"
-        )
+            # Continuous overlap-add enhancer wrapping the per-window model call.
+            # enh_hop is clamped to <= enh_window.
+            win = max(1, int(round(self.enh_window * OUTPUT_RATE)))
+            hop = max(1, int(round(min(self.enh_hop, self.enh_window) * OUTPUT_RATE)))
+            self.enhancer = ContinuousEnhancer(
+                self.beam.run, win=win, hop=hop, fs=OUTPUT_RATE,
+                agc_target_rms=self.agc_target_rms, agc_tc_s=self.agc_tc_s,
+                agc_max_gain=self.agc_max_gain, agc_gate_rms=self.agc_gate_rms,
+            )
+            self.get_logger().info(
+                f"Continuous overlap-add enhancer: win={win / OUTPUT_RATE:.2f}s "
+                f"hop={hop / OUTPUT_RATE:.2f}s (latency +{win / OUTPUT_RATE:.2f}s), "
+                f"AGC target_rms={self.agc_target_rms:.3f} tc={self.agc_tc_s:.1f}s "
+                f"max_gain={self.agc_max_gain:.1f} gate={self.agc_gate_rms:.4f}"
+            )
 
         self.pub = self.create_publisher(Float32MultiArray, self.output_topic, 10)
         self.diag_pub = self.create_publisher(String, "/voice_mod/diagnostics", 10)
@@ -862,23 +1164,34 @@ class VoiceMod(Node):
     def _tick(self):
         for ch in self.mics:
             ch.resample_in()
-        # Lock the independent USB clocks to each other by pulling every
-        # channel's FIFO toward the cross-channel mean.
-        if len(self.mics) > 1:
-            ref = sum(ch.fifo_len() for ch in self.mics) / len(self.mics)
-            for ch in self.mics:
-                ch.update_ratio(ref)
+        # Lock the independent USB clocks to each other: keep the capture time
+        # at the head of every FIFO equal (from the first aligned block on).
+        if self.drift_correction and self._primed:
+            lock_channels(self.mics)
 
         # On first fill, trim all FIFOs to a common depth so the channels
         # start phase-aligned before enhancement begins.
         if not self._primed:
             depths = [ch.fifo_len() for ch in self.mics]
             if min(depths) >= max(TARGET_OUT, L_OUT):
-                common = min(depths)
-                for ch in self.mics:
-                    ch.trim_fifo(common)
+                # The channels must start on the same capture instant. Keeping
+                # the newest `common` samples of every FIFO does that only if
+                # every FIFO ends at the same instant, and it does not when one
+                # device's 100 ms callback has landed before this tick and
+                # another's has not: that channel then ends one capture block
+                # later and would stay 1600 samples off for the whole run. So
+                # each channel keeps, beyond the common depth, the samples by
+                # which its FIFO ends later than the earliest-ending one.
+                extra = prime_offsets([ch.fifo_end_mono for ch in self.mics])
+                common = min(d - e for d, e in zip(depths, extra))
+                if common < L_OUT:                  # not enough behind the latest block yet
+                    return
+                for ch, e in zip(self.mics, extra):
+                    ch.trim_fifo(common + e)
                 self._primed = True
-                self.get_logger().info("FIFOs primed and aligned; enhancing.")
+                self.get_logger().info(
+                    "FIFOs primed and aligned; enhancing. Samples kept beyond the common "
+                    f"depth per channel (later capture end): {extra}")
             else:
                 return
 
@@ -1104,11 +1417,20 @@ class VoiceMod(Node):
                 pass
 
 
+def _raise_interrupt(signum, frame):
+    raise KeyboardInterrupt
+
+
 def main(args=None):
-    rclpy.init(args=args)
+    # Handle SIGINT/SIGTERM ourselves: rclpy's own handlers invalidate the
+    # context before `finally` runs, so the tail flush in node.shutdown() could
+    # never be published ("publisher's context is invalid").
+    rclpy.init(args=args, signal_handler_options=SignalHandlerOptions.NO)
+    signal.signal(signal.SIGTERM, _raise_interrupt)
     node = VoiceMod()
     try:
-        rclpy.spin(node)
+        while rclpy.ok():
+            rclpy.spin_once(node, timeout_sec=0.2)
     except KeyboardInterrupt:
         pass
     finally:
