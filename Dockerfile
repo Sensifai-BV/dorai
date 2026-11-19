@@ -27,8 +27,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # --- Python runtime dependencies --------------------------------------------
 # Not covered by rosdep. --break-system-packages is required because Ubuntu
 # 24.04 (Jazzy's base) marks the system Python as externally managed (PEP 668),
-# matching the project README. sherpa-onnx runs the Nemotron STT (stt_mod).
-# The Nemotron model files (~640 MB each) are NOT baked in: mount ~/dorai/models at
+# matching the project README. sherpa-onnx runs the STT engines (stt_mod): fine-tuned
+# Whisper (default) and Nemotron. The model files (1.0 GB and 0.67 GB, from
+# huggingface.co/sensifai/dorai) are NOT baked in: mount ~/dorai/models at
 # /root/.cache/dorai/models (see docker-compose.yml) or set DORAI_MODELS_DIR.
 RUN pip3 install --no-cache-dir --break-system-packages \
         onnxruntime \

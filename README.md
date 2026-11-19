@@ -24,7 +24,7 @@ them on voice activity, and publishes the bearing in degrees.
  [/dorai_clean_audio]                          [/dorai_doa]  (degrees, 0-360)
         v
    +---------+
-   | stt_mod |  Speech-to-Text (NVIDIA Nemotron + dorai adapter)
+   | stt_mod |  Speech-to-Text (fine-tuned Whisper behind a VAD gate; or Nemotron)
    +---------+
         |
  [/dorai_transcript]
@@ -72,10 +72,23 @@ See `doa_mod/README.md`.
    pip3 install --user --break-system-packages onnxruntime numpy scipy sounddevice samplerate sherpa-onnx
    ```
 
-   **Nemotron STT model**: the default (1120 ms + dorai `mc-ref` adapter) is bundled in `stt_mod/models/`.
-   Other latency profiles/adapters: see [`stt_mod/README.md`](stt_mod/README.md#models). Check that it loads and measure the RTF (no ROS needed):
+   **Models**: every dorai model is in one Hugging Face repo, [huggingface.co/sensifai/dorai](https://huggingface.co/sensifai/dorai/tree/main):
+
+   | Path in the repo | Size | Used by |
+   | :--- | ---: | :--- |
+   | `stt-model/whisper-finetuned/sherpa-onnx-whisper-large-v3-turbo-dorai-artaban/` | 1.0 GB | `stt_mod`, default engine (fine-tuned Whisper) |
+   | `stt-model/nemo-finetuned/` | 0.67 GB | `stt_mod`, `engine:=nemotron` (1120 ms + dorai `mc-ref` adapter) and the fallback when Whisper is missing |
+   | `intent-model/intent-qwen35-4b-Q4_0.gguf` | 2.6 GB | `intent_mod` |
+
+   **STT models**: nothing is bundled in the package; download them once into `~/dorai/models/` (the nodes look there on their own):
    ```bash
-   python3 -m stt_mod.transcribe stt_mod/models/*/test_wavs/*.wav
+   bash stt_mod/scripts/download_models.sh                     # Whisper + Nemotron, 1.7 GB
+   MODELS="whisper nemotron intent" bash stt_mod/scripts/download_models.sh   # + the intent model, for an offline robot
+   ```
+   Details and other ways: [`stt_mod/README.md`](stt_mod/README.md#models). Check that a model loads and measure the RTF (no ROS needed):
+   ```bash
+   python3 -m stt_mod.transcribe --list                                              # what is installed
+   python3 -m stt_mod.transcribe --engine nemotron ~/dorai/models/stt-model/nemo-finetuned/test_wavs/*.wav
    ```
 
    **Intent LLM runtime** (intent_mod). Use 0.3.36 or newer, the first release with Qwen3.5 support. It builds from source on ARM, which takes several minutes on a Pi. Without it, intent_mod falls back to its rule parser:
@@ -83,11 +96,11 @@ See `doa_mod/README.md`.
    CMAKE_BUILD_PARALLEL_LEVEL=4 pip3 install --user --break-system-packages "llama-cpp-python>=0.3.36" jinja2
    ```
 
-   **Intent model**: `intent-qwen35-4b-Q4_0.gguf` (2.6 GB) lives at
-   [huggingface.co/sensifai/dorai-intent-model](https://huggingface.co/sensifai/dorai-intent-model).
+   **Intent model**: `intent-qwen35-4b-Q4_0.gguf` (2.6 GB) lives in the same repo, at
+   [`intent-model/`](https://huggingface.co/sensifai/dorai/tree/main/intent-model).
    You don't need to fetch it by hand: the first `intent_mod` start downloads it into `~/dorai/models/`. The download resumes after an interruption and is checked against its sha256. For an offline robot, copy the file there beforehand:
    ```bash
-   mkdir -p ~/dorai/models && hf download sensifai/dorai-intent-model intent-qwen35-4b-Q4_0.gguf --local-dir ~/dorai/models
+   mkdir -p ~/dorai/models && hf download sensifai/dorai intent-model/intent-qwen35-4b-Q4_0.gguf --local-dir ~/dorai/models
    ```
 
 4. **Build the Workspace**:
@@ -144,18 +157,26 @@ ros2 run voice_mod voice --ros-args -p publish_raw:=true -p input_latency:=0.05
 
 ### 2. Stage 2: Speech-To-Text (`stt_mod`)
 
-Streaming NVIDIA `nemotron-speech-streaming-en-0.6b` (NeMo FastConformer + RNN-T, int8 ONNX via sherpa-onnx), with
-the dorai fine-tuned workshop adapter `mc-ref` baked in; that default model ships inside the package
-(`stt_mod/models/`). It publishes partials and finals:
-```bash
-ros2 launch stt_mod stt.launch.py                          # 1120 ms profile, mc-ref, 2 threads
-ros2 run stt_mod stt --ros-args -p latency_ms:=560 -p num_threads:=4
-```
-Key parameters: `latency_ms` (80 | 160 | 560 | 1120), `adapter` (mc-ref | mc-das | none), `num_threads`,
-`ep_rule2_sil` (0 = auto per profile). The full table, the measured
-latency/accuracy behind each default, and the adapter bake tool are in [`stt_mod/README.md`](stt_mod/README.md).
+Two engines, both int8 ONNX through sherpa-onnx, chosen with `engine`:
 
-* On a Pi 4, no profile decodes in real time (1120 ms reaches RTF ≈ 1.7). The node queues audio rather than
+* `whisper` (default): Whisper large-v3-turbo with the dorai command fine-tune. The clean stream is cut into
+  utterances by a neural VAD gate (`vad_gated.onnx`, shipped in the package) and each utterance is decoded once,
+  when the talker stops; audio the gate does not pass is never decoded, so noise gives no text. Finals only.
+* `nemotron`: streaming NVIDIA `nemotron-speech-streaming-en-0.6b` (NeMo FastConformer + RNN-T) with the dorai
+  fine-tuned workshop adapter `mc-ref` baked in. Partials and finals. Also what the node runs, with an error in
+  the log, when the Whisper model is not installed (`engine_fallback`).
+
+The models come from [huggingface.co/sensifai/dorai](https://huggingface.co/sensifai/dorai/tree/main)
+(`bash stt_mod/scripts/download_models.sh`).
+```bash
+ros2 launch stt_mod stt.launch.py                          # Whisper behind the VAD gate, 2 threads
+ros2 run stt_mod stt --ros-args -p engine:=nemotron        # streaming engine, 1120 ms profile, mc-ref
+```
+Key parameters: `engine` (whisper | nemotron), `vad` (neural | energy | none), `vad_min_silence_s`, `num_threads`;
+for Nemotron `latency_ms` and `adapter` (mc-ref | mc-das | none). The full table, the measured
+latency/accuracy behind the defaults, and the adapter bake tool are in [`stt_mod/README.md`](stt_mod/README.md).
+
+* On a Pi 4, no Nemotron profile decodes in real time (1120 ms reaches RTF ≈ 1.7), and Whisper has not been timed there. The node queues audio rather than
   dropping it and reports `backlog_s` on `/dorai_stt/status`. When it runs on the same Pi as `voice_mod`,
   start voice_mod with `-p input_latency:=0.25`; at 0.0 the STT load caused capture overflows (see `test/sim_pipeline.sh`).
 
@@ -193,7 +214,8 @@ ros2 topic echo /dorai_plan
 | `engine` | `auto` | `auto` (LLM if the model loads, else rules), `llm` (fail if missing), `rules`. |
 | `model` | `intent-qwen35-4b-Q4_0.gguf` | File name (searched in the model roots), absolute path, or huggingface.co file URL. |
 | `models_dir` | `""` | Extra model root searched first; downloads go here (`""` = `~/dorai/models`). |
-| `hf_repo` | `sensifai/dorai-intent-model` | Where a missing model is downloaded from. A private repo needs `$HF_TOKEN`. |
+| `hf_repo` | `sensifai/dorai` | Where a missing model is downloaded from. A private repo needs `$HF_TOKEN`. |
+| `hf_subdir` | `intent-model` | Folder of that repo the model file is in. |
 | `auto_download` | `true` | `false` never touches the network; a missing model then falls back to rules. |
 | `require_wake` | `true` | Only act on speech addressed to `wake_word` (`artaban`). Stop always works. |
 | `num_threads` | `2` | llama.cpp threads. |
