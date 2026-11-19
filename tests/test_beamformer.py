@@ -25,7 +25,7 @@ sys.modules['std_msgs.msg'].String = object
 
 # Now we can safely import the pipeline logic from the ROS node script
 try:
-    from voice_mod.voice import (
+    from ros2.voice_mod.voice import (
         detect_microphones, MicChannel, Beamformer, ContinuousEnhancer,
         OUTPUT_RATE, BLOCK_S, L_OUT, TARGET_OUT
     )

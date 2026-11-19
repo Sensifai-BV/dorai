@@ -1,0 +1,1200 @@
+{"world": "synth_000", "text": "go to the packing station and wait there", "plan": {"steps": [{"task": "goto", "target": "packing_station"}]}}
+{"world": "synth_001", "text": "go to welding machine d for check meter after that bring me marker", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_d"}, {"task": "bring", "object": "marker"}]}}
+{"world": "synth_002", "text": "Please go charge yourself up.", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_003", "text": "walk with me then go back", "plan": {"steps": [{"task": "follow_me"}, {"task": "go_back"}]}}
+{"world": "synth_004", "text": "um get up", "plan": {"steps": [{"task": "posture", "pose": "stand"}]}}
+{"world": "synth_005", "text": "lay down", "plan": {"steps": [{"task": "posture", "pose": "lie_down"}]}}
+{"world": "synth_006", "text": "hey turn right", "plan": {"steps": [{"task": "turn", "direction": "right"}]}}
+{"world": "synth_007", "text": "can you go back home", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_008", "text": "focus your camera on drill", "plan": {"steps": [{"task": "look_at", "object": "drill"}]}}
+{"world": "synth_009", "text": "Close the claw.", "plan": {"steps": [{"task": "gripper", "state": "close"}]}}
+{"world": "synth_010", "text": "Give me a status update.", "plan": {"steps": [{"task": "report", "what": "status"}]}}
+{"world": "synth_011", "text": "read meter at powder coater for me", "plan": {"steps": [{"task": "inspect_meter", "target": "paint_line"}]}}
+{"world": "synth_012", "text": "Roll ahead two meters.", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 2}]}}
+{"world": "synth_013", "text": "come closer", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_014", "text": "That's right.", "plan": {"steps": [{"task": "confirm", "answer": "yes"}]}}
+{"world": "synth_015", "text": "check the meter", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_016", "text": "uh what does the meter on the welding machine nine say", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_9"}]}}
+{"world": "synth_017", "text": "finish your rounds", "plan": {"steps": [{"task": "inspection", "state": "stop"}]}}
+{"world": "synth_018", "text": "go slower", "plan": {"steps": [{"task": "set_speed", "speed": "slow"}]}}
+{"world": "synth_019", "text": "Return home!", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_020", "text": "please have a look at bucket", "plan": {"steps": [{"task": "look_at", "object": "bucket"}]}}
+{"world": "synth_021", "text": "Grab the coffee mug!", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_022", "text": "go to ventilation fan for check meter", "plan": {"steps": [{"task": "inspect_meter", "target": "ventilation_fan"}]}}
+{"world": "synth_023", "text": "resume inspection", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "synth_024", "text": "look at the printer", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_025", "text": "new guy starts monday", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_026", "text": "can you go to the oxygen cylinder and wait there", "plan": {"steps": [{"task": "goto", "target": "oxygen_tank"}]}}
+{"world": "synth_027", "text": "go to the supervisor desk", "plan": {"steps": [{"task": "goto", "target": "office"}]}}
+{"world": "synth_028", "text": "arm up", "plan": {"steps": [{"task": "arm", "state": "lift"}]}}
+{"world": "synth_029", "text": "hey artaban swing left", "plan": {"steps": [{"task": "turn", "direction": "left"}]}}
+{"world": "synth_030", "text": "take a look at bucket", "plan": {"steps": [{"task": "look_at", "object": "bucket"}]}}
+{"world": "synth_031", "text": "i need you to we need more argon next week", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_032", "text": "Back up two meters.", "plan": {"steps": [{"task": "move", "direction": "backward", "meters": 2}]}}
+{"world": "synth_033", "text": "Pick up power cable.", "plan": {"steps": [{"task": "pick", "object": "extension_cord"}]}}
+{"world": "synth_034", "text": "Take a look at power drill?", "plan": {"steps": [{"task": "look_at", "object": "drill"}]}}
+{"world": "synth_035", "text": "go charge yourself up", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_036", "text": "Tell me your battery and after that take a look at steel pipe.", "plan": {"steps": [{"task": "report", "what": "battery"}, {"task": "look_at", "object": "pipe"}]}}
+{"world": "synth_037", "text": "go back where you came from", "plan": {"steps": [{"task": "go_back"}]}}
+{"world": "synth_038", "text": "come here", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_039", "text": "Can you check the gauges at the crane.", "plan": {"steps": [{"task": "inspect_meter", "target": "overhead_crane"}]}}
+{"world": "synth_040", "text": "Uh follow me.", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_041", "text": "um yes", "plan": {"steps": [{"task": "confirm", "answer": "yes"}]}}
+{"world": "synth_042", "text": "Come closer.", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_043", "text": "Finish welding.", "plan": {"steps": [{"task": "weld", "state": "stop"}]}}
+{"world": "synth_044", "text": "Um check meter!", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_045", "text": "do a visual check of the welding machine a", "plan": {"steps": [{"task": "inspect_visual", "target": "welder_a"}]}}
+{"world": "synth_046", "text": "uh check the meter", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_047", "text": "I need you to turn off the lights and what is the volts reading at welding device five.", "plan": {"steps": [{"task": "lights", "state": "off"}, {"task": "inspect_meter", "target": "welder_5"}]}}
+{"world": "synth_048", "text": "head over to cutting table after that read the meter and after that return to base", "plan": {"steps": [{"task": "goto", "target": "cutting_table"}, {"task": "read_meter"}, {"task": "goto", "target": "base"}]}}
+{"world": "synth_049", "text": "move quicker", "plan": {"steps": [{"task": "set_speed", "speed": "fast"}]}}
+{"world": "synth_050", "text": "can you please go to reception now", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_051", "text": "come over here", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_052", "text": "did you see the game last night", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_053", "text": "please finish welding", "plan": {"steps": [{"task": "weld", "state": "stop"}]}}
+{"world": "synth_054", "text": "okay show me ear protection", "plan": {"steps": [{"task": "look_at", "object": "ear_muffs"}]}}
+{"world": "synth_055", "text": "Walk over to furnace!", "plan": {"steps": [{"task": "goto", "target": "furnace"}]}}
+{"world": "synth_056", "text": "Hey artaban take a picture of elevator?", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_057", "text": "end the inspection round", "plan": {"steps": [{"task": "inspection", "state": "stop"}]}}
+{"world": "synth_058", "text": "bring multimeter here", "plan": {"steps": [{"task": "bring", "object": "multimeter"}]}}
+{"world": "synth_059", "text": "walk with me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_060", "text": "Hey artaban now back to normal speed and then hold on to radio.", "plan": {"steps": [{"task": "set_speed", "speed": "normal"}, {"task": "hold", "object": "radio"}]}}
+{"world": "synth_061", "text": "take the torque wrench", "plan": {"steps": [{"task": "pick", "object": "torque_wrench"}]}}
+{"world": "synth_062", "text": "stay and then plug yourself in", "plan": {"steps": [{"task": "wait"}, {"task": "dock"}]}}
+{"world": "synth_063", "text": "Go to the welder number f and check the meter.", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_f"}]}}
+{"world": "synth_064", "text": "Could you please check the temperature on transformer after that give me a status update then roll ahead three meters.", "plan": {"steps": [{"task": "inspect_meter", "target": "transformer"}, {"task": "report", "what": "status"}, {"task": "move", "direction": "forward", "meters": 3}]}}
+{"world": "synth_065", "text": "get over here", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_066", "text": "Please stand?", "plan": {"steps": [{"task": "posture", "pose": "stand"}]}}
+{"world": "synth_067", "text": "End the weld.", "plan": {"steps": [{"task": "weld", "state": "stop"}]}}
+{"world": "synth_068", "text": "uh drive backward one and a half meters", "plan": {"steps": [{"task": "move", "direction": "backward", "meters": 1.5}]}}
+{"world": "synth_069", "text": "Could you please go charge yourself up.", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_070", "text": "Please you need a recharge go dock?", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_071", "text": "head to the charging dock", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_072", "text": "now lunch is at twelve", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_073", "text": "i need you to turn right please", "plan": {"steps": [{"task": "turn", "direction": "right"}]}}
+{"world": "synth_074", "text": "swing right", "plan": {"steps": [{"task": "turn", "direction": "right"}]}}
+{"world": "synth_075", "text": "This coffee is terrible.", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_076", "text": "check transformer meter", "plan": {"steps": [{"task": "inspect_meter", "target": "transformer"}]}}
+{"world": "synth_077", "text": "check this meter and then stay put", "plan": {"steps": [{"task": "read_meter"}, {"task": "wait"}]}}
+{"world": "synth_078", "text": "please open your hand", "plan": {"steps": [{"task": "gripper", "state": "open"}]}}
+{"world": "synth_079", "text": "Go read the gauges over at the welding station two.", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_2"}]}}
+{"world": "synth_000", "text": "go home after that go to the welding station d for check meter", "plan": {"steps": [{"task": "goto", "target": "base"}, {"task": "inspect_meter", "target": "welder_d"}]}}
+{"world": "synth_001", "text": "Go recharge your battery.", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_002", "text": "go back where you came from", "plan": {"steps": [{"task": "go_back"}]}}
+{"world": "synth_003", "text": "Uh bring step ladder here!", "plan": {"steps": [{"task": "bring", "object": "ladder"}]}}
+{"world": "synth_004", "text": "could you please where did i put my keys", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_005", "text": "return to your previous spot", "plan": {"steps": [{"task": "go_back"}]}}
+{"world": "synth_006", "text": "Bring chisel here!", "plan": {"steps": [{"task": "bring", "object": "chisel"}]}}
+{"world": "synth_007", "text": "okay go charge and then what does the meter on heat treat furnace say", "plan": {"steps": [{"task": "dock"}, {"task": "inspect_meter", "target": "furnace"}]}}
+{"world": "synth_008", "text": "Go back home?", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_009", "text": "keep holding bolts", "plan": {"steps": [{"task": "hold", "object": "bolt_box"}]}}
+{"world": "synth_010", "text": "where did i put my keys", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_011", "text": "inspect office and after that raise your arm", "plan": {"steps": [{"task": "inspect_visual", "target": "office"}, {"task": "arm", "state": "lift"}]}}
+{"world": "synth_012", "text": "Go lie down then read the gauge?", "plan": {"steps": [{"task": "posture", "pose": "lie_down"}, {"task": "read_meter"}]}}
+{"world": "synth_013", "text": "so lie flat", "plan": {"steps": [{"task": "posture", "pose": "lie_down"}]}}
+{"world": "synth_014", "text": "Um let go!", "plan": {"steps": [{"task": "gripper", "state": "open"}]}}
+{"world": "synth_015", "text": "go back home and back up three meeters", "plan": {"steps": [{"task": "goto", "target": "base"}, {"task": "move", "direction": "backward", "meters": 3}]}}
+{"world": "synth_016", "text": "go faster", "plan": {"steps": [{"task": "set_speed", "speed": "fast"}]}}
+{"world": "synth_017", "text": "get over here", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_018", "text": "turn around then point your camera at extension cord", "plan": {"steps": [{"task": "turn", "direction": "around"}, {"task": "look_at", "object": "extension_cord"}]}}
+{"world": "synth_019", "text": "So head over to testing rig.", "plan": {"steps": [{"task": "goto", "target": "test_bench"}]}}
+{"world": "synth_020", "text": "so return to base and then take a picture of grinder station", "plan": {"steps": [{"task": "goto", "target": "base"}, {"task": "inspect_visual", "target": "grinding_bench"}]}}
+{"world": "synth_021", "text": "Can you go to drill press.", "plan": {"steps": [{"task": "goto", "target": "drill_press"}]}}
+{"world": "synth_022", "text": "did you see the game last night", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_023", "text": "Follow me?", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_024", "text": "plug yourself in", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_025", "text": "carry the coffee mug over to me", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_026", "text": "Okay slow down please!", "plan": {"steps": [{"task": "set_speed", "speed": "slow"}]}}
+{"world": "synth_027", "text": "Artaban come over here.", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_028", "text": "rotate right", "plan": {"steps": [{"task": "turn", "direction": "right"}]}}
+{"world": "synth_029", "text": "now rotate right", "plan": {"steps": [{"task": "turn", "direction": "right"}]}}
+{"world": "synth_030", "text": "please did you see the game last night", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_031", "text": "swing right", "plan": {"steps": [{"task": "turn", "direction": "right"}]}}
+{"world": "synth_032", "text": "boss is coming tomorrow", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_033", "text": "Start welding.", "plan": {"steps": [{"task": "weld", "state": "start"}]}}
+{"world": "synth_034", "text": "okay step back 3 meters", "plan": {"steps": [{"task": "move", "direction": "backward", "meters": 3}]}}
+{"world": "synth_035", "text": "go to testing rig and check the meter", "plan": {"steps": [{"task": "inspect_meter", "target": "test_bench"}]}}
+{"world": "synth_036", "text": "switch your lights on", "plan": {"steps": [{"task": "lights", "state": "on"}]}}
+{"world": "synth_037", "text": "uh check the gauge here", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_038", "text": "swing right", "plan": {"steps": [{"task": "turn", "direction": "right"}]}}
+{"world": "synth_039", "text": "finish welding and after that turn left please", "plan": {"steps": [{"task": "weld", "state": "stop"}, {"task": "turn", "direction": "left"}]}}
+{"world": "synth_040", "text": "Go lie down then take a picture of welding device u and stay put.", "plan": {"steps": [{"task": "posture", "pose": "lie_down"}, {"task": "inspect_visual", "target": "welder_u"}, {"task": "wait"}]}}
+{"world": "synth_041", "text": "step back one and a half meters", "plan": {"steps": [{"task": "move", "direction": "backward", "meters": 1.5}]}}
+{"world": "synth_042", "text": "okay rotate left", "plan": {"steps": [{"task": "turn", "direction": "left"}]}}
+{"world": "synth_043", "text": "carry ipad over to me", "plan": {"steps": [{"task": "bring", "object": "tablet"}]}}
+{"world": "synth_044", "text": "This coffee is terrible.", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_045", "text": "Grab ear protection!", "plan": {"steps": [{"task": "pick", "object": "ear_muffs"}]}}
+{"world": "synth_046", "text": "Artaban who left the door open!", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_047", "text": "hey artaban what does the gauge say and do your inspection round", "plan": {"steps": [{"task": "read_meter"}, {"task": "inspection", "state": "start"}]}}
+{"world": "synth_048", "text": "um stand up please", "plan": {"steps": [{"task": "posture", "pose": "stand"}]}}
+{"world": "synth_049", "text": "bring me the socket set", "plan": {"steps": [{"task": "bring", "object": "socket_set"}]}}
+{"world": "synth_050", "text": "Go back home and after that raise your arm.", "plan": {"steps": [{"task": "goto", "target": "base"}, {"task": "arm", "state": "lift"}]}}
+{"world": "synth_051", "text": "take rag", "plan": {"steps": [{"task": "pick", "object": "rag"}]}}
+{"world": "synth_052", "text": "could you please where did i put my keys", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_053", "text": "Start welding and after that pause the inspection.", "plan": {"steps": [{"task": "weld", "state": "start"}, {"task": "inspection", "state": "stop"}]}}
+{"world": "synth_054", "text": "Go back to where you were.", "plan": {"steps": [{"task": "go_back"}]}}
+{"world": "synth_055", "text": "go to base", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_056", "text": "go to the charger", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_057", "text": "go back to base", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_058", "text": "i need you to move it there", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_059", "text": "Read the dial and go to the oxygen tank and check the meter!", "plan": {"steps": [{"task": "read_meter"}, {"task": "inspect_meter", "target": "oxygen_tank"}]}}
+{"world": "synth_060", "text": "end the weld after that read the dial", "plan": {"steps": [{"task": "weld", "state": "stop"}, {"task": "read_meter"}]}}
+{"world": "synth_061", "text": "arm up", "plan": {"steps": [{"task": "arm", "state": "lift"}]}}
+{"world": "synth_062", "text": "check the gauges at boiler room", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_063", "text": "focus your camera on torque wrench", "plan": {"steps": [{"task": "look_at", "object": "torque_wrench"}]}}
+{"world": "synth_064", "text": "what does the meter on the welder four say", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_4"}]}}
+{"world": "synth_065", "text": "begin the weld", "plan": {"steps": [{"task": "weld", "state": "start"}]}}
+{"world": "synth_066", "text": "put your arm down", "plan": {"steps": [{"task": "arm", "state": "lower"}]}}
+{"world": "synth_067", "text": "I need you to read the meter!", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_068", "text": "i need you to how charged are you", "plan": {"steps": [{"task": "report", "what": "battery"}]}}
+{"world": "synth_069", "text": "wait", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_070", "text": "can somebody call maintenance", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_071", "text": "have a look around the o two bottle", "plan": {"steps": [{"task": "inspect_visual", "target": "oxygen_tank"}]}}
+{"world": "synth_072", "text": "read meter and then go recharge your battery", "plan": {"steps": [{"task": "read_meter"}, {"task": "dock"}]}}
+{"world": "synth_073", "text": "read the meter", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_074", "text": "start inspection at cleaning tank", "plan": {"steps": [{"task": "inspect_visual", "target": "wash_station"}]}}
+{"world": "synth_075", "text": "Go to welding station fifty?", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_076", "text": "how charged are you", "plan": {"steps": [{"task": "report", "what": "battery"}]}}
+{"world": "synth_077", "text": "Go to weld station b and check the meter?", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_b"}]}}
+{"world": "synth_078", "text": "lie flat", "plan": {"steps": [{"task": "posture", "pose": "lie_down"}]}}
+{"world": "synth_079", "text": "Kill the lights.", "plan": {"steps": [{"task": "lights", "state": "off"}]}}
+{"world": "synth_000", "text": "Check shipping table for damage.", "plan": {"steps": [{"task": "inspect_visual", "target": "packing_station"}]}}
+{"world": "synth_001", "text": "the forklift needs new tyres", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_002", "text": "return to base", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_003", "text": "Move to truck bay.", "plan": {"steps": [{"task": "goto", "target": "forklift_bay"}]}}
+{"world": "synth_004", "text": "Follow me please then point your camera at flashlight!", "plan": {"steps": [{"task": "follow_me"}, {"task": "look_at", "object": "flashlight"}]}}
+{"world": "synth_005", "text": "take a chair", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_006", "text": "check the gauge here", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_007", "text": "do a visual check of it closet", "plan": {"steps": [{"task": "inspect_visual", "target": "server_rack"}]}}
+{"world": "synth_008", "text": "Hey over there.", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_009", "text": "read the gauge at testing rig", "plan": {"steps": [{"task": "inspect_meter", "target": "test_bench"}]}}
+{"world": "synth_010", "text": "Go to hvac unit and check the meter!", "plan": {"steps": [{"task": "inspect_meter", "target": "hvac_unit"}]}}
+{"world": "synth_011", "text": "okay begin the inspection round", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "synth_012", "text": "Tag along with me.", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_013", "text": "Go recharge your battery?", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_014", "text": "plug yourself in", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_015", "text": "Roll ahead ten meters after that check the volts on the welding station eight?", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 10}, {"task": "inspect_meter", "target": "welder_8"}]}}
+{"world": "synth_016", "text": "Now give me a status update?", "plan": {"steps": [{"task": "report", "what": "status"}]}}
+{"world": "synth_017", "text": "Go recharge your battery.", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_018", "text": "now fetch extension cord", "plan": {"steps": [{"task": "bring", "object": "extension_cord"}]}}
+{"world": "synth_019", "text": "have a look at marker and hold your position", "plan": {"steps": [{"task": "look_at", "object": "marker"}, {"task": "wait"}]}}
+{"world": "synth_020", "text": "yes confirm", "plan": {"steps": [{"task": "confirm", "answer": "yes"}]}}
+{"world": "synth_021", "text": "begin inspection", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "synth_022", "text": "Return to base!", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_023", "text": "head to the wash station please and go dock yourself", "plan": {"steps": [{"task": "goto", "target": "wash_station"}, {"task": "dock"}]}}
+{"world": "synth_024", "text": "give me a status update", "plan": {"steps": [{"task": "report", "what": "status"}]}}
+{"world": "synth_025", "text": "Uh back up one meter?", "plan": {"steps": [{"task": "move", "direction": "backward", "meters": 1}]}}
+{"world": "synth_026", "text": "look over the weld station r for problems", "plan": {"steps": [{"task": "inspect_visual", "target": "welder_r"}]}}
+{"world": "synth_027", "text": "battery is low go charge", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_028", "text": "can you go to the cafeteria upstairs", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_029", "text": "please go to the welding cell s now", "plan": {"steps": [{"task": "goto", "target": "welder_s"}]}}
+{"world": "synth_030", "text": "pick up bucket", "plan": {"steps": [{"task": "pick", "object": "bucket"}]}}
+{"world": "synth_031", "text": "turn back around", "plan": {"steps": [{"task": "turn", "direction": "around"}]}}
+{"world": "synth_032", "text": "Hey artaban turn left please?", "plan": {"steps": [{"task": "turn", "direction": "left"}]}}
+{"world": "synth_033", "text": "now start the weld", "plan": {"steps": [{"task": "weld", "state": "start"}]}}
+{"world": "synth_034", "text": "please can you um", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_035", "text": "we need more argon next week", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_036", "text": "tell me the volts on the test stand", "plan": {"steps": [{"task": "inspect_meter", "target": "test_bench"}]}}
+{"world": "synth_037", "text": "Return to base.", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_038", "text": "back to the last place", "plan": {"steps": [{"task": "go_back"}]}}
+{"world": "synth_039", "text": "tell me the gas flow on welding device j", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_j"}]}}
+{"world": "synth_040", "text": "turn on the lights", "plan": {"steps": [{"task": "lights", "state": "on"}]}}
+{"world": "synth_041", "text": "move it there", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_042", "text": "go to the welding station b for check meter", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_b"}]}}
+{"world": "synth_043", "text": "return to base", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_044", "text": "What does the meter on welder number h say.", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_h"}]}}
+{"world": "synth_045", "text": "Move to parking lot.", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_046", "text": "go home", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_047", "text": "get yourself to welder t", "plan": {"steps": [{"task": "goto", "target": "welder_t"}]}}
+{"world": "synth_048", "text": "the new guy starts monday", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_049", "text": "come with me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_050", "text": "So stand up.", "plan": {"steps": [{"task": "posture", "pose": "stand"}]}}
+{"world": "synth_051", "text": "end the inspection round", "plan": {"steps": [{"task": "inspection", "state": "stop"}]}}
+{"world": "synth_052", "text": "don't move", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_053", "text": "Hey artaban forget it.", "plan": {"steps": [{"task": "cancel"}]}}
+{"world": "synth_054", "text": "hey artaban please go forward five meters", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 5}]}}
+{"world": "synth_055", "text": "check the gauges at the welding device three", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_3"}]}}
+{"world": "synth_056", "text": "hold on to the metal file", "plan": {"steps": [{"task": "hold", "object": "file"}]}}
+{"world": "synth_057", "text": "now come closer", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_058", "text": "take car keys", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_059", "text": "Go to the charger.", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_060", "text": "turn to the left", "plan": {"steps": [{"task": "turn", "direction": "left"}]}}
+{"world": "synth_061", "text": "take a look at the torque wrench", "plan": {"steps": [{"task": "look_at", "object": "torque_wrench"}]}}
+{"world": "synth_062", "text": "read the gauge at welding cell four", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_4"}]}}
+{"world": "synth_063", "text": "follow me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_064", "text": "so go to welding device t and read the volts", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_t"}]}}
+{"world": "synth_065", "text": "go to the charging station and then read the meter at the cooling water tank for me", "plan": {"steps": [{"task": "dock"}, {"task": "inspect_meter", "target": "water_tank"}]}}
+{"world": "synth_066", "text": "please keep holding grease gun", "plan": {"steps": [{"task": "hold", "object": "grease_gun"}]}}
+{"world": "synth_067", "text": "begin inspection", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "synth_068", "text": "Check the gauges at welding cell e?", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_e"}]}}
+{"world": "synth_069", "text": "can you turn on the lights then move to the office", "plan": {"steps": [{"task": "lights", "state": "on"}, {"task": "goto", "target": "office"}]}}
+{"world": "synth_070", "text": "Go forward three meters?", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 3}]}}
+{"world": "synth_071", "text": "go to the ac unit and read the temp", "plan": {"steps": [{"task": "inspect_meter", "target": "hvac_unit"}]}}
+{"world": "synth_072", "text": "stay here", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_073", "text": "Can you look over the welding machine h for problems.", "plan": {"steps": [{"task": "inspect_visual", "target": "welder_h"}]}}
+{"world": "synth_074", "text": "The forklift needs new tyres.", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_075", "text": "do a visual check of the welding machine 3", "plan": {"steps": [{"task": "inspect_visual", "target": "welder_3"}]}}
+{"world": "synth_076", "text": "hold on to clipboard", "plan": {"steps": [{"task": "hold", "object": "clipboard"}]}}
+{"world": "synth_077", "text": "um pick bucket of paint up", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_078", "text": "bring a sandwich here", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_079", "text": "Hey focus your camera on the tape measure?", "plan": {"steps": [{"task": "look_at", "object": "tape_measure"}]}}
+{"world": "synth_000", "text": "Read the display.", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_001", "text": "Close the claw?", "plan": {"steps": [{"task": "gripper", "state": "close"}]}}
+{"world": "synth_002", "text": "Go back where you came from and how much battery do you have?", "plan": {"steps": [{"task": "go_back"}, {"task": "report", "what": "battery"}]}}
+{"world": "synth_003", "text": "Hey start inspection at the cnc mill?", "plan": {"steps": [{"task": "inspect_visual", "target": "cnc_mill"}]}}
+{"world": "synth_004", "text": "Turn left please?", "plan": {"steps": [{"task": "turn", "direction": "left"}]}}
+{"world": "synth_005", "text": "could you please get up", "plan": {"steps": [{"task": "posture", "pose": "stand"}]}}
+{"world": "synth_006", "text": "uh focus your camera on chisel and then keep holding the chisel", "plan": {"steps": [{"task": "look_at", "object": "chisel"}, {"task": "hold", "object": "chisel"}]}}
+{"world": "synth_007", "text": "check the test bench meter", "plan": {"steps": [{"task": "inspect_meter", "target": "test_bench"}]}}
+{"world": "synth_008", "text": "Start inspection?", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "synth_009", "text": "come over here after that go faster", "plan": {"steps": [{"task": "come_here"}, {"task": "set_speed", "speed": "fast"}]}}
+{"world": "synth_010", "text": "Now we need more argon next week?", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_011", "text": "Now go forward two meters!", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 2}]}}
+{"world": "synth_012", "text": "go stand next to the forklift bay and check the voltage on welding device b", "plan": {"steps": [{"task": "goto", "target": "forklift_bay"}, {"task": "inspect_meter", "target": "welder_b"}]}}
+{"world": "synth_013", "text": "End inspection!", "plan": {"steps": [{"task": "inspection", "state": "stop"}]}}
+{"world": "synth_014", "text": "move it there", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_015", "text": "okay who left the door open", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_016", "text": "okay go to roof", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_017", "text": "wait for me here", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_018", "text": "stop the weld now", "plan": {"steps": [{"task": "weld", "state": "stop"}]}}
+{"world": "synth_019", "text": "can you face the other way then keep following me", "plan": {"steps": [{"task": "turn", "direction": "around"}, {"task": "follow_me"}]}}
+{"world": "synth_020", "text": "tell me the amperage on welding cell c", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_c"}]}}
+{"world": "synth_021", "text": "Stay behind me.", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_022", "text": "Follow me please?", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_023", "text": "can you see fire blanket", "plan": {"steps": [{"task": "look_at", "object": "fire_blanket"}]}}
+{"world": "synth_024", "text": "hey artaban move back three meters", "plan": {"steps": [{"task": "move", "direction": "backward", "meters": 3}]}}
+{"world": "synth_025", "text": "how are you doing", "plan": {"steps": [{"task": "report", "what": "status"}]}}
+{"world": "synth_026", "text": "So go to the charger and what is your battery level?", "plan": {"steps": [{"task": "dock"}, {"task": "report", "what": "battery"}]}}
+{"world": "synth_027", "text": "Hey artaban return home?", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_028", "text": "hold your position", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_029", "text": "Return to base.", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_030", "text": "Artaban do a visual check of welding station q!", "plan": {"steps": [{"task": "inspect_visual", "target": "welder_q"}]}}
+{"world": "synth_031", "text": "pick the clipboard up", "plan": {"steps": [{"task": "pick", "object": "clipboard"}]}}
+{"world": "synth_032", "text": "Cancel.", "plan": {"steps": [{"task": "cancel"}]}}
+{"world": "synth_033", "text": "please head home", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_034", "text": "um focus your camera on the wire brush", "plan": {"steps": [{"task": "look_at", "object": "wire_brush"}]}}
+{"world": "synth_035", "text": "take a reading at weld station p", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_p"}]}}
+{"world": "synth_036", "text": "what does the gauge say", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_037", "text": "come here please", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_038", "text": "check the meter on the warehouse", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_039", "text": "check the gauges at air handler", "plan": {"steps": [{"task": "inspect_meter", "target": "hvac_unit"}]}}
+{"world": "synth_040", "text": "hey go inspect the lab downstairs", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_041", "text": "focus your camera on rag", "plan": {"steps": [{"task": "look_at", "object": "rag"}]}}
+{"world": "synth_042", "text": "Now back to normal speed!", "plan": {"steps": [{"task": "set_speed", "speed": "normal"}]}}
+{"world": "synth_043", "text": "um have a look at the clipboard", "plan": {"steps": [{"task": "look_at", "object": "clipboard"}]}}
+{"world": "synth_044", "text": "turn around", "plan": {"steps": [{"task": "turn", "direction": "around"}]}}
+{"world": "synth_045", "text": "can somebody call maintenance", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_046", "text": "start the patrol", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "synth_047", "text": "Have a look at screwdriver.", "plan": {"steps": [{"task": "look_at", "object": "screwdriver"}]}}
+{"world": "synth_048", "text": "Uh can somebody call maintenance.", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_049", "text": "Stand up please then check welder f for damage.", "plan": {"steps": [{"task": "posture", "pose": "stand"}, {"task": "inspect_visual", "target": "welder_f"}]}}
+{"world": "synth_050", "text": "lay down then go stand next to the test stand", "plan": {"steps": [{"task": "posture", "pose": "lie_down"}, {"task": "goto", "target": "test_bench"}]}}
+{"world": "synth_051", "text": "Artaban hey pick the grinder up!", "plan": {"steps": [{"task": "pick", "object": "grinder"}]}}
+{"world": "synth_052", "text": "artaban open the gripper", "plan": {"steps": [{"task": "gripper", "state": "open"}]}}
+{"world": "synth_053", "text": "Stand up.", "plan": {"steps": [{"task": "posture", "pose": "stand"}]}}
+{"world": "synth_054", "text": "So what does the meter on heat treat furnace say?", "plan": {"steps": [{"task": "inspect_meter", "target": "furnace"}]}}
+{"world": "synth_055", "text": "Where did i put my keys.", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_056", "text": "i need you to focus your camera on chisel", "plan": {"steps": [{"task": "look_at", "object": "chisel"}]}}
+{"world": "synth_057", "text": "i need you to back to your home position", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_058", "text": "affirmative", "plan": {"steps": [{"task": "confirm", "answer": "yes"}]}}
+{"world": "synth_059", "text": "Wait for me here!", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_060", "text": "check this meter", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_061", "text": "drive to the first aid station", "plan": {"steps": [{"task": "goto", "target": "first_aid"}]}}
+{"world": "synth_062", "text": "stand up", "plan": {"steps": [{"task": "posture", "pose": "stand"}]}}
+{"world": "synth_063", "text": "Please begin the weld!", "plan": {"steps": [{"task": "weld", "state": "start"}]}}
+{"world": "synth_064", "text": "go over by the welder number t", "plan": {"steps": [{"task": "goto", "target": "welder_t"}]}}
+{"world": "synth_065", "text": "Check the gauge here!", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_066", "text": "Report status.", "plan": {"steps": [{"task": "report", "what": "status"}]}}
+{"world": "synth_067", "text": "go recharge your battery", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_068", "text": "can you come to me now", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_069", "text": "pick up the cleaning cloth", "plan": {"steps": [{"task": "pick", "object": "rag"}]}}
+{"world": "synth_070", "text": "Could you please dock?", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_071", "text": "please show me voltmeter", "plan": {"steps": [{"task": "look_at", "object": "multimeter"}]}}
+{"world": "synth_072", "text": "the boss is coming tomorrow", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_073", "text": "come to me", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_074", "text": "return to base", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_075", "text": "over here please", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_076", "text": "Did you see the game last night?", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_077", "text": "artaban end the weld", "plan": {"steps": [{"task": "weld", "state": "stop"}]}}
+{"world": "synth_078", "text": "Now navigate to cooling water tank.", "plan": {"steps": [{"task": "goto", "target": "water_tank"}]}}
+{"world": "synth_079", "text": "Okay come to me!", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_000", "text": "lights on", "plan": {"steps": [{"task": "lights", "state": "on"}]}}
+{"world": "synth_001", "text": "read the meter at the pumps for me", "plan": {"steps": [{"task": "inspect_meter", "target": "pump_room"}]}}
+{"world": "synth_002", "text": "come here please", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_003", "text": "my shift ends at five", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_004", "text": "do it", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_005", "text": "could you please go to charging station", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_006", "text": "Hold level.", "plan": {"steps": [{"task": "hold", "object": "level"}]}}
+{"world": "synth_007", "text": "hey artaban hold wire brush", "plan": {"steps": [{"task": "hold", "object": "wire_brush"}]}}
+{"world": "synth_008", "text": "go to roof for check meter", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_009", "text": "strike an arc", "plan": {"steps": [{"task": "weld", "state": "start"}]}}
+{"world": "synth_010", "text": "please go to it closet now", "plan": {"steps": [{"task": "goto", "target": "server_rack"}]}}
+{"world": "synth_011", "text": "bring me vise grip after that go home", "plan": {"steps": [{"task": "bring", "object": "pliers"}, {"task": "goto", "target": "base"}]}}
+{"world": "synth_012", "text": "show me tablet", "plan": {"steps": [{"task": "look_at", "object": "tablet"}]}}
+{"world": "synth_013", "text": "go home", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_014", "text": "can you come with me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_015", "text": "Check the amperage on welding station 8.", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_8"}]}}
+{"world": "synth_016", "text": "hey artaban drive backward 5 meters", "plan": {"steps": [{"task": "move", "direction": "backward", "meters": 5}]}}
+{"world": "synth_017", "text": "Pick the printer up.", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_018", "text": "Inspect welding cell e?", "plan": {"steps": [{"task": "inspect_visual", "target": "welder_e"}]}}
+{"world": "synth_019", "text": "grab ladder from outside", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_020", "text": "how charged are you", "plan": {"steps": [{"task": "report", "what": "battery"}]}}
+{"world": "synth_021", "text": "Artaban now start the weld.", "plan": {"steps": [{"task": "weld", "state": "start"}]}}
+{"world": "synth_022", "text": "turn up the radio", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_023", "text": "can you take vise grip and then check gauge here", "plan": {"steps": [{"task": "pick", "object": "pliers"}, {"task": "read_meter"}]}}
+{"world": "synth_024", "text": "Could you please stand up please then stop the weld now.", "plan": {"steps": [{"task": "posture", "pose": "stand"}, {"task": "weld", "state": "stop"}]}}
+{"world": "synth_025", "text": "hey abort the task", "plan": {"steps": [{"task": "cancel"}]}}
+{"world": "synth_026", "text": "now grab ladder", "plan": {"steps": [{"task": "pick", "object": "ladder"}]}}
+{"world": "synth_027", "text": "Follow me!", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_028", "text": "um stand up please", "plan": {"steps": [{"task": "posture", "pose": "stand"}]}}
+{"world": "synth_029", "text": "grab bolts", "plan": {"steps": [{"task": "pick", "object": "bolt_box"}]}}
+{"world": "synth_030", "text": "Go to the charging station!", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_031", "text": "could you please check the gauge here then turn on the lights", "plan": {"steps": [{"task": "read_meter"}, {"task": "lights", "state": "on"}]}}
+{"world": "synth_032", "text": "Okay we need more argon next week?", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_033", "text": "go to substation for check meter", "plan": {"steps": [{"task": "inspect_meter", "target": "transformer"}]}}
+{"world": "synth_034", "text": "Okay walk with me.", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_035", "text": "head to the overhead crane please", "plan": {"steps": [{"task": "goto", "target": "overhead_crane"}]}}
+{"world": "synth_036", "text": "Look at ipad please.", "plan": {"steps": [{"task": "look_at", "object": "tablet"}]}}
+{"world": "synth_037", "text": "Pick the marker up!", "plan": {"steps": [{"task": "pick", "object": "marker"}]}}
+{"world": "synth_038", "text": "stop welding and after that read the gauge at the it closet", "plan": {"steps": [{"task": "weld", "state": "stop"}, {"task": "inspect_meter", "target": "server_rack"}]}}
+{"world": "synth_039", "text": "go look at welder v after that back to the last place", "plan": {"steps": [{"task": "inspect_visual", "target": "welder_v"}, {"task": "go_back"}]}}
+{"world": "synth_040", "text": "i need you to go over by the parts shelf", "plan": {"steps": [{"task": "goto", "target": "storage_rack"}]}}
+{"world": "synth_041", "text": "follow me please", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_042", "text": "that weld looks good to me", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_043", "text": "Can you go at normal speed?", "plan": {"steps": [{"task": "set_speed", "speed": "normal"}]}}
+{"world": "synth_044", "text": "you need a recharge go dock and then stop the weld now", "plan": {"steps": [{"task": "dock"}, {"task": "weld", "state": "stop"}]}}
+{"world": "synth_045", "text": "Please navigate to the welding device d?", "plan": {"steps": [{"task": "goto", "target": "welder_d"}]}}
+{"world": "synth_046", "text": "Go back to where you were.", "plan": {"steps": [{"task": "go_back"}]}}
+{"world": "synth_047", "text": "walk with me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_048", "text": "move forward two meters", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 2}]}}
+{"world": "synth_049", "text": "stand", "plan": {"steps": [{"task": "posture", "pose": "stand"}]}}
+{"world": "synth_050", "text": "this coffee is terrible", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_051", "text": "hey go back to base", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_052", "text": "The boss is coming tomorrow.", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_053", "text": "um come with me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_054", "text": "arm up", "plan": {"steps": [{"task": "arm", "state": "lift"}]}}
+{"world": "synth_055", "text": "uh stay here", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_056", "text": "go forward three meters", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 3}]}}
+{"world": "synth_057", "text": "lights off", "plan": {"steps": [{"task": "lights", "state": "off"}]}}
+{"world": "synth_058", "text": "Come here please.", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_059", "text": "go faster and head to cnc mill please", "plan": {"steps": [{"task": "set_speed", "speed": "fast"}, {"task": "goto", "target": "cnc_mill"}]}}
+{"world": "synth_060", "text": "take a picture of welder y", "plan": {"steps": [{"task": "inspect_visual", "target": "welder_y"}]}}
+{"world": "synth_061", "text": "go to base", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_062", "text": "can somebody call maintenance", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_063", "text": "can you go to assembly station", "plan": {"steps": [{"task": "goto", "target": "assembly_line"}]}}
+{"world": "synth_064", "text": "Normal speed then turn to the right!", "plan": {"steps": [{"task": "set_speed", "speed": "normal"}, {"task": "turn", "direction": "right"}]}}
+{"world": "synth_065", "text": "hand me bucket of paint", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_066", "text": "wait here", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_067", "text": "read the dial", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_068", "text": "tell me what the meter says and then speed up", "plan": {"steps": [{"task": "read_meter"}, {"task": "set_speed", "speed": "fast"}]}}
+{"world": "synth_069", "text": "get me cleaning cloth", "plan": {"steps": [{"task": "bring", "object": "rag"}]}}
+{"world": "synth_070", "text": "Read the meter after that open the gripper?", "plan": {"steps": [{"task": "read_meter"}, {"task": "gripper", "state": "open"}]}}
+{"world": "synth_071", "text": "Turn around!", "plan": {"steps": [{"task": "turn", "direction": "around"}]}}
+{"world": "synth_072", "text": "read gauge at the warehouse", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_073", "text": "where did i put my keys", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_074", "text": "open the gripper", "plan": {"steps": [{"task": "gripper", "state": "open"}]}}
+{"world": "synth_075", "text": "go inspect pump room", "plan": {"steps": [{"task": "inspect_visual", "target": "pump_room"}]}}
+{"world": "synth_076", "text": "Hand me angle grinder?", "plan": {"steps": [{"task": "bring", "object": "grinder"}]}}
+{"world": "synth_077", "text": "check the gauge here", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_078", "text": "Swing right and after that focus your camera on step ladder.", "plan": {"steps": [{"task": "turn", "direction": "right"}, {"task": "look_at", "object": "ladder"}]}}
+{"world": "synth_079", "text": "Um walk to me and then inspect metal scrap container after that read the gauge at weld station 2.", "plan": {"steps": [{"task": "come_here"}, {"task": "inspect_visual", "target": "scrap_bin"}, {"task": "inspect_meter", "target": "welder_2"}]}}
+{"world": "synth_000", "text": "um begin the weld", "plan": {"steps": [{"task": "weld", "state": "start"}]}}
+{"world": "synth_001", "text": "uh go over by the", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_002", "text": "finish welding", "plan": {"steps": [{"task": "weld", "state": "stop"}]}}
+{"world": "synth_003", "text": "Could you please check the meter on welding machine five?", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_5"}]}}
+{"world": "synth_004", "text": "put your arm down", "plan": {"steps": [{"task": "arm", "state": "lower"}]}}
+{"world": "synth_005", "text": "so stay behind me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_006", "text": "head home and after that drive backward ten meters", "plan": {"steps": [{"task": "goto", "target": "base"}, {"task": "move", "direction": "backward", "meters": 10}]}}
+{"world": "synth_007", "text": "Go at normal speed.", "plan": {"steps": [{"task": "set_speed", "speed": "normal"}]}}
+{"world": "synth_008", "text": "back to normal speed", "plan": {"steps": [{"task": "set_speed", "speed": "normal"}]}}
+{"world": "synth_009", "text": "lights off", "plan": {"steps": [{"task": "lights", "state": "off"}]}}
+{"world": "synth_010", "text": "uh come over here and then go read the gauges over at network cabinet", "plan": {"steps": [{"task": "come_here"}, {"task": "inspect_meter", "target": "server_rack"}]}}
+{"world": "synth_011", "text": "can you go look at foreman office", "plan": {"steps": [{"task": "inspect_visual", "target": "office"}]}}
+{"world": "synth_012", "text": "Look at the forklift.", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_013", "text": "battery is low go charge", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_014", "text": "please reverse one metre", "plan": {"steps": [{"task": "move", "direction": "backward", "meters": 1}]}}
+{"world": "synth_015", "text": "is it break time yet", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_016", "text": "could you please grab the mounting bracket", "plan": {"steps": [{"task": "pick", "object": "bracket"}]}}
+{"world": "synth_017", "text": "take a reading at parts washer", "plan": {"steps": [{"task": "inspect_meter", "target": "wash_station"}]}}
+{"world": "synth_018", "text": "come here after that walk with me and what does the meter on the overhead crane say", "plan": {"steps": [{"task": "come_here"}, {"task": "follow_me"}, {"task": "inspect_meter", "target": "overhead_crane"}]}}
+{"world": "synth_019", "text": "End the inspection round.", "plan": {"steps": [{"task": "inspection", "state": "stop"}]}}
+{"world": "synth_020", "text": "now lower arm after that end the weld", "plan": {"steps": [{"task": "arm", "state": "lower"}, {"task": "weld", "state": "stop"}]}}
+{"world": "synth_021", "text": "can you go to the chiller", "plan": {"steps": [{"task": "goto", "target": "cooling_unit"}]}}
+{"world": "synth_022", "text": "Have a look at extension cord and carry grinder over to me!", "plan": {"steps": [{"task": "look_at", "object": "extension_cord"}, {"task": "bring", "object": "grinder"}]}}
+{"world": "synth_023", "text": "finish welding", "plan": {"steps": [{"task": "weld", "state": "stop"}]}}
+{"world": "synth_024", "text": "hold your position", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_025", "text": "go home and go to the parts washer", "plan": {"steps": [{"task": "goto", "target": "base"}, {"task": "goto", "target": "wash_station"}]}}
+{"world": "synth_026", "text": "what is your battery level", "plan": {"steps": [{"task": "report", "what": "battery"}]}}
+{"world": "synth_027", "text": "how are you doing after that back to your home position then go to cleaning tank and wait there", "plan": {"steps": [{"task": "report", "what": "status"}, {"task": "goto", "target": "base"}, {"task": "goto", "target": "wash_station"}]}}
+{"world": "synth_028", "text": "walk with me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_029", "text": "Drive forward half a meters.", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 0.5}]}}
+{"world": "synth_030", "text": "go to the water tank and read the level", "plan": {"steps": [{"task": "inspect_meter", "target": "water_tank"}]}}
+{"world": "synth_031", "text": "could you please can you go to the welding station g", "plan": {"steps": [{"task": "goto", "target": "welder_g"}]}}
+{"world": "synth_032", "text": "sit down please", "plan": {"steps": [{"task": "posture", "pose": "sit"}]}}
+{"world": "synth_033", "text": "hold ladder", "plan": {"steps": [{"task": "hold", "object": "ladder"}]}}
+{"world": "synth_034", "text": "now keep following me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_035", "text": "Check the gauges at the test stand.", "plan": {"steps": [{"task": "inspect_meter", "target": "test_bench"}]}}
+{"world": "synth_036", "text": "grip it", "plan": {"steps": [{"task": "gripper", "state": "close"}]}}
+{"world": "synth_037", "text": "Come closer.", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_038", "text": "walk with me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_039", "text": "Do the thing.", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_040", "text": "do a visual check of the welding station q", "plan": {"steps": [{"task": "inspect_visual", "target": "welder_q"}]}}
+{"world": "synth_041", "text": "so go back and after that go to base", "plan": {"steps": [{"task": "go_back"}, {"task": "goto", "target": "base"}]}}
+{"world": "synth_042", "text": "Hey artaban do it.", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_043", "text": "um that weld looks good to me", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_044", "text": "read the meter", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_045", "text": "can you start inspection at parts shelf", "plan": {"steps": [{"task": "inspect_visual", "target": "storage_rack"}]}}
+{"world": "synth_046", "text": "artaban now begin inspection", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "synth_047", "text": "start the patrol", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "synth_048", "text": "we need more argon next week", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_049", "text": "stop the inspection", "plan": {"steps": [{"task": "inspection", "state": "stop"}]}}
+{"world": "synth_050", "text": "now navigate to welding station c", "plan": {"steps": [{"task": "goto", "target": "welder_c"}]}}
+{"world": "synth_051", "text": "turn up the radio", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_052", "text": "stop the weld now", "plan": {"steps": [{"task": "weld", "state": "stop"}]}}
+{"world": "synth_053", "text": "follow me please", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_054", "text": "uh head home", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_055", "text": "focus your camera on ear protection and after that check the meter on welding cell one and after that get up", "plan": {"steps": [{"task": "look_at", "object": "ear_muffs"}, {"task": "inspect_meter", "target": "welder_1"}, {"task": "posture", "pose": "stand"}]}}
+{"world": "synth_056", "text": "cancel the last task", "plan": {"steps": [{"task": "cancel"}]}}
+{"world": "synth_057", "text": "i need you to begin inspection", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "synth_058", "text": "walk to me then stand", "plan": {"steps": [{"task": "come_here"}, {"task": "posture", "pose": "stand"}]}}
+{"world": "synth_059", "text": "um go dock yourself and then what's the reading", "plan": {"steps": [{"task": "dock"}, {"task": "read_meter"}]}}
+{"world": "synth_060", "text": "back to your home position", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_061", "text": "so head over to welder number h", "plan": {"steps": [{"task": "goto", "target": "welder_h"}]}}
+{"world": "synth_062", "text": "do it", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_063", "text": "Bring bolts here!", "plan": {"steps": [{"task": "bring", "object": "bolt_box"}]}}
+{"world": "synth_064", "text": "sit down", "plan": {"steps": [{"task": "posture", "pose": "sit"}]}}
+{"world": "synth_065", "text": "are you ok", "plan": {"steps": [{"task": "report", "what": "status"}]}}
+{"world": "synth_066", "text": "back to normal speed", "plan": {"steps": [{"task": "set_speed", "speed": "normal"}]}}
+{"world": "synth_067", "text": "Get me the measuring tape.", "plan": {"steps": [{"task": "bring", "object": "tape_measure"}]}}
+{"world": "synth_068", "text": "did you see the game last night", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_069", "text": "i think it's going to rain", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_070", "text": "inspect the overhead crane", "plan": {"steps": [{"task": "inspect_visual", "target": "overhead_crane"}]}}
+{"world": "synth_071", "text": "go home then go back where you came from", "plan": {"steps": [{"task": "goto", "target": "base"}, {"task": "go_back"}]}}
+{"world": "synth_072", "text": "walk with me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_073", "text": "back to your home position", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_074", "text": "hey stay and bring me sockets", "plan": {"steps": [{"task": "wait"}, {"task": "bring", "object": "socket_set"}]}}
+{"world": "synth_075", "text": "now focus your camera on vise grip after that look at mounting bracket", "plan": {"steps": [{"task": "look_at", "object": "pliers"}, {"task": "look_at", "object": "bracket"}]}}
+{"world": "synth_076", "text": "follow me then turn around and then grip it", "plan": {"steps": [{"task": "follow_me"}, {"task": "turn", "direction": "around"}, {"task": "gripper", "state": "close"}]}}
+{"world": "synth_077", "text": "Grab sockets.", "plan": {"steps": [{"task": "pick", "object": "socket_set"}]}}
+{"world": "synth_078", "text": "grip it", "plan": {"steps": [{"task": "gripper", "state": "close"}]}}
+{"world": "synth_079", "text": "pick a pizza up", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_000", "text": "so grab the socket set and after that get up", "plan": {"steps": [{"task": "pick", "object": "socket_set"}, {"task": "posture", "pose": "stand"}]}}
+{"world": "synth_001", "text": "hey tag along with me and then go stand next to welding cell e", "plan": {"steps": [{"task": "follow_me"}, {"task": "goto", "target": "welder_e"}]}}
+{"world": "synth_002", "text": "can you check welding station fifty for damage", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_003", "text": "fetch my jacket", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_004", "text": "head to the charging dock", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_005", "text": "hand me cleaning cloth and focus your camera on the wire brush", "plan": {"steps": [{"task": "bring", "object": "rag"}, {"task": "look_at", "object": "wire_brush"}]}}
+{"world": "synth_006", "text": "uh go stand next to welder number 8", "plan": {"steps": [{"task": "goto", "target": "welder_8"}]}}
+{"world": "synth_007", "text": "return home", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_008", "text": "Start the patrol!", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "synth_009", "text": "i need you to drive backward three meters", "plan": {"steps": [{"task": "move", "direction": "backward", "meters": 3}]}}
+{"world": "synth_010", "text": "back to the last place and back to your home position", "plan": {"steps": [{"task": "go_back"}, {"task": "goto", "target": "base"}]}}
+{"world": "synth_011", "text": "go to coating line and check the meter", "plan": {"steps": [{"task": "inspect_meter", "target": "paint_line"}]}}
+{"world": "synth_012", "text": "Walk with me after that go to exhaust fan and read the speed?", "plan": {"steps": [{"task": "follow_me"}, {"task": "inspect_meter", "target": "ventilation_fan"}]}}
+{"world": "synth_013", "text": "what's the reading", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_014", "text": "Uh head to the charging dock.", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_015", "text": "look at the clamp", "plan": {"steps": [{"task": "look_at", "object": "clamp"}]}}
+{"world": "synth_016", "text": "begin inspection", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "synth_017", "text": "Can you um.", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_018", "text": "hand me the forklift", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_019", "text": "pick the printer up", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_020", "text": "move back ten meters", "plan": {"steps": [{"task": "move", "direction": "backward", "meters": 10}]}}
+{"world": "synth_021", "text": "so return to your previous spot and then stop the weld now then go recharge your battery", "plan": {"steps": [{"task": "go_back"}, {"task": "weld", "state": "stop"}, {"task": "dock"}]}}
+{"world": "synth_022", "text": "hey have a look at the clamp", "plan": {"steps": [{"task": "look_at", "object": "clamp"}]}}
+{"world": "synth_023", "text": "head over to parts washer after that back up two meters", "plan": {"steps": [{"task": "goto", "target": "wash_station"}, {"task": "move", "direction": "backward", "meters": 2}]}}
+{"world": "synth_024", "text": "Get yourself to parking lot.", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_025", "text": "can you see the extension cord", "plan": {"steps": [{"task": "look_at", "object": "extension_cord"}]}}
+{"world": "synth_026", "text": "go to the charger", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_027", "text": "come over here then walk with me", "plan": {"steps": [{"task": "come_here"}, {"task": "follow_me"}]}}
+{"world": "synth_028", "text": "slow down please", "plan": {"steps": [{"task": "set_speed", "speed": "slow"}]}}
+{"world": "synth_029", "text": "do a visual check of conference room", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_030", "text": "Point your camera at drill.", "plan": {"steps": [{"task": "look_at", "object": "drill"}]}}
+{"world": "synth_031", "text": "hey go stand next to welding station one", "plan": {"steps": [{"task": "goto", "target": "welder_1"}]}}
+{"world": "synth_032", "text": "no don't", "plan": {"steps": [{"task": "confirm", "answer": "no"}]}}
+{"world": "synth_033", "text": "return to base", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_034", "text": "Artaban can you go to pump room.", "plan": {"steps": [{"task": "goto", "target": "pump_room"}]}}
+{"world": "synth_035", "text": "go back to base", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_036", "text": "Point your camera at power cable!", "plan": {"steps": [{"task": "look_at", "object": "extension_cord"}]}}
+{"world": "synth_037", "text": "go to the water chiller and check the meter", "plan": {"steps": [{"task": "inspect_meter", "target": "cooling_unit"}]}}
+{"world": "synth_038", "text": "Check the meter?", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_039", "text": "go read the gauges over at the welding device j", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_j"}]}}
+{"world": "synth_040", "text": "stand", "plan": {"steps": [{"task": "posture", "pose": "stand"}]}}
+{"world": "synth_041", "text": "go charge yourself up", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_042", "text": "could you please look at the power cable please", "plan": {"steps": [{"task": "look_at", "object": "extension_cord"}]}}
+{"world": "synth_043", "text": "come here please", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_044", "text": "now return to your previous spot", "plan": {"steps": [{"task": "go_back"}]}}
+{"world": "synth_045", "text": "Focus your camera on ear protection.", "plan": {"steps": [{"task": "look_at", "object": "ear_muffs"}]}}
+{"world": "synth_046", "text": "move back one and a half meters", "plan": {"steps": [{"task": "move", "direction": "backward", "meters": 1.5}]}}
+{"world": "synth_047", "text": "no that's wrong", "plan": {"steps": [{"task": "confirm", "answer": "no"}]}}
+{"world": "synth_048", "text": "spin around and drive forward five meters", "plan": {"steps": [{"task": "turn", "direction": "around"}, {"task": "move", "direction": "forward", "meters": 5}]}}
+{"world": "synth_049", "text": "follow me please", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_050", "text": "I need you to look over conference room for problems.", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_051", "text": "Hold on to the fire blanket?", "plan": {"steps": [{"task": "hold", "object": "fire_blanket"}]}}
+{"world": "synth_052", "text": "battery is low go charge and then do a visual check of the storage rack", "plan": {"steps": [{"task": "dock"}, {"task": "inspect_visual", "target": "storage_rack"}]}}
+{"world": "synth_053", "text": "back to your home position", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_054", "text": "we need more argon next week", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_055", "text": "Focus your camera on the marker.", "plan": {"steps": [{"task": "look_at", "object": "marker"}]}}
+{"world": "synth_056", "text": "artaban go dock yourself", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_057", "text": "okay go faster", "plan": {"steps": [{"task": "set_speed", "speed": "fast"}]}}
+{"world": "synth_058", "text": "lunch is at twelve", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_059", "text": "what does the meter on boiler room say", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_060", "text": "go stand next to the press", "plan": {"steps": [{"task": "goto", "target": "hydraulic_press"}]}}
+{"world": "synth_061", "text": "i think it's going to rain", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_062", "text": "i need you to focus your camera on ear muffs", "plan": {"steps": [{"task": "look_at", "object": "ear_muffs"}]}}
+{"world": "synth_063", "text": "can somebody call maintenance", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_064", "text": "don't move", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_065", "text": "get me power drill", "plan": {"steps": [{"task": "bring", "object": "drill"}]}}
+{"world": "synth_066", "text": "Go read the gauges over at welder number three.", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_3"}]}}
+{"world": "synth_067", "text": "stop the weld now", "plan": {"steps": [{"task": "weld", "state": "stop"}]}}
+{"world": "synth_068", "text": "uh go charge", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_069", "text": "so get yourself to packing station", "plan": {"steps": [{"task": "goto", "target": "packing_station"}]}}
+{"world": "synth_070", "text": "Bring torch light here!", "plan": {"steps": [{"task": "bring", "object": "flashlight"}]}}
+{"world": "synth_071", "text": "Finish your rounds.", "plan": {"steps": [{"task": "inspection", "state": "stop"}]}}
+{"world": "synth_072", "text": "go over by weld station v", "plan": {"steps": [{"task": "goto", "target": "welder_v"}]}}
+{"world": "synth_073", "text": "tag along with me then go to it closet and wait there", "plan": {"steps": [{"task": "follow_me"}, {"task": "goto", "target": "server_rack"}]}}
+{"world": "synth_074", "text": "Please how are you doing!", "plan": {"steps": [{"task": "report", "what": "status"}]}}
+{"world": "synth_075", "text": "pick up file", "plan": {"steps": [{"task": "pick", "object": "file"}]}}
+{"world": "synth_076", "text": "How are you doing.", "plan": {"steps": [{"task": "report", "what": "status"}]}}
+{"world": "synth_077", "text": "go look at the fume extractor", "plan": {"steps": [{"task": "inspect_visual", "target": "ventilation_fan"}]}}
+{"world": "synth_078", "text": "tag along with me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_079", "text": "Did you see game last night!", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_000", "text": "could you please give me a status update", "plan": {"steps": [{"task": "report", "what": "status"}]}}
+{"world": "synth_001", "text": "you need a recharge go dock", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_002", "text": "Now come to me.", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_003", "text": "show me grease gun and after that wait here after that check the meter", "plan": {"steps": [{"task": "look_at", "object": "grease_gun"}, {"task": "wait"}, {"task": "read_meter"}]}}
+{"world": "synth_004", "text": "tell me your battery", "plan": {"steps": [{"task": "report", "what": "battery"}]}}
+{"world": "synth_005", "text": "so get over here and walk with me", "plan": {"steps": [{"task": "come_here"}, {"task": "follow_me"}]}}
+{"world": "synth_006", "text": "okay yes confirm", "plan": {"steps": [{"task": "confirm", "answer": "yes"}]}}
+{"world": "synth_007", "text": "go over by the test stand", "plan": {"steps": [{"task": "goto", "target": "test_bench"}]}}
+{"world": "synth_008", "text": "please look at drill please", "plan": {"steps": [{"task": "look_at", "object": "drill"}]}}
+{"world": "synth_009", "text": "i need you at powder coater after that tag along with me", "plan": {"steps": [{"task": "goto", "target": "paint_line"}, {"task": "follow_me"}]}}
+{"world": "synth_010", "text": "head to welling device s please", "plan": {"steps": [{"task": "goto", "target": "welder_s"}]}}
+{"world": "synth_011", "text": "come to where i am", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_012", "text": "hey walk to me", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_013", "text": "my shift ends at five", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_014", "text": "face right", "plan": {"steps": [{"task": "turn", "direction": "right"}]}}
+{"world": "synth_015", "text": "point your camera at the clamp", "plan": {"steps": [{"task": "look_at", "object": "clamp"}]}}
+{"world": "synth_016", "text": "do a visual check of cut off saw", "plan": {"steps": [{"task": "inspect_visual", "target": "saw"}]}}
+{"world": "synth_017", "text": "hey artaban the boss is coming tomorrow", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_018", "text": "take bolts", "plan": {"steps": [{"task": "pick", "object": "bolt_box"}]}}
+{"world": "synth_019", "text": "take a reading at welding station f", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_f"}]}}
+{"world": "synth_020", "text": "hey artaban start inspection at the mezzanine", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_021", "text": "artaban speed up", "plan": {"steps": [{"task": "set_speed", "speed": "fast"}]}}
+{"world": "synth_022", "text": "sit", "plan": {"steps": [{"task": "posture", "pose": "sit"}]}}
+{"world": "synth_023", "text": "can you end inspection", "plan": {"steps": [{"task": "inspection", "state": "stop"}]}}
+{"world": "synth_024", "text": "please pick the clamp up", "plan": {"steps": [{"task": "pick", "object": "clamp"}]}}
+{"world": "synth_025", "text": "go to the charger", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_026", "text": "dock", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_027", "text": "head to the charging dock", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_028", "text": "follow me please", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_029", "text": "boss is coming tomorrow", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_030", "text": "i need you to sit", "plan": {"steps": [{"task": "posture", "pose": "sit"}]}}
+{"world": "synth_031", "text": "do your inspection round", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "synth_032", "text": "focus your camera on the drill", "plan": {"steps": [{"task": "look_at", "object": "drill"}]}}
+{"world": "synth_033", "text": "walk over to the mezzanine", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_034", "text": "take a picture of hvac unit", "plan": {"steps": [{"task": "inspect_visual", "target": "hvac_unit"}]}}
+{"world": "synth_035", "text": "artaban stand", "plan": {"steps": [{"task": "posture", "pose": "stand"}]}}
+{"world": "synth_036", "text": "Arm down!", "plan": {"steps": [{"task": "arm", "state": "lower"}]}}
+{"world": "synth_037", "text": "slow down and after that go inspect the substation and after that hold vise grip", "plan": {"steps": [{"task": "set_speed", "speed": "slow"}, {"task": "inspect_visual", "target": "transformer"}, {"task": "hold", "object": "pliers"}]}}
+{"world": "synth_038", "text": "read the gauge and return to base", "plan": {"steps": [{"task": "read_meter"}, {"task": "goto", "target": "base"}]}}
+{"world": "synth_039", "text": "fetch the grease gun", "plan": {"steps": [{"task": "bring", "object": "grease_gun"}]}}
+{"world": "synth_040", "text": "walk with me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_041", "text": "Artaban go to the charging station.", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_042", "text": "bring me the printer", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_043", "text": "Bring the spirit level here.", "plan": {"steps": [{"task": "bring", "object": "level"}]}}
+{"world": "synth_044", "text": "bring the file here", "plan": {"steps": [{"task": "bring", "object": "file"}]}}
+{"world": "synth_045", "text": "Hold on to chisel.", "plan": {"steps": [{"task": "hold", "object": "chisel"}]}}
+{"world": "synth_046", "text": "check the gauges at the welding machine b", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_b"}]}}
+{"world": "synth_047", "text": "Turn to the right!", "plan": {"steps": [{"task": "turn", "direction": "right"}]}}
+{"world": "synth_048", "text": "Please slow down.", "plan": {"steps": [{"task": "set_speed", "speed": "slow"}]}}
+{"world": "synth_049", "text": "battery status and go slower", "plan": {"steps": [{"task": "report", "what": "battery"}, {"task": "set_speed", "speed": "slow"}]}}
+{"world": "synth_050", "text": "roll ahead half a meters", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 0.5}]}}
+{"world": "synth_051", "text": "Please walk over to the welding cell t!", "plan": {"steps": [{"task": "goto", "target": "welder_t"}]}}
+{"world": "synth_052", "text": "Hey correct!", "plan": {"steps": [{"task": "confirm", "answer": "yes"}]}}
+{"world": "synth_053", "text": "Walk with me.", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_054", "text": "wait for me here and then go home", "plan": {"steps": [{"task": "wait"}, {"task": "goto", "target": "base"}]}}
+{"world": "synth_055", "text": "okay check the temperature on parts washer", "plan": {"steps": [{"task": "inspect_meter", "target": "wash_station"}]}}
+{"world": "synth_056", "text": "go back to base", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_057", "text": "could you please go forward four meters then come to where i am", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 4}, {"task": "come_here"}]}}
+{"world": "synth_058", "text": "Uh what does the meter on hvac unit say!", "plan": {"steps": [{"task": "inspect_meter", "target": "hvac_unit"}]}}
+{"world": "synth_059", "text": "See if anything is wrong at the drilling machine.", "plan": {"steps": [{"task": "inspect_visual", "target": "drill_press"}]}}
+{"world": "synth_060", "text": "artaban go dock yourself", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_061", "text": "come here", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_062", "text": "battery is low go charge then come with me", "plan": {"steps": [{"task": "dock"}, {"task": "follow_me"}]}}
+{"world": "synth_063", "text": "let go and report status", "plan": {"steps": [{"task": "gripper", "state": "open"}, {"task": "report", "what": "status"}]}}
+{"world": "synth_064", "text": "Cancel that?", "plan": {"steps": [{"task": "cancel"}]}}
+{"world": "synth_065", "text": "Inspect the tank and then go to the welder number 11 for check meter.", "plan": {"steps": [{"task": "inspect_visual", "target": "water_tank"}, {"task": "inspect_meter", "target": "welder_11"}]}}
+{"world": "synth_066", "text": "read the gauge at the welding station nine", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_9"}]}}
+{"world": "synth_067", "text": "look at the tape measure please", "plan": {"steps": [{"task": "look_at", "object": "tape_measure"}]}}
+{"world": "synth_068", "text": "reverse ten meters", "plan": {"steps": [{"task": "move", "direction": "backward", "meters": 10}]}}
+{"world": "synth_069", "text": "check the voltage on welding cell v then have a look around the chiller", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_v"}, {"task": "inspect_visual", "target": "cooling_unit"}]}}
+{"world": "synth_070", "text": "Bring voltmeter here!", "plan": {"steps": [{"task": "bring", "object": "multimeter"}]}}
+{"world": "synth_071", "text": "Go to air handler and read the temperature!", "plan": {"steps": [{"task": "inspect_meter", "target": "hvac_unit"}]}}
+{"world": "synth_072", "text": "artaban finish welding after that take a reading at welding station m and stand up", "plan": {"steps": [{"task": "weld", "state": "stop"}, {"task": "inspect_meter", "target": "welder_m"}, {"task": "posture", "pose": "stand"}]}}
+{"world": "synth_073", "text": "Hey walk with me?", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_074", "text": "come closer", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_075", "text": "make your way to gantry crane after that go to the charger", "plan": {"steps": [{"task": "goto", "target": "overhead_crane"}, {"task": "dock"}]}}
+{"world": "synth_076", "text": "swing right and after that check this meter", "plan": {"steps": [{"task": "turn", "direction": "right"}, {"task": "read_meter"}]}}
+{"world": "synth_077", "text": "turn up the radio", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_078", "text": "I need you to what's the reading.", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_079", "text": "sit", "plan": {"steps": [{"task": "posture", "pose": "sit"}]}}
+{"world": "synth_000", "text": "Hey artaban take sockets.", "plan": {"steps": [{"task": "pick", "object": "socket_set"}]}}
+{"world": "synth_001", "text": "Go over by the shelving.", "plan": {"steps": [{"task": "goto", "target": "storage_rack"}]}}
+{"world": "synth_002", "text": "get up", "plan": {"steps": [{"task": "posture", "pose": "stand"}]}}
+{"world": "synth_003", "text": "tell me your battery", "plan": {"steps": [{"task": "report", "what": "battery"}]}}
+{"world": "synth_004", "text": "Forget it?", "plan": {"steps": [{"task": "cancel"}]}}
+{"world": "synth_005", "text": "do it", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_006", "text": "Read the gauge at the network cabinet.", "plan": {"steps": [{"task": "inspect_meter", "target": "server_rack"}]}}
+{"world": "synth_007", "text": "what does the meter on welder number g say and go charge", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_g"}, {"task": "dock"}]}}
+{"world": "synth_008", "text": "wait here then return to your previous spot and after that close your hand", "plan": {"steps": [{"task": "wait"}, {"task": "go_back"}, {"task": "gripper", "state": "close"}]}}
+{"world": "synth_009", "text": "Hand me steel pipe.", "plan": {"steps": [{"task": "bring", "object": "pipe"}]}}
+{"world": "synth_010", "text": "walk over to the old shed", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_011", "text": "head over to the old shed", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_012", "text": "see if anything is wrong at pillar drill", "plan": {"steps": [{"task": "inspect_visual", "target": "drill_press"}]}}
+{"world": "synth_013", "text": "see if anything is wrong at emergency exit and take a reading at the weld station r", "plan": {"steps": [{"task": "inspect_visual", "target": "exit_door"}, {"task": "inspect_meter", "target": "welder_r"}]}}
+{"world": "synth_014", "text": "drive to shelving", "plan": {"steps": [{"task": "goto", "target": "storage_rack"}]}}
+{"world": "synth_015", "text": "stay put", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_016", "text": "please what is the flow reading at the pumps", "plan": {"steps": [{"task": "inspect_meter", "target": "pump_room"}]}}
+{"world": "synth_017", "text": "start inspection at o two bottle and after that sit", "plan": {"steps": [{"task": "inspect_visual", "target": "oxygen_tank"}, {"task": "posture", "pose": "sit"}]}}
+{"world": "synth_018", "text": "close your hand", "plan": {"steps": [{"task": "gripper", "state": "close"}]}}
+{"world": "synth_019", "text": "look over overhead crane for problems", "plan": {"steps": [{"task": "inspect_visual", "target": "overhead_crane"}]}}
+{"world": "synth_020", "text": "Begin inspection then you need a recharge go dock?", "plan": {"steps": [{"task": "inspection", "state": "start"}, {"task": "dock"}]}}
+{"world": "synth_021", "text": "Return home!", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_022", "text": "How are you doing.", "plan": {"steps": [{"task": "report", "what": "status"}]}}
+{"world": "synth_023", "text": "The forklift needs new tyres!", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_024", "text": "keep following me and kill lights", "plan": {"steps": [{"task": "follow_me"}, {"task": "lights", "state": "off"}]}}
+{"world": "synth_025", "text": "drive to furnace", "plan": {"steps": [{"task": "goto", "target": "furnace"}]}}
+{"world": "synth_026", "text": "tag along with me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_027", "text": "okay finish your rounds", "plan": {"steps": [{"task": "inspection", "state": "stop"}]}}
+{"world": "synth_028", "text": "make your way to bathroom", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_029", "text": "Read the meter!", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_030", "text": "go to the hvac unit and wait there and then tag along with me", "plan": {"steps": [{"task": "goto", "target": "hvac_unit"}, {"task": "follow_me"}]}}
+{"world": "synth_031", "text": "okay the boss is coming tomorrow", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_032", "text": "look at the power drill", "plan": {"steps": [{"task": "look_at", "object": "drill"}]}}
+{"world": "synth_033", "text": "what is the amperage reading at the welding device seven", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_7"}]}}
+{"world": "synth_034", "text": "yeah do it", "plan": {"steps": [{"task": "confirm", "answer": "yes"}]}}
+{"world": "synth_035", "text": "I need you to turn to the right.", "plan": {"steps": [{"task": "turn", "direction": "right"}]}}
+{"world": "synth_036", "text": "who left the door open", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_037", "text": "artaban take a look at pliers", "plan": {"steps": [{"task": "look_at", "object": "pliers"}]}}
+{"world": "synth_038", "text": "Resume the inspection and after that look at welding gloves and after that focus your camera on angle grinder.", "plan": {"steps": [{"task": "inspection", "state": "start"}, {"task": "look_at", "object": "gloves"}, {"task": "look_at", "object": "grinder"}]}}
+{"world": "synth_039", "text": "Check the meter?", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_040", "text": "walk to me", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_041", "text": "Hold grease gun.", "plan": {"steps": [{"task": "hold", "object": "grease_gun"}]}}
+{"world": "synth_042", "text": "get me the bolts", "plan": {"steps": [{"task": "bring", "object": "bolt_box"}]}}
+{"world": "synth_043", "text": "sit down please", "plan": {"steps": [{"task": "posture", "pose": "sit"}]}}
+{"world": "synth_044", "text": "stand", "plan": {"steps": [{"task": "posture", "pose": "stand"}]}}
+{"world": "synth_045", "text": "come to me now and then go back to base and then stop the inspection", "plan": {"steps": [{"task": "come_here"}, {"task": "goto", "target": "base"}, {"task": "inspection", "state": "stop"}]}}
+{"world": "synth_046", "text": "go to welder b for check meter", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_b"}]}}
+{"world": "synth_047", "text": "tell me what the meter says", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_048", "text": "go to the side door and wait there", "plan": {"steps": [{"task": "goto", "target": "exit_door"}]}}
+{"world": "synth_049", "text": "grab checklist", "plan": {"steps": [{"task": "pick", "object": "clipboard"}]}}
+{"world": "synth_050", "text": "Carry a sandwich over to me.", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_051", "text": "did you see the game last night", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_052", "text": "come with me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_053", "text": "the boss is coming tomorrow", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_054", "text": "uh don't move and after that check truck bay for damage and over here please", "plan": {"steps": [{"task": "wait"}, {"task": "inspect_visual", "target": "forklift_bay"}, {"task": "come_here"}]}}
+{"world": "synth_055", "text": "face right", "plan": {"steps": [{"task": "turn", "direction": "right"}]}}
+{"world": "synth_056", "text": "Can somebody call maintenance!", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_057", "text": "could you please back to the last place", "plan": {"steps": [{"task": "go_back"}]}}
+{"world": "synth_058", "text": "can you check the amps on welding cell d and what is the meter showing and then sit down", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_d"}, {"task": "read_meter"}, {"task": "posture", "pose": "sit"}]}}
+{"world": "synth_059", "text": "please go inspect the drilling machine", "plan": {"steps": [{"task": "inspect_visual", "target": "drill_press"}]}}
+{"world": "synth_060", "text": "the uh", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_061", "text": "Could you please head home.", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_062", "text": "go to boiler room and wait there", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_063", "text": "Artaban head to the old shed please!", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_064", "text": "grip it", "plan": {"steps": [{"task": "gripper", "state": "close"}]}}
+{"world": "synth_065", "text": "Turn to right.", "plan": {"steps": [{"task": "turn", "direction": "right"}]}}
+{"world": "synth_066", "text": "grab checklist", "plan": {"steps": [{"task": "pick", "object": "clipboard"}]}}
+{"world": "synth_067", "text": "don't move", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_068", "text": "Check elevator meter.", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_069", "text": "check the gauge here and after that tell me the amperage on welding cell v", "plan": {"steps": [{"task": "read_meter"}, {"task": "inspect_meter", "target": "welder_v"}]}}
+{"world": "synth_070", "text": "Follow me please.", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_071", "text": "take a look at radio", "plan": {"steps": [{"task": "look_at", "object": "radio"}]}}
+{"world": "synth_072", "text": "Check gauges at welding cell m.", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_m"}]}}
+{"world": "synth_073", "text": "start your rounds", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "synth_074", "text": "Focus your camera on clipboard!", "plan": {"steps": [{"task": "look_at", "object": "clipboard"}]}}
+{"world": "synth_075", "text": "i need you to drive forward 4 meters", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 4}]}}
+{"world": "synth_076", "text": "uh go to base", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_077", "text": "okay navigate to the dumpster", "plan": {"steps": [{"task": "goto", "target": "scrap_bin"}]}}
+{"world": "synth_078", "text": "go to the charging station", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_079", "text": "move back four meters", "plan": {"steps": [{"task": "move", "direction": "backward", "meters": 4}]}}
+{"world": "synth_000", "text": "Turn on the lights.", "plan": {"steps": [{"task": "lights", "state": "on"}]}}
+{"world": "synth_001", "text": "hey where did i put my keys", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_002", "text": "how much battery do you have", "plan": {"steps": [{"task": "report", "what": "battery"}]}}
+{"world": "synth_003", "text": "walk with me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_004", "text": "take a look at the walkie talkie and after that tag along with me", "plan": {"steps": [{"task": "look_at", "object": "radio"}, {"task": "follow_me"}]}}
+{"world": "synth_005", "text": "Go at normal speed.", "plan": {"steps": [{"task": "set_speed", "speed": "normal"}]}}
+{"world": "synth_006", "text": "the new guy starts monday", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_007", "text": "hey go read the gauges over at the weld station g", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_g"}]}}
+{"world": "synth_008", "text": "come to where i am", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_009", "text": "now tell me the temperature on heat treat furnace", "plan": {"steps": [{"task": "inspect_meter", "target": "furnace"}]}}
+{"world": "synth_010", "text": "that weld looks good to me", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_011", "text": "Take a look at level.", "plan": {"steps": [{"task": "look_at", "object": "level"}]}}
+{"world": "synth_012", "text": "Can you see the pipe after that open your hand after that bring me ipad!", "plan": {"steps": [{"task": "look_at", "object": "pipe"}, {"task": "gripper", "state": "open"}, {"task": "bring", "object": "tablet"}]}}
+{"world": "synth_013", "text": "um face right and then walk with me after that grab box of bolts", "plan": {"steps": [{"task": "turn", "direction": "right"}, {"task": "follow_me"}, {"task": "pick", "object": "bolt_box"}]}}
+{"world": "synth_014", "text": "hold the bucket", "plan": {"steps": [{"task": "hold", "object": "bucket"}]}}
+{"world": "synth_015", "text": "come with me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_016", "text": "turn your lights on", "plan": {"steps": [{"task": "lights", "state": "on"}]}}
+{"world": "synth_017", "text": "stop the inspection", "plan": {"steps": [{"task": "inspection", "state": "stop"}]}}
+{"world": "synth_018", "text": "the forklift needs new tyres", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_019", "text": "battery status", "plan": {"steps": [{"task": "report", "what": "battery"}]}}
+{"world": "synth_020", "text": "could you please this coffee is terrible", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_021", "text": "stay behind me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_022", "text": "i need you to what does the meter on the welder number three say and after that hand me c clamp", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_3"}, {"task": "bring", "object": "clamp"}]}}
+{"world": "synth_023", "text": "back up 3 meters", "plan": {"steps": [{"task": "move", "direction": "backward", "meters": 3}]}}
+{"world": "synth_024", "text": "Go inspect forklift parking?", "plan": {"steps": [{"task": "inspect_visual", "target": "forklift_bay"}]}}
+{"world": "synth_025", "text": "Head over to pillar drill!", "plan": {"steps": [{"task": "goto", "target": "drill_press"}]}}
+{"world": "synth_026", "text": "go back to base", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_027", "text": "go inspect heat treat furnace", "plan": {"steps": [{"task": "inspect_visual", "target": "furnace"}]}}
+{"world": "synth_028", "text": "i need you to do it", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_029", "text": "artaban point your camera at printer", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_030", "text": "So come to me?", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_031", "text": "Please where did i put my keys.", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_032", "text": "hey artaban tell me the gas flow on weld station nine", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_9"}]}}
+{"world": "synth_033", "text": "Grab car keys.", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_034", "text": "uh stay put", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_035", "text": "fetch the tablet and after that have a look at the tape measure", "plan": {"steps": [{"task": "bring", "object": "tablet"}, {"task": "look_at", "object": "tape_measure"}]}}
+{"world": "synth_036", "text": "so check meter on the pump room after that head to welding device u please", "plan": {"steps": [{"task": "inspect_meter", "target": "pump_room"}, {"task": "goto", "target": "welder_u"}]}}
+{"world": "synth_037", "text": "what does the gauge say", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_038", "text": "Can you look at welding gloves please.", "plan": {"steps": [{"task": "look_at", "object": "gloves"}]}}
+{"world": "synth_039", "text": "Stop the weld now!", "plan": {"steps": [{"task": "weld", "state": "stop"}]}}
+{"world": "synth_040", "text": "turn off the lights", "plan": {"steps": [{"task": "lights", "state": "off"}]}}
+{"world": "synth_041", "text": "Go back to base!", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_042", "text": "uh where did i put my keys", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_043", "text": "read the gauge at weld station h", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_h"}]}}
+{"world": "synth_044", "text": "return to your previous spot", "plan": {"steps": [{"task": "go_back"}]}}
+{"world": "synth_045", "text": "Can you walk over to welder number d then turn to the right and after that stand up.", "plan": {"steps": [{"task": "goto", "target": "welder_d"}, {"task": "turn", "direction": "right"}, {"task": "posture", "pose": "stand"}]}}
+{"world": "synth_046", "text": "Return home after that check metre on weld station f.", "plan": {"steps": [{"task": "goto", "target": "base"}, {"task": "inspect_meter", "target": "welder_f"}]}}
+{"world": "synth_047", "text": "carry the fire blanket over to me and read the meter at welding cell eight for me then pick grinder up", "plan": {"steps": [{"task": "bring", "object": "fire_blanket"}, {"task": "inspect_meter", "target": "welder_8"}, {"task": "pick", "object": "grinder"}]}}
+{"world": "synth_048", "text": "Head to packing table please.", "plan": {"steps": [{"task": "goto", "target": "packing_station"}]}}
+{"world": "synth_049", "text": "focus your camera on sockets", "plan": {"steps": [{"task": "look_at", "object": "socket_set"}]}}
+{"world": "synth_050", "text": "check the meter and after that look at goggles please", "plan": {"steps": [{"task": "read_meter"}, {"task": "look_at", "object": "safety_glasses"}]}}
+{"world": "synth_051", "text": "read the meter at elevator for me", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_052", "text": "okay turn on the lights after that return to your previous spot", "plan": {"steps": [{"task": "lights", "state": "on"}, {"task": "go_back"}]}}
+{"world": "synth_053", "text": "what's the reading", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_054", "text": "Point your camera at file?", "plan": {"steps": [{"task": "look_at", "object": "file"}]}}
+{"world": "synth_055", "text": "Sit down.", "plan": {"steps": [{"task": "posture", "pose": "sit"}]}}
+{"world": "synth_056", "text": "artaban where did i put my keys", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_057", "text": "please go to the grinder station now", "plan": {"steps": [{"task": "goto", "target": "grinding_bench"}]}}
+{"world": "synth_058", "text": "What's the reading!", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_059", "text": "Um head to weld station b please.", "plan": {"steps": [{"task": "goto", "target": "welder_b"}]}}
+{"world": "synth_060", "text": "battery status", "plan": {"steps": [{"task": "report", "what": "battery"}]}}
+{"world": "synth_061", "text": "go at normal speed", "plan": {"steps": [{"task": "set_speed", "speed": "normal"}]}}
+{"world": "synth_062", "text": "hey artaban read the meter at the testing rig for me", "plan": {"steps": [{"task": "inspect_meter", "target": "test_bench"}]}}
+{"world": "synth_063", "text": "move forward one and a half meters", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 1.5}]}}
+{"world": "synth_064", "text": "return to base", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_065", "text": "come over here", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_066", "text": "hey look at a sandwich", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_067", "text": "Who left the door open.", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_068", "text": "could you please lie down", "plan": {"steps": [{"task": "posture", "pose": "lie_down"}]}}
+{"world": "synth_069", "text": "what is the meter showing", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_070", "text": "please have a look at the multimeter", "plan": {"steps": [{"task": "look_at", "object": "multimeter"}]}}
+{"world": "synth_071", "text": "Move it there.", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_072", "text": "go lie down", "plan": {"steps": [{"task": "posture", "pose": "lie_down"}]}}
+{"world": "synth_073", "text": "grab the power drill", "plan": {"steps": [{"task": "pick", "object": "drill"}]}}
+{"world": "synth_074", "text": "pick the clipboard up", "plan": {"steps": [{"task": "pick", "object": "clipboard"}]}}
+{"world": "synth_075", "text": "go read the gauges over at welding machine three", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_3"}]}}
+{"world": "synth_076", "text": "can you go to the charging station", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_077", "text": "go to base", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_078", "text": "Can you see cleaning cloth?", "plan": {"steps": [{"task": "look_at", "object": "rag"}]}}
+{"world": "synth_079", "text": "so check the gauges at welding cell r", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_r"}]}}
+{"world": "synth_000", "text": "Show me safety glasses and after that go ahead two meters!", "plan": {"steps": [{"task": "look_at", "object": "safety_glasses"}, {"task": "move", "direction": "forward", "meters": 2}]}}
+{"world": "synth_001", "text": "can you tell me your battery", "plan": {"steps": [{"task": "report", "what": "battery"}]}}
+{"world": "synth_002", "text": "stop inspection then go to welder y", "plan": {"steps": [{"task": "inspection", "state": "stop"}, {"task": "goto", "target": "welder_y"}]}}
+{"world": "synth_003", "text": "go to welding station d and read the amperage", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_d"}]}}
+{"world": "synth_004", "text": "end inspection", "plan": {"steps": [{"task": "inspection", "state": "stop"}]}}
+{"world": "synth_005", "text": "wait for me here", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_006", "text": "carry the extension cord over to me", "plan": {"steps": [{"task": "bring", "object": "extension_cord"}]}}
+{"world": "synth_007", "text": "please check the meter on it closet", "plan": {"steps": [{"task": "inspect_meter", "target": "server_rack"}]}}
+{"world": "synth_008", "text": "turn right please", "plan": {"steps": [{"task": "turn", "direction": "right"}]}}
+{"world": "synth_009", "text": "hey artaban walk to me", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_010", "text": "okay abort the task", "plan": {"steps": [{"task": "cancel"}]}}
+{"world": "synth_011", "text": "start welding", "plan": {"steps": [{"task": "weld", "state": "start"}]}}
+{"world": "synth_012", "text": "Hey go inspect welding station fifty!", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_013", "text": "Hey what does the gauge say?", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_014", "text": "turn right please after that take pail and then check the metre", "plan": {"steps": [{"task": "turn", "direction": "right"}, {"task": "pick", "object": "bucket"}, {"task": "read_meter"}]}}
+{"world": "synth_015", "text": "Follow me please!", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_016", "text": "hey don't move", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_017", "text": "can you focus your camera on the walkie talkie", "plan": {"steps": [{"task": "look_at", "object": "radio"}]}}
+{"world": "synth_018", "text": "i think it's going to rain", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_019", "text": "can you switch your lights off", "plan": {"steps": [{"task": "lights", "state": "off"}]}}
+{"world": "synth_020", "text": "so go stand next to the forklift bay and then take a look at flashlight", "plan": {"steps": [{"task": "goto", "target": "forklift_bay"}, {"task": "look_at", "object": "flashlight"}]}}
+{"world": "synth_021", "text": "Read the meter.", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_022", "text": "hey artaban turn off the lights", "plan": {"steps": [{"task": "lights", "state": "off"}]}}
+{"world": "synth_023", "text": "Battery status.", "plan": {"steps": [{"task": "report", "what": "battery"}]}}
+{"world": "synth_024", "text": "over here please", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_025", "text": "Check the gauges at welder f then go back to base.", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_f"}, {"task": "goto", "target": "base"}]}}
+{"world": "synth_026", "text": "return home and take a reading at exhaust fan", "plan": {"steps": [{"task": "goto", "target": "base"}, {"task": "inspect_meter", "target": "ventilation_fan"}]}}
+{"world": "synth_027", "text": "Hand me the angle grinder?", "plan": {"steps": [{"task": "bring", "object": "grinder"}]}}
+{"world": "synth_028", "text": "Artaban check.", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_029", "text": "hand me walkie talkie", "plan": {"steps": [{"task": "bring", "object": "radio"}]}}
+{"world": "synth_030", "text": "Uh that one!", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_031", "text": "Read the meter at the powder coater for me.", "plan": {"steps": [{"task": "inspect_meter", "target": "paint_line"}]}}
+{"world": "synth_032", "text": "end the inspection round and after that hold on to walkie talkie", "plan": {"steps": [{"task": "inspection", "state": "stop"}, {"task": "hold", "object": "radio"}]}}
+{"world": "synth_033", "text": "hey tag along with me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_034", "text": "Go charge yourself up and after that come to where i am and then swing right.", "plan": {"steps": [{"task": "dock"}, {"task": "come_here"}, {"task": "turn", "direction": "right"}]}}
+{"world": "synth_035", "text": "Fetch a sandwich!", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_036", "text": "now turn left", "plan": {"steps": [{"task": "turn", "direction": "left"}]}}
+{"world": "synth_037", "text": "Um strike an arc?", "plan": {"steps": [{"task": "weld", "state": "start"}]}}
+{"world": "synth_038", "text": "I need you at welding device u.", "plan": {"steps": [{"task": "goto", "target": "welder_u"}]}}
+{"world": "synth_039", "text": "we need more argon next week", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_040", "text": "i need you to tell me the flow on the chiller", "plan": {"steps": [{"task": "inspect_meter", "target": "cooling_unit"}]}}
+{"world": "synth_041", "text": "Come here please.", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_042", "text": "i need you at welding machine ten", "plan": {"steps": [{"task": "goto", "target": "welder_10"}]}}
+{"world": "synth_043", "text": "back to normal speed", "plan": {"steps": [{"task": "set_speed", "speed": "normal"}]}}
+{"world": "synth_044", "text": "head home", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_045", "text": "bring me ear protection", "plan": {"steps": [{"task": "bring", "object": "ear_muffs"}]}}
+{"world": "synth_046", "text": "battery status", "plan": {"steps": [{"task": "report", "what": "battery"}]}}
+{"world": "synth_047", "text": "so back to the last place", "plan": {"steps": [{"task": "go_back"}]}}
+{"world": "synth_048", "text": "wait here", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_049", "text": "can you read the meter", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_050", "text": "Um my shift ends at five!", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_051", "text": "Hold on to chisel.", "plan": {"steps": [{"task": "hold", "object": "chisel"}]}}
+{"world": "synth_052", "text": "take a reading at welding device q", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_q"}]}}
+{"world": "synth_053", "text": "stand up please", "plan": {"steps": [{"task": "posture", "pose": "stand"}]}}
+{"world": "synth_054", "text": "Go to welding machine two and check the meter and after that go inspect welding cell two?", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_2"}, {"task": "inspect_visual", "target": "welder_2"}]}}
+{"world": "synth_055", "text": "drive forward three meters and then head to the charging dock", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 3}, {"task": "dock"}]}}
+{"world": "synth_056", "text": "My shift ends at five?", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_057", "text": "go back where you came from and stop welding", "plan": {"steps": [{"task": "go_back"}, {"task": "weld", "state": "stop"}]}}
+{"world": "synth_058", "text": "normal speed and bring the walkie talkie here and then you need a recharge go dock", "plan": {"steps": [{"task": "set_speed", "speed": "normal"}, {"task": "bring", "object": "radio"}, {"task": "dock"}]}}
+{"world": "synth_059", "text": "bring me power drill", "plan": {"steps": [{"task": "bring", "object": "drill"}]}}
+{"world": "synth_060", "text": "go to welding device j", "plan": {"steps": [{"task": "goto", "target": "welder_j"}]}}
+{"world": "synth_061", "text": "stand up and then come to where i am", "plan": {"steps": [{"task": "posture", "pose": "stand"}, {"task": "come_here"}]}}
+{"world": "synth_062", "text": "get me measuring tape", "plan": {"steps": [{"task": "bring", "object": "tape_measure"}]}}
+{"world": "synth_063", "text": "could you please start welding", "plan": {"steps": [{"task": "weld", "state": "start"}]}}
+{"world": "synth_064", "text": "artaban read the gauge", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_065", "text": "Return home.", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_066", "text": "you need a recharge go dock", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_067", "text": "strike an arc", "plan": {"steps": [{"task": "weld", "state": "start"}]}}
+{"world": "synth_068", "text": "drive to the weld station e", "plan": {"steps": [{"task": "goto", "target": "welder_e"}]}}
+{"world": "synth_069", "text": "Back to normal speed.", "plan": {"steps": [{"task": "set_speed", "speed": "normal"}]}}
+{"world": "synth_070", "text": "that weld looks good to me", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_071", "text": "Let go!", "plan": {"steps": [{"task": "gripper", "state": "open"}]}}
+{"world": "synth_072", "text": "now go to the", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_073", "text": "hey artaban that weld looks good to me", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_074", "text": "hey the boss is coming tomorrow", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_075", "text": "i need you to grab metal file", "plan": {"steps": [{"task": "pick", "object": "file"}]}}
+{"world": "synth_076", "text": "look at the blue cylinder please", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_077", "text": "Artaban turn on the lights!", "plan": {"steps": [{"task": "lights", "state": "on"}]}}
+{"world": "synth_078", "text": "check", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_079", "text": "strike an arc", "plan": {"steps": [{"task": "weld", "state": "start"}]}}
+{"world": "synth_000", "text": "please lay down", "plan": {"steps": [{"task": "posture", "pose": "lie_down"}]}}
+{"world": "synth_001", "text": "Take a reading at welding station e after that i need you at welding device e.", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_e"}, {"task": "goto", "target": "welder_e"}]}}
+{"world": "synth_002", "text": "hurry up a bit", "plan": {"steps": [{"task": "set_speed", "speed": "fast"}]}}
+{"world": "synth_003", "text": "lie down", "plan": {"steps": [{"task": "posture", "pose": "lie_down"}]}}
+{"world": "synth_004", "text": "Return to base.", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_005", "text": "Could you please what does the meter on reception say.", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_006", "text": "artaban fetch grinder and then what's the reading", "plan": {"steps": [{"task": "bring", "object": "grinder"}, {"task": "read_meter"}]}}
+{"world": "synth_007", "text": "read gauge", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_008", "text": "finish welding", "plan": {"steps": [{"task": "weld", "state": "stop"}]}}
+{"world": "synth_009", "text": "make your way to cooling tower", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_010", "text": "Wait?", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_011", "text": "so go to paint line and check the meter", "plan": {"steps": [{"task": "inspect_meter", "target": "paint_line"}]}}
+{"world": "synth_012", "text": "focus your camera on ipad", "plan": {"steps": [{"task": "look_at", "object": "tablet"}]}}
+{"world": "synth_013", "text": "please turn up the radio", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_014", "text": "start the patrol", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "synth_015", "text": "can you forklift needs new tyres", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_016", "text": "um is it break time yet", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_017", "text": "kill the lights", "plan": {"steps": [{"task": "lights", "state": "off"}]}}
+{"world": "synth_018", "text": "hey please go to the chiller now", "plan": {"steps": [{"task": "goto", "target": "cooling_unit"}]}}
+{"world": "synth_019", "text": "Could you please go back.", "plan": {"steps": [{"task": "go_back"}]}}
+{"world": "synth_020", "text": "take a reading at weld station ten", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_10"}]}}
+{"world": "synth_021", "text": "drive to welder number twelve", "plan": {"steps": [{"task": "goto", "target": "welder_12"}]}}
+{"world": "synth_022", "text": "Have a look around roof.", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_023", "text": "Please come over here.", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_024", "text": "walk with me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_025", "text": "have a look at tape measure", "plan": {"steps": [{"task": "look_at", "object": "tape_measure"}]}}
+{"world": "synth_026", "text": "come here please", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_027", "text": "tell me the voltage on the welder 4", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_4"}]}}
+{"world": "synth_028", "text": "look over the grinding bench for problems", "plan": {"steps": [{"task": "inspect_visual", "target": "grinding_bench"}]}}
+{"world": "synth_029", "text": "go back please", "plan": {"steps": [{"task": "go_back"}]}}
+{"world": "synth_030", "text": "turn your lights on", "plan": {"steps": [{"task": "lights", "state": "on"}]}}
+{"world": "synth_031", "text": "can somebody call maintenance", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_032", "text": "go to the charger", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_033", "text": "what's the reading", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_034", "text": "swing left", "plan": {"steps": [{"task": "turn", "direction": "left"}]}}
+{"world": "synth_035", "text": "Okay come here?", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_036", "text": "navigate to the drill press and after that i need you at the welding machine z", "plan": {"steps": [{"task": "goto", "target": "drill_press"}, {"task": "goto", "target": "welder_z"}]}}
+{"world": "synth_037", "text": "The boss is coming tomorrow!", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_038", "text": "Stay behind me!", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_039", "text": "have a look around powder coater", "plan": {"steps": [{"task": "inspect_visual", "target": "paint_line"}]}}
+{"world": "synth_040", "text": "um report status", "plan": {"steps": [{"task": "report", "what": "status"}]}}
+{"world": "synth_041", "text": "go stand next to the forklift bay", "plan": {"steps": [{"task": "goto", "target": "forklift_bay"}]}}
+{"world": "synth_042", "text": "i need you at truck bay", "plan": {"steps": [{"task": "goto", "target": "forklift_bay"}]}}
+{"world": "synth_043", "text": "what does the meter on welding machine nine say", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_9"}]}}
+{"world": "synth_044", "text": "finish your rounds", "plan": {"steps": [{"task": "inspection", "state": "stop"}]}}
+{"world": "synth_045", "text": "stay here", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_046", "text": "Check this meter.", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_047", "text": "get me screwdriver", "plan": {"steps": [{"task": "bring", "object": "screwdriver"}]}}
+{"world": "synth_048", "text": "get over here and end the inspection round after that check the gauges at welding cell g", "plan": {"steps": [{"task": "come_here"}, {"task": "inspection", "state": "stop"}, {"task": "inspect_meter", "target": "welder_g"}]}}
+{"world": "synth_049", "text": "can you come to me now", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_050", "text": "Focus your camera on level.", "plan": {"steps": [{"task": "look_at", "object": "level"}]}}
+{"world": "synth_051", "text": "I think it's going to rain?", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_052", "text": "report status", "plan": {"steps": [{"task": "report", "what": "status"}]}}
+{"world": "synth_053", "text": "focus your camera on wire brush", "plan": {"steps": [{"task": "look_at", "object": "wire_brush"}]}}
+{"world": "synth_054", "text": "walk with me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_055", "text": "head to the cafeteria upstairs please", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_056", "text": "Check it closet for damage!", "plan": {"steps": [{"task": "inspect_visual", "target": "server_rack"}]}}
+{"world": "synth_057", "text": "that one", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_058", "text": "do a u turn", "plan": {"steps": [{"task": "turn", "direction": "around"}]}}
+{"world": "synth_059", "text": "who left the door open", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_060", "text": "So tell me the temp on substation?", "plan": {"steps": [{"task": "inspect_meter", "target": "transformer"}]}}
+{"world": "synth_061", "text": "i need you to turn left", "plan": {"steps": [{"task": "turn", "direction": "left"}]}}
+{"world": "synth_062", "text": "now take a look at the blue cylinder", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_063", "text": "let go", "plan": {"steps": [{"task": "gripper", "state": "open"}]}}
+{"world": "synth_064", "text": "lift the arm", "plan": {"steps": [{"task": "arm", "state": "lift"}]}}
+{"world": "synth_065", "text": "Get over here.", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_066", "text": "Please go to break room and hurry up a bit.", "plan": {"steps": [{"task": "goto", "target": "break_room"}, {"task": "set_speed", "speed": "fast"}]}}
+{"world": "synth_067", "text": "Start inspection at the weld station g!", "plan": {"steps": [{"task": "inspect_visual", "target": "welder_g"}]}}
+{"world": "synth_068", "text": "navigate to the smelter", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_069", "text": "Tell me the load on overhead crane.", "plan": {"steps": [{"task": "inspect_meter", "target": "overhead_crane"}]}}
+{"world": "synth_070", "text": "turn to the right", "plan": {"steps": [{"task": "turn", "direction": "right"}]}}
+{"world": "synth_071", "text": "please go back to base", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_072", "text": "Have a look at the clamp then inspect shelving.", "plan": {"steps": [{"task": "look_at", "object": "clamp"}, {"task": "inspect_visual", "target": "storage_rack"}]}}
+{"world": "synth_073", "text": "hey artaban this coffee is terrible", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_074", "text": "Stop the weld now.", "plan": {"steps": [{"task": "weld", "state": "stop"}]}}
+{"world": "synth_075", "text": "Plug yourself in!", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_076", "text": "Where did i put my keys.", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_077", "text": "focus your camera on the goggles", "plan": {"steps": [{"task": "look_at", "object": "safety_glasses"}]}}
+{"world": "synth_078", "text": "begin the weld", "plan": {"steps": [{"task": "weld", "state": "start"}]}}
+{"world": "synth_079", "text": "point your camera at the laptop", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_000", "text": "uh end the inspection round", "plan": {"steps": [{"task": "inspection", "state": "stop"}]}}
+{"world": "synth_001", "text": "wait", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_002", "text": "Uh come here.", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_003", "text": "Go dock yourself!", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_004", "text": "walk over to welding device q", "plan": {"steps": [{"task": "goto", "target": "welder_q"}]}}
+{"world": "synth_005", "text": "artaban rotate right", "plan": {"steps": [{"task": "turn", "direction": "right"}]}}
+{"world": "synth_006", "text": "are you ok", "plan": {"steps": [{"task": "report", "what": "status"}]}}
+{"world": "synth_007", "text": "start the inspection and turn to the right", "plan": {"steps": [{"task": "inspection", "state": "start"}, {"task": "turn", "direction": "right"}]}}
+{"world": "synth_008", "text": "um go back to base", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_009", "text": "pick up walkie talkie", "plan": {"steps": [{"task": "pick", "object": "radio"}]}}
+{"world": "synth_010", "text": "bring me power cable", "plan": {"steps": [{"task": "bring", "object": "extension_cord"}]}}
+{"world": "synth_011", "text": "negative", "plan": {"steps": [{"task": "confirm", "answer": "no"}]}}
+{"world": "synth_012", "text": "okay go faster", "plan": {"steps": [{"task": "set_speed", "speed": "fast"}]}}
+{"world": "synth_013", "text": "Drive to the side door?", "plan": {"steps": [{"task": "goto", "target": "exit_door"}]}}
+{"world": "synth_014", "text": "Can you hurry up a bit!", "plan": {"steps": [{"task": "set_speed", "speed": "fast"}]}}
+{"world": "synth_015", "text": "see if anything is wrong at welding device p", "plan": {"steps": [{"task": "inspect_visual", "target": "welder_p"}]}}
+{"world": "synth_016", "text": "what is the voltage reading at the weld station nine and after that raise your arm", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_9"}, {"task": "arm", "state": "lift"}]}}
+{"world": "synth_017", "text": "so get yourself to the welding machine z", "plan": {"steps": [{"task": "goto", "target": "welder_z"}]}}
+{"world": "synth_018", "text": "check the gauges at welding machine e", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_e"}]}}
+{"world": "synth_019", "text": "Go back to where you were and then come here and then bring me box of bolts.", "plan": {"steps": [{"task": "go_back"}, {"task": "come_here"}, {"task": "bring", "object": "bolt_box"}]}}
+{"world": "synth_020", "text": "battery status", "plan": {"steps": [{"task": "report", "what": "battery"}]}}
+{"world": "synth_021", "text": "Could you please take a picture of the welder twelve.", "plan": {"steps": [{"task": "inspect_visual", "target": "welder_12"}]}}
+{"world": "synth_022", "text": "now who left the door open", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_023", "text": "follow me please", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_024", "text": "the uh", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_025", "text": "hey pick up power cable", "plan": {"steps": [{"task": "pick", "object": "extension_cord"}]}}
+{"world": "synth_026", "text": "Come to where i am!", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_027", "text": "follow me please", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_028", "text": "keep holding drill", "plan": {"steps": [{"task": "hold", "object": "drill"}]}}
+{"world": "synth_029", "text": "so close the claw", "plan": {"steps": [{"task": "gripper", "state": "close"}]}}
+{"world": "synth_030", "text": "come here please", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_031", "text": "Slow down.", "plan": {"steps": [{"task": "set_speed", "speed": "slow"}]}}
+{"world": "synth_032", "text": "go to hvac unit and read the temp", "plan": {"steps": [{"task": "inspect_meter", "target": "hvac_unit"}]}}
+{"world": "synth_033", "text": "Roll ahead ten meters after that face left!", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 10}, {"task": "turn", "direction": "left"}]}}
+{"world": "synth_034", "text": "Go ahead five meters after that check the gauges at the welder number one.", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 5}, {"task": "inspect_meter", "target": "welder_1"}]}}
+{"world": "synth_035", "text": "okay stay behind me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_036", "text": "Take a reading at pump room and then inspect welder s!", "plan": {"steps": [{"task": "inspect_meter", "target": "pump_room"}, {"task": "inspect_visual", "target": "welder_s"}]}}
+{"world": "synth_037", "text": "do a visual check of the packing table", "plan": {"steps": [{"task": "inspect_visual", "target": "packing_station"}]}}
+{"world": "synth_038", "text": "hey get up", "plan": {"steps": [{"task": "posture", "pose": "stand"}]}}
+{"world": "synth_039", "text": "take grease gun", "plan": {"steps": [{"task": "pick", "object": "grease_gun"}]}}
+{"world": "synth_040", "text": "uh can you see the fire blanket", "plan": {"steps": [{"task": "look_at", "object": "fire_blanket"}]}}
+{"world": "synth_041", "text": "cancel that", "plan": {"steps": [{"task": "cancel"}]}}
+{"world": "synth_042", "text": "go to cleaning tank and check the meter", "plan": {"steps": [{"task": "inspect_meter", "target": "wash_station"}]}}
+{"world": "synth_043", "text": "can you plug yourself in", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_044", "text": "The boss is coming tomorrow!", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_045", "text": "drive forward two meters", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 2}]}}
+{"world": "synth_046", "text": "i need you to grip it", "plan": {"steps": [{"task": "gripper", "state": "close"}]}}
+{"world": "synth_047", "text": "please go inspect welding station fifty", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_048", "text": "Now fetch pipe?", "plan": {"steps": [{"task": "bring", "object": "pipe"}]}}
+{"world": "synth_049", "text": "go inspect boiler room", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_050", "text": "report status", "plan": {"steps": [{"task": "report", "what": "status"}]}}
+{"world": "synth_051", "text": "bring me a sandwich", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_052", "text": "okay read the meter", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_053", "text": "look at steel pipe please", "plan": {"steps": [{"task": "look_at", "object": "pipe"}]}}
+{"world": "synth_054", "text": "okay do it", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_055", "text": "please inspect elevator", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_056", "text": "Check the meter on welding cell two?", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_2"}]}}
+{"world": "synth_057", "text": "I need you to hurry up a bit.", "plan": {"steps": [{"task": "set_speed", "speed": "fast"}]}}
+{"world": "synth_058", "text": "hey go stand next to the smelter", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_059", "text": "i need you to lay down", "plan": {"steps": [{"task": "posture", "pose": "lie_down"}]}}
+{"world": "synth_060", "text": "what is the meter showing", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_061", "text": "resume the inspection", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "synth_062", "text": "come to where i am", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_063", "text": "go forward three meters", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 3}]}}
+{"world": "synth_064", "text": "Dock then have a look around the server rack and roll ahead one meter.", "plan": {"steps": [{"task": "dock"}, {"task": "inspect_visual", "target": "server_rack"}, {"task": "move", "direction": "forward", "meters": 1}]}}
+{"world": "synth_065", "text": "i need you at the tank", "plan": {"steps": [{"task": "goto", "target": "water_tank"}]}}
+{"world": "synth_066", "text": "go to boiler room for check meter", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_067", "text": "are you ok and then open the gripper", "plan": {"steps": [{"task": "report", "what": "status"}, {"task": "gripper", "state": "open"}]}}
+{"world": "synth_068", "text": "head to cooling tower please", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_069", "text": "take a reading at the weld station v", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_v"}]}}
+{"world": "synth_070", "text": "can you turn left please then go to pump room for check meter", "plan": {"steps": [{"task": "turn", "direction": "left"}, {"task": "inspect_meter", "target": "pump_room"}]}}
+{"world": "synth_071", "text": "what is the pressure reading at press line then turn off the lights and point your camera at the walkie talkie", "plan": {"steps": [{"task": "inspect_meter", "target": "hydraulic_press"}, {"task": "lights", "state": "off"}, {"task": "look_at", "object": "radio"}]}}
+{"world": "synth_072", "text": "Look at bolts please.", "plan": {"steps": [{"task": "look_at", "object": "bolt_box"}]}}
+{"world": "synth_073", "text": "wait", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_074", "text": "take the grease gun and read the dial", "plan": {"steps": [{"task": "pick", "object": "grease_gun"}, {"task": "read_meter"}]}}
+{"world": "synth_075", "text": "where did i put my keys", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_076", "text": "Over there?", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_077", "text": "Read the meter at the weld station p for me.", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_p"}]}}
+{"world": "synth_078", "text": "Go to the charging station!", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_079", "text": "now yes", "plan": {"steps": [{"task": "confirm", "answer": "yes"}]}}
+{"world": "synth_000", "text": "could you please what does the gauge say", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_001", "text": "the boss is coming tomorrow", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_002", "text": "Check the voltage on welding machine e?", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_e"}]}}
+{"world": "synth_003", "text": "now arm up", "plan": {"steps": [{"task": "arm", "state": "lift"}]}}
+{"world": "synth_004", "text": "fetch the cleaning cloth", "plan": {"steps": [{"task": "bring", "object": "rag"}]}}
+{"world": "synth_005", "text": "Take measuring tape and after that go stand next to welder number m.", "plan": {"steps": [{"task": "pick", "object": "tape_measure"}, {"task": "goto", "target": "welder_m"}]}}
+{"world": "synth_006", "text": "Over here please.", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_007", "text": "do it", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_008", "text": "can you what is your battery level", "plan": {"steps": [{"task": "report", "what": "battery"}]}}
+{"world": "synth_009", "text": "Take a look at torque wrench?", "plan": {"steps": [{"task": "look_at", "object": "torque_wrench"}]}}
+{"world": "synth_010", "text": "my shift ends at five", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_011", "text": "forget it", "plan": {"steps": [{"task": "cancel"}]}}
+{"world": "synth_012", "text": "Raise your arm.", "plan": {"steps": [{"task": "arm", "state": "lift"}]}}
+{"world": "synth_013", "text": "walk over to paint line", "plan": {"steps": [{"task": "goto", "target": "paint_line"}]}}
+{"world": "synth_014", "text": "take a reading at weld station v", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_v"}]}}
+{"world": "synth_015", "text": "go sit", "plan": {"steps": [{"task": "posture", "pose": "sit"}]}}
+{"world": "synth_016", "text": "artaban what does the meter on the smelter say", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_017", "text": "close claw", "plan": {"steps": [{"task": "gripper", "state": "close"}]}}
+{"world": "synth_018", "text": "can you fetch bolts", "plan": {"steps": [{"task": "bring", "object": "bolt_box"}]}}
+{"world": "synth_019", "text": "go to the charger and keep following me and after that go back to base", "plan": {"steps": [{"task": "dock"}, {"task": "follow_me"}, {"task": "goto", "target": "base"}]}}
+{"world": "synth_020", "text": "keep holding the pail", "plan": {"steps": [{"task": "hold", "object": "bucket"}]}}
+{"world": "synth_021", "text": "Show me extension cord.", "plan": {"steps": [{"task": "look_at", "object": "extension_cord"}]}}
+{"world": "synth_022", "text": "turn to the right and what is the current reading at the weld station m", "plan": {"steps": [{"task": "turn", "direction": "right"}, {"task": "inspect_meter", "target": "welder_m"}]}}
+{"world": "synth_023", "text": "point your camera at fire blanket", "plan": {"steps": [{"task": "look_at", "object": "fire_blanket"}]}}
+{"world": "synth_024", "text": "what does the meter on bathroom say", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_025", "text": "can you walk over to welding machine 10", "plan": {"steps": [{"task": "goto", "target": "welder_10"}]}}
+{"world": "synth_026", "text": "drive backward one meter", "plan": {"steps": [{"task": "move", "direction": "backward", "meters": 1}]}}
+{"world": "synth_027", "text": "um check welding station 4 meter", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_4"}]}}
+{"world": "synth_028", "text": "Close the claw.", "plan": {"steps": [{"task": "gripper", "state": "close"}]}}
+{"world": "synth_029", "text": "where did i put my keys", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_030", "text": "don't move", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_031", "text": "i need you to please go to the weld station one now", "plan": {"steps": [{"task": "goto", "target": "welder_1"}]}}
+{"world": "synth_032", "text": "okay check the shipping door for damage", "plan": {"steps": [{"task": "inspect_visual", "target": "loading_dock"}]}}
+{"world": "synth_033", "text": "uh drive forward four meters", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 4}]}}
+{"world": "synth_034", "text": "Over here please.", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_035", "text": "can you head to the charging dock", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_036", "text": "go look at the hvac unit", "plan": {"steps": [{"task": "inspect_visual", "target": "hvac_unit"}]}}
+{"world": "synth_037", "text": "keep following me", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_038", "text": "check the cafeteria upstairs meter", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_039", "text": "what's the reading", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_040", "text": "read this gauge for me", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_041", "text": "Have a look around welding device p?", "plan": {"steps": [{"task": "inspect_visual", "target": "welder_p"}]}}
+{"world": "synth_042", "text": "now get me the pliers", "plan": {"steps": [{"task": "bring", "object": "pliers"}]}}
+{"world": "synth_043", "text": "could you please sit", "plan": {"steps": [{"task": "posture", "pose": "sit"}]}}
+{"world": "synth_044", "text": "so come here", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_045", "text": "so come to me", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_046", "text": "read the gauge at welding machine b then take a seat", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_b"}, {"task": "posture", "pose": "sit"}]}}
+{"world": "synth_047", "text": "artaban go to the charger and can you see angle grinder", "plan": {"steps": [{"task": "dock"}, {"task": "look_at", "object": "grinder"}]}}
+{"world": "synth_048", "text": "who left the door open", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_049", "text": "show me a pizza", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_050", "text": "Get over here.", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_051", "text": "can you see box of bolts", "plan": {"steps": [{"task": "look_at", "object": "bolt_box"}]}}
+{"world": "synth_052", "text": "face other way", "plan": {"steps": [{"task": "turn", "direction": "around"}]}}
+{"world": "synth_053", "text": "rotate right", "plan": {"steps": [{"task": "turn", "direction": "right"}]}}
+{"world": "synth_054", "text": "lift your arm up", "plan": {"steps": [{"task": "arm", "state": "lift"}]}}
+{"world": "synth_055", "text": "We need more argon next week?", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_056", "text": "so take a reading at cooling tower", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_057", "text": "is it break time yet", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_058", "text": "now read the meter", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_059", "text": "begin the inspection round after that turn to the left", "plan": {"steps": [{"task": "inspection", "state": "start"}, {"task": "turn", "direction": "left"}]}}
+{"world": "synth_060", "text": "Look at the laptop.", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_061", "text": "begin the inspection round", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "synth_062", "text": "check the gauges at the weld station four", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_4"}]}}
+{"world": "synth_063", "text": "Hey take the blue cylinder?", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_064", "text": "Um go ahead three meters?", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 3}]}}
+{"world": "synth_065", "text": "walk to me", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_066", "text": "head to the charging dock", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_067", "text": "go to the charger", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_068", "text": "Get yourself to welding cell e!", "plan": {"steps": [{"task": "goto", "target": "welder_e"}]}}
+{"world": "synth_069", "text": "Could you please can somebody call maintenance.", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_070", "text": "rotate right", "plan": {"steps": [{"task": "turn", "direction": "right"}]}}
+{"world": "synth_071", "text": "follow me please", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_072", "text": "where did i put my keys", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_073", "text": "Artaban go stand next to medical kit and go recharge your battery?", "plan": {"steps": [{"task": "goto", "target": "first_aid"}, {"task": "dock"}]}}
+{"world": "synth_074", "text": "Please start inspection at the network cabinet!", "plan": {"steps": [{"task": "inspect_visual", "target": "server_rack"}]}}
+{"world": "synth_075", "text": "what is the level reading at the tank", "plan": {"steps": [{"task": "inspect_meter", "target": "water_tank"}]}}
+{"world": "synth_076", "text": "Please go to weld station y now!", "plan": {"steps": [{"task": "goto", "target": "welder_y"}]}}
+{"world": "synth_077", "text": "hey artaban start your rounds", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "synth_078", "text": "pause the inspection and make your way to the chiller", "plan": {"steps": [{"task": "inspection", "state": "stop"}, {"task": "goto", "target": "cooling_unit"}]}}
+{"world": "synth_079", "text": "walk to me", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_000", "text": "okay go slower and after that finish welding", "plan": {"steps": [{"task": "set_speed", "speed": "slow"}, {"task": "weld", "state": "stop"}]}}
+{"world": "synth_001", "text": "hold your position", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_002", "text": "Now turn up the radio!", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_003", "text": "finish your rounds", "plan": {"steps": [{"task": "inspection", "state": "stop"}]}}
+{"world": "synth_004", "text": "bring sockets here", "plan": {"steps": [{"task": "bring", "object": "socket_set"}]}}
+{"world": "synth_005", "text": "did you see game last night", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_006", "text": "what's the reading", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_007", "text": "hold grease gun", "plan": {"steps": [{"task": "hold", "object": "grease_gun"}]}}
+{"world": "synth_008", "text": "Turn off the lights.", "plan": {"steps": [{"task": "lights", "state": "off"}]}}
+{"world": "synth_009", "text": "go to press line", "plan": {"steps": [{"task": "goto", "target": "hydraulic_press"}]}}
+{"world": "synth_010", "text": "start the weld", "plan": {"steps": [{"task": "weld", "state": "start"}]}}
+{"world": "synth_011", "text": "read the display", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_012", "text": "Affirmative.", "plan": {"steps": [{"task": "confirm", "answer": "yes"}]}}
+{"world": "synth_013", "text": "So hold on to the chisel.", "plan": {"steps": [{"task": "hold", "object": "chisel"}]}}
+{"world": "synth_014", "text": "hey go inspect gantry crane", "plan": {"steps": [{"task": "inspect_visual", "target": "overhead_crane"}]}}
+{"world": "synth_015", "text": "hey artaban please fetch the extension cord", "plan": {"steps": [{"task": "bring", "object": "extension_cord"}]}}
+{"world": "synth_016", "text": "go charge", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_017", "text": "Wait.", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_018", "text": "Walk with me!", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_019", "text": "hold clipboard", "plan": {"steps": [{"task": "hold", "object": "clipboard"}]}}
+{"world": "synth_020", "text": "I think it's going to rain.", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_021", "text": "Follow me.", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_022", "text": "Follow me!", "plan": {"steps": [{"task": "follow_me"}]}}
+{"world": "synth_023", "text": "Head over to testing rig!", "plan": {"steps": [{"task": "goto", "target": "test_bench"}]}}
+{"world": "synth_024", "text": "Who left the door open.", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_025", "text": "go recharge your battery", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_026", "text": "Go look at conference room.", "plan": {"steps": [{"task": "clarify", "reason": "unknown_target"}]}}
+{"world": "synth_027", "text": "go to base", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_028", "text": "Start the patrol.", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "synth_029", "text": "so lay down", "plan": {"steps": [{"task": "posture", "pose": "lie_down"}]}}
+{"world": "synth_030", "text": "head home", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_031", "text": "go home", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_032", "text": "i need you at shipping table", "plan": {"steps": [{"task": "goto", "target": "packing_station"}]}}
+{"world": "synth_033", "text": "go to furnace and wait there", "plan": {"steps": [{"task": "goto", "target": "furnace"}]}}
+{"world": "synth_034", "text": "check the gas flow on welder number v", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_v"}]}}
+{"world": "synth_035", "text": "yes", "plan": {"steps": [{"task": "confirm", "answer": "yes"}]}}
+{"world": "synth_036", "text": "go inspect assembly station", "plan": {"steps": [{"task": "inspect_visual", "target": "assembly_line"}]}}
+{"world": "synth_037", "text": "check the meter on the chiller", "plan": {"steps": [{"task": "inspect_meter", "target": "cooling_unit"}]}}
+{"world": "synth_038", "text": "Carry welding gloves over to me?", "plan": {"steps": [{"task": "bring", "object": "gloves"}]}}
+{"world": "synth_039", "text": "Head to the charging dock.", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_040", "text": "put your arm down", "plan": {"steps": [{"task": "arm", "state": "lower"}]}}
+{"world": "synth_041", "text": "Hey roll ahead one meter and then drive backward one and a half meters!", "plan": {"steps": [{"task": "move", "direction": "forward", "meters": 1}, {"task": "move", "direction": "backward", "meters": 1.5}]}}
+{"world": "synth_042", "text": "Go back please?", "plan": {"steps": [{"task": "go_back"}]}}
+{"world": "synth_043", "text": "Pick car keys up.", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_044", "text": "Cancel?", "plan": {"steps": [{"task": "cancel"}]}}
+{"world": "synth_045", "text": "go to welding machine z", "plan": {"steps": [{"task": "goto", "target": "welder_z"}]}}
+{"world": "synth_046", "text": "over here please", "plan": {"steps": [{"task": "come_here"}]}}
+{"world": "synth_047", "text": "Um have a look around the welder t?", "plan": {"steps": [{"task": "inspect_visual", "target": "welder_t"}]}}
+{"world": "synth_048", "text": "What is the volts reading at the test stand.", "plan": {"steps": [{"task": "inspect_meter", "target": "test_bench"}]}}
+{"world": "synth_049", "text": "Bring tape measure here?", "plan": {"steps": [{"task": "bring", "object": "tape_measure"}]}}
+{"world": "synth_050", "text": "wait here", "plan": {"steps": [{"task": "wait"}]}}
+{"world": "synth_051", "text": "go back home and then follow me please", "plan": {"steps": [{"task": "goto", "target": "base"}, {"task": "follow_me"}]}}
+{"world": "synth_052", "text": "Stop patrolling and after that what does gauge say.", "plan": {"steps": [{"task": "inspection", "state": "stop"}, {"task": "read_meter"}]}}
+{"world": "synth_053", "text": "over there", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_054", "text": "go over by the oven and then go slower", "plan": {"steps": [{"task": "goto", "target": "furnace"}, {"task": "set_speed", "speed": "slow"}]}}
+{"world": "synth_055", "text": "Please hand me fire blanket.", "plan": {"steps": [{"task": "bring", "object": "fire_blanket"}]}}
+{"world": "synth_056", "text": "come closer then go to welding cell t and read the volts after that dock", "plan": {"steps": [{"task": "come_here"}, {"task": "inspect_meter", "target": "welder_t"}, {"task": "dock"}]}}
+{"world": "synth_057", "text": "could you please is it break time yet", "plan": {"steps": [{"task": "none"}]}}
+{"world": "synth_058", "text": "Could you please you need a recharge go dock.", "plan": {"steps": [{"task": "dock"}]}}
+{"world": "synth_059", "text": "tell me the gas flow on welder number b", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_b"}]}}
+{"world": "synth_060", "text": "hey artaban do the thing", "plan": {"steps": [{"task": "clarify", "reason": "unclear"}]}}
+{"world": "synth_061", "text": "End the inspections round!", "plan": {"steps": [{"task": "inspection", "state": "stop"}]}}
+{"world": "synth_062", "text": "grab coffee mug", "plan": {"steps": [{"task": "clarify", "reason": "unknown_object"}]}}
+{"world": "synth_063", "text": "look at box of bolts please", "plan": {"steps": [{"task": "look_at", "object": "bolt_box"}]}}
+{"world": "synth_064", "text": "keep following me and then read gauge at the welding station j", "plan": {"steps": [{"task": "follow_me"}, {"task": "inspect_meter", "target": "welder_j"}]}}
+{"world": "synth_065", "text": "go to air handler and check the meter then what does the meter on welding device g say", "plan": {"steps": [{"task": "inspect_meter", "target": "hvac_unit"}, {"task": "inspect_meter", "target": "welder_g"}]}}
+{"world": "synth_066", "text": "go faster", "plan": {"steps": [{"task": "set_speed", "speed": "fast"}]}}
+{"world": "synth_067", "text": "please go to welding device 9 now then head over to the forklift parking", "plan": {"steps": [{"task": "goto", "target": "welder_9"}, {"task": "goto", "target": "forklift_bay"}]}}
+{"world": "synth_068", "text": "start patrol", "plan": {"steps": [{"task": "inspection", "state": "start"}]}}
+{"world": "synth_069", "text": "hey artaban take a look at sockets", "plan": {"steps": [{"task": "look_at", "object": "socket_set"}]}}
+{"world": "synth_070", "text": "get me the fire blanket", "plan": {"steps": [{"task": "bring", "object": "fire_blanket"}]}}
+{"world": "synth_071", "text": "what is the volts reading at the welding device nine", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_9"}]}}
+{"world": "synth_072", "text": "turn right", "plan": {"steps": [{"task": "turn", "direction": "right"}]}}
+{"world": "synth_073", "text": "Go back to base and then can you see the clipboard.", "plan": {"steps": [{"task": "goto", "target": "base"}, {"task": "look_at", "object": "clipboard"}]}}
+{"world": "synth_074", "text": "Uh check gauges at the welding device n!", "plan": {"steps": [{"task": "inspect_meter", "target": "welder_n"}]}}
+{"world": "synth_075", "text": "return home", "plan": {"steps": [{"task": "goto", "target": "base"}]}}
+{"world": "synth_076", "text": "read the gauge at test bench and after that follow me", "plan": {"steps": [{"task": "inspect_meter", "target": "test_bench"}, {"task": "follow_me"}]}}
+{"world": "synth_077", "text": "Check the meter.", "plan": {"steps": [{"task": "read_meter"}]}}
+{"world": "synth_078", "text": "finish your rounds", "plan": {"steps": [{"task": "inspection", "state": "stop"}]}}
+{"world": "synth_079", "text": "what is the meter showing", "plan": {"steps": [{"task": "read_meter"}]}}
