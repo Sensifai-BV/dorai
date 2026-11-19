@@ -16,7 +16,7 @@ import logging
 import threading
 import time
 
-from .models import DEFAULT_MODEL, HF_REPO, find_model, resolve_model
+from .models import DEFAULT_MODEL, HF_REPO, HF_SUBDIR, find_model, resolve_model
 from .rules import RuleParser
 from .schema import plan_schema, system_prompt
 
@@ -28,6 +28,7 @@ class RuleIntentEngine:
     model = "rules"
 
     def __init__(self, locs, objs):
+        self.last = {}           # details of the last parse(); a rule matches or not, so no confidence
         self.reload_world(locs, objs)
 
     def reload_world(self, locs, objs):
@@ -80,6 +81,7 @@ class LlamaIntentEngine:
         self.model = model_path.rsplit("/", 1)[-1]
         self.max_tokens = int(max_tokens)
         self.use_grammar = bool(use_grammar)   # Pi 4: grammar sampling costs ~1-3 s/command; validate()+guard keep it safe
+        self.last = {}                         # details of the last parse(): confidence, tokens, raw text
         self._lock = threading.Lock()                     # llama.cpp contexts are not thread-safe
         kw = {"lora_path": lora_path} if lora_path else {}
         self.llm = Llama(model_path=model_path, n_ctx=int(n_ctx), n_threads=int(n_threads),
@@ -106,10 +108,13 @@ class LlamaIntentEngine:
         with self._lock:
             self.llm.load_state(self.state)
             full = self.llm.tokenize((self.pre_txt + text + self.post_txt).encode(), add_bos=True, special=True)
-            raw, n = "", 0
+            raw, n, logps = "", 0, []
             for tok in self.llm.generate(full[len(self.pre):], temp=0.0, grammar=self.grammar if self.use_grammar else None, reset=False):
                 if tok == self.llm.token_eos() or n >= self.max_tokens:
                     break
+                if logps is not None:
+                    lp = self._token_logprob(tok)
+                    logps = None if lp is None else logps + [lp]     # all tokens or no confidence at all
                 raw += self.llm.detokenize([tok]).decode("utf-8", "ignore")
                 n += 1
                 if raw.rstrip().endswith("}") and raw.count("{") == raw.count("}"):
@@ -118,7 +123,39 @@ class LlamaIntentEngine:
             plan = json.loads(raw)
         except (ValueError, TypeError):
             plan = dict(BAD_PLAN)
+        self.last = {"raw": raw, "tokens": n, **plan_confidence(logps or [])}
         return plan, time.perf_counter() - t0
+
+    def _token_logprob(self, tok):
+        """Log-probability the model gave the token it just produced, or None if it cannot be
+        read reliably. Never raises.
+
+        The binding keeps no per-token scores unless every position's logits are requested
+        (logits_all, which costs memory), so the logits of the position that was just decoded
+        are read from the llama.cpp context while the generator is suspended at this token.
+        Decoding is greedy: without a grammar the token must be the arg-max of those logits.
+        If it is not, they are not the logits it was sampled from (a binding that works
+        differently), and None is returned rather than a wrong number."""
+        try:
+            import numpy as np
+            logits = np.ctypeslib.as_array(self.llm._ctx.get_logits(), shape=(int(self.llm.n_vocab()),)).astype(np.float64)
+            if not self.use_grammar and int(logits.argmax()) != int(tok):
+                return None
+            m = float(logits.max())
+            return float(logits[tok] - m - np.log(np.exp(logits - m).sum()))
+        except Exception:  # noqa: BLE001  logging aid only
+            return None
+
+
+def plan_confidence(logps):
+    """{"confidence", "min_token_prob"} from the per-token log-probabilities of a generated plan:
+    the geometric mean of the token probabilities (1.0 = the model saw no alternative at any
+    token) and the least certain token. Both None when no probabilities are available."""
+    if not logps:
+        return {"confidence": None, "min_token_prob": None}
+    import math
+    return {"confidence": round(math.exp(sum(logps) / len(logps)), 3),
+            "min_token_prob": round(math.exp(min(logps)), 3)}
 
 
 def make_engine(cfg, log=None):
@@ -136,6 +173,7 @@ def make_engine(cfg, log=None):
         return RuleIntentEngine(locs, objs)
     name = cfg.get("model") or DEFAULT_MODEL
     path = resolve_model(name, cfg.get("models_dir", ""), hf_repo=cfg.get("hf_repo", HF_REPO),
+                         hf_subdir=cfg.get("hf_subdir", HF_SUBDIR),
                          download=bool(cfg.get("auto_download", True)), log=log)
     if path is None:
         msg = f"intent model '{name}' not found in any models root and not downloadable"

@@ -8,7 +8,8 @@ the ``models_dir`` parameter, $DORAI_MODELS_DIR, the package's own ``models/`` d
 ``name`` may also be an absolute path, or a huggingface.co file URL.
 
 When the file is in no root, ``resolve_model`` downloads it from the Hugging Face repo
-(``hf_repo``, default sensifai/dorai-intent-model) into ``models_dir`` or ~/dorai/models,
+(``hf_repo``, default sensifai/dorai, where it lives in the folder ``hf_subdir`` =
+intent-model, next to the speech-to-text models) into ``models_dir`` or ~/dorai/models,
 resuming a partial ``.part`` file and checking the sha256 the Hub reports. A private repo
 needs $HF_TOKEN.
 """
@@ -24,7 +25,8 @@ import urllib.request
 
 DEFAULT_LORA = ""   # optional runtime adapter (slower on ARM); the default model already has it merged
 DEFAULT_MODEL = "intent-qwen35-4b-Q4_0.gguf"   # Qwen3.5-4B + dorai Artaban LoRA, merged, Q4_0 (train/)
-HF_REPO = "sensifai/dorai-intent-model"          # where DEFAULT_MODEL is published
+HF_REPO = "sensifai/dorai"                       # one Hub repo for every dorai model
+HF_SUBDIR = "intent-model"                       # the folder of that repo DEFAULT_MODEL is published in
 _HF_URL = re.compile(r"^https?://huggingface\.co/([^/]+/[^/]+)/(?:blob|resolve)/([^/]+)/(.+?)(?:\?.*)?$")
 
 
@@ -129,14 +131,16 @@ def hf_download(repo, filename, dest_dir, revision="main", log=None, chunk=1 << 
     return dest
 
 
-def resolve_model(name=DEFAULT_MODEL, models_dir="", hf_repo=HF_REPO, download=True, log=None):
+def resolve_model(name=DEFAULT_MODEL, models_dir="", hf_repo=HF_REPO, download=True, log=None,
+                  hf_subdir=HF_SUBDIR):
     """Path of the GGUF: an absolute path, a file in a models root, or - when it is in none and
     `download` is on - fetched from Hugging Face (`name` as a huggingface.co URL, else
-    `hf_repo`/`name`). None when it cannot be found or fetched."""
+    `hf_repo`/`hf_subdir`/`name`). None when it cannot be found or fetched."""
     log = log or logging.getLogger("intent_mod")
     name = (name or DEFAULT_MODEL).strip()
     m = _HF_URL.match(name)
-    repo, rev, fname = (m.group(1), m.group(2), m.group(3)) if m else (hf_repo, "main", name)
+    in_repo = "/".join(x for x in ((hf_subdir or "").strip("/"), name) if x)
+    repo, rev, fname = (m.group(1), m.group(2), m.group(3)) if m else (hf_repo, "main", in_repo)
     if not m:
         path = find_model(os.path.expanduser(name), models_dir)
         if path or os.path.isabs(os.path.expanduser(name)):

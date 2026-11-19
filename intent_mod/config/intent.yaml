@@ -9,7 +9,8 @@ intent_mod:
     use_grammar: false                          # 0.43 vs 0.63 s/command (VM, 4 threads), same accuracy; validate()+guard keep it safe
     grounding_guard: true                       # 'did you mean X?' when the plan names an unsaid place
     models_dir: ""          # extra models root searched first; downloads go here ("" = ~/dorai/models)
-    hf_repo: sensifai/dorai-intent-model        # model missing locally -> downloaded from here at startup
+    hf_repo: sensifai/dorai                     # model missing locally -> downloaded from here at startup ...
+    hf_subdir: intent-model                     # ... out of this folder of the repo
     auto_download: true                         # false: never touch the network (engine auto -> rules)
     num_threads: 2
     n_ctx: 2048

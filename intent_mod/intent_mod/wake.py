@@ -10,6 +10,8 @@ request cannot be delayed by model latency, a bad generation or a missing model.
 * ``strip_wake(text)`` -> (addressed, rest)
   Levenshtein match of the first 1-3 tokens against the wake word, tolerant to
   how the ASR spells an out-of-vocabulary name ("artiban", "art a ban", ...).
+* ``match_wake(text)`` -> the same decision with its evidence (what was heard
+  in place of the wake word and how many edits it is away), for logging.
 """
 from __future__ import annotations
 
@@ -45,13 +47,20 @@ def lev(a, b):
 
 
 # ------------------------------------------------------------------ wake word
-def strip_wake(text, wake_word="artaban", max_edits=2):
-    """(addressed, rest). ``rest`` is the normalised text after the wake word (and an
-    optional leading 'hey'/'ok'). If not addressed, ``rest`` is the normalised input."""
+def match_wake(text, wake_word="artaban", max_edits=2):
+    """The wake-word decision with its evidence, as a dict:
+
+    addressed  the first 1-3 tokens are within ``max_edits`` of the wake word
+    rest       the normalised text after the wake word (the whole text if not addressed)
+    edits      Levenshtein distance of the best candidate (None if the text is too short
+               to hold one); for an addressed utterance this is 0..max_edits
+    heard      that candidate as it was heard ("arthaban", "art a ban")
+    confidence 1 - edits / len(wake word): 1.0 exact, 0.71 at two edits of "artaban"
+    """
     toks = normalise(text).split()
     wake = normalise(wake_word).replace(" ", "")
     start = 1 if toks and toks[0] in GREETINGS else 0
-    best = None                               # (edits, n_tokens)
+    best = closest = None                     # (edits, n_tokens): accepted / nearest of any distance
     for n in (1, 2, 3):
         if start + n > len(toks):
             break
@@ -59,11 +68,23 @@ def strip_wake(text, wake_word="artaban", max_edits=2):
         if len(joined) < 4:
             continue
         d = lev(joined, wake)
+        if closest is None or d < closest[0]:
+            closest = (d, n)
         if d <= max_edits and (best is None or d < best[0]):
             best = (d, n)
-    if best is None:
-        return False, " ".join(toks)
-    return True, " ".join(toks[start + best[1]:])
+    pick = best or closest
+    out = {"addressed": best is not None, "rest": " ".join(toks[start + best[1]:] if best else toks),
+           "edits": pick[0] if pick else None,
+           "heard": " ".join(toks[start:start + pick[1]]) if pick else "",
+           "confidence": round(max(0.0, 1.0 - pick[0] / max(1, len(wake))), 2) if pick else 0.0}
+    return out
+
+
+def strip_wake(text, wake_word="artaban", max_edits=2):
+    """(addressed, rest). ``rest`` is the normalised text after the wake word (and an
+    optional leading 'hey'/'ok'). If not addressed, ``rest`` is the normalised input."""
+    m = match_wake(text, wake_word, max_edits)
+    return m["addressed"], m["rest"]
 
 
 # ----------------------------------------------------------------- stop words

@@ -455,17 +455,137 @@ def test_resolve_model_sources(tmp_path, monkeypatch):
         return os.path.join(dest, os.path.basename(fname))
     monkeypatch.setattr(models, "hf_download", fake)
     d = str(tmp_path / "dl")
-    # bare name, not installed -> hf_repo/name into models_dir
-    assert models.resolve_model("x.gguf", d, hf_repo="sensifai/dorai-intent-model") == os.path.join(d, "x.gguf")
+    # bare name, not installed -> hf_repo/hf_subdir/name into models_dir (the file itself lands in models_dir)
+    assert models.resolve_model("x.gguf", d) == os.path.join(d, "x.gguf")
+    assert models.resolve_model("x.gguf", d, hf_repo="org/other", hf_subdir="") == os.path.join(d, "x.gguf")
     # huggingface.co URL (blob or resolve) -> that repo, revision and file
-    url = "https://huggingface.co/sensifai/dorai-intent-model/blob/main/intent-qwen35-4b-Q4_0.gguf"
-    models.resolve_model(url, d)
-    assert calls == [("sensifai/dorai-intent-model", "x.gguf", d, "main"),
-                     ("sensifai/dorai-intent-model", "intent-qwen35-4b-Q4_0.gguf", d, "main")]
+    url = "https://huggingface.co/sensifai/dorai/blob/main/intent-model/intent-qwen35-4b-Q4_0.gguf"
+    assert models.resolve_model(url, d) == os.path.join(d, "intent-qwen35-4b-Q4_0.gguf")
+    assert calls == [("sensifai/dorai", "intent-model/x.gguf", d, "main"),
+                     ("org/other", "x.gguf", d, "main"),
+                     ("sensifai/dorai", "intent-model/intent-qwen35-4b-Q4_0.gguf", d, "main")]
+    assert (models.HF_REPO, models.HF_SUBDIR, models.DEFAULT_MODEL) == ("sensifai/dorai", "intent-model", "intent-qwen35-4b-Q4_0.gguf")
     # an explicit path that is missing is an error, never a download; download=False stays offline
     assert models.resolve_model(str(tmp_path / "nope.gguf"), d) is None
     assert models.resolve_model("y.gguf", d, download=False) is None
-    assert len(calls) == 2
+    assert len(calls) == 3
     # already installed -> no download
     (tmp_path / "z.gguf").write_bytes(b"x")
-    assert models.resolve_model("z.gguf", d) == str(tmp_path / "z.gguf") and len(calls) == 2
+    assert models.resolve_model("z.gguf", d) == str(tmp_path / "z.gguf") and len(calls) == 3
+    # ... also where a download of the whole Hub repo puts it: <root>/intent-model/<name>
+    (tmp_path / "intent-model").mkdir()
+    (tmp_path / "intent-model" / "w.gguf").write_bytes(b"x")
+    assert models.resolve_model("w.gguf", d) == str(tmp_path / "intent-model" / "w.gguf") and len(calls) == 3
+
+
+# ------------------------------------------------- decisions and confidence
+def test_match_wake_reports_its_evidence():
+    m = wake.match_wake("Artaban come here.")
+    assert (m["addressed"], m["rest"], m["edits"], m["heard"], m["confidence"]) == (True, "come here", 0, "artaban", 1.0)
+    m = wake.match_wake("hey Arthaban, stand up")
+    assert (m["addressed"], m["rest"], m["edits"], m["heard"]) == (True, "stand up", 1, "arthaban")
+    assert 0.8 < m["confidence"] < 0.9
+    m = wake.match_wake("art a ban turn left")
+    assert m["addressed"] and m["heard"] == "art a ban" and m["edits"] == 0
+    m = wake.match_wake("Arthabonetsoft")                      # what a recogniser made of "Artaban stop"
+    assert not m["addressed"] and m["heard"] == "arthabonetsoft" and m["edits"] > 2 and m["confidence"] < 0.3
+    assert m["rest"] == "arthabonetsoft"
+    m = wake.match_wake("go")                                  # nothing long enough to be a name
+    assert (m["addressed"], m["edits"], m["heard"], m["confidence"]) == (False, None, "", 0.0)
+    for text in ("artaban stop", "turn left", "hey artiban go to welder a", ""):
+        m = wake.match_wake(text)
+        assert (m["addressed"], m["rest"]) == wake.strip_wake(text)
+
+
+def test_plan_confidence_from_token_probabilities():
+    import math
+    from intent_mod.engine import LlamaIntentEngine, plan_confidence
+    assert plan_confidence([]) == {"confidence": None, "min_token_prob": None}
+    c = plan_confidence([math.log(0.9), math.log(0.4), math.log(1.0)])
+    assert c["min_token_prob"] == 0.4 and abs(c["confidence"] - (0.9 * 0.4) ** (1 / 3)) < 1e-3
+
+    import ctypes
+
+    class FakeLlm:                                             # logits of the position just decoded
+        def __init__(self, logits):
+            self._buf = (ctypes.c_float * len(logits))(*logits)
+            self._ctx = self
+
+        def n_vocab(self): return len(self._buf)
+        def get_logits(self): return ctypes.cast(self._buf, ctypes.POINTER(ctypes.c_float))
+
+    eng = object.__new__(LlamaIntentEngine)
+    eng.use_grammar = False
+    eng.llm = FakeLlm([0.0, math.log(3.0), 0.0, 0.0])
+    assert abs(math.exp(eng._token_logprob(1)) - 0.5) < 1e-6   # 3 / (1 + 3 + 1 + 1)
+    assert eng._token_logprob(0) is None                       # greedy decoding cannot have produced token 0
+    eng.use_grammar = True                                     # a grammar may force a token that is not the arg-max
+    assert abs(math.exp(eng._token_logprob(0)) - 1 / 6) < 1e-6
+    eng.llm = object()                                         # a binding without these internals: no confidence, no error
+    assert eng._token_logprob(1) is None
+
+
+def decisions(n):
+    return [json.loads(m) for m in n.pubs[n.p["decision_topic"]].msgs]
+
+
+def test_node_publishes_one_decision_per_transcript(make_node):
+    n = make_node(debug=True)
+    say(n, "Artaban go to welder a")            # plan (rule engine)
+    assert n.wait_idle()
+    say(n, "Arthaban, stop!")                   # stop, wake word one edit off
+    say(n, "turn left")                         # not addressed
+    say(n, "Artaban")                           # wake word only
+    say(n, "artaban go to the paint shop")      # unknown place -> asks back
+    assert n.wait_idle()
+    eng = FakeEngine({"steps": [{"task": "wait"}]})
+    eng.last = {"confidence": 0.87, "min_token_prob": 0.41}
+    n.engine = eng
+    say(n, "artaban wait")                      # plan from an engine that reports a confidence
+    assert n.wait_idle()
+    n.engine = FakeEngine({"steps": [{"task": "goto", "target": "narnia"}]})
+    say(n, "artaban go to narnia")              # invalid plan
+    assert n.wait_idle()
+
+    class Boom(FakeEngine):
+        def parse(self, text):
+            raise RuntimeError("boom")
+    n.engine = Boom()
+    say(n, "artaban go to welder a")            # engine failure
+    assert n.wait_idle()
+
+    d = decisions(n)
+    assert [x["decision"] for x in d] == ["plan", "stop", "ignored", "wake_only", "clarify", "plan", "invalid", "error"]
+    plan, stop, ignored, wake_only, clarify, plan2, invalid, error = d
+    assert plan["engine"] == "rules" and plan["command"] == "go to welder a" and plan["tasks"] == ["goto"]
+    assert plan["confidence"] is None and plan["wake_edits"] == 0 and plan["wake_confidence"] == 1.0
+    assert plan["latency_s"] is not None and plan["text"] == "Artaban go to welder a"
+    assert stop["wake_heard"] == "arthaban" and stop["wake_edits"] == 1 and stop["engine"] is None
+    assert not ignored["addressed"] and ignored["command"] is None and ignored["wake_edits"] > 2
+    assert wake_only["addressed"] and wake_only["command"] == ""
+    assert clarify["why"] == "unknown_target" and clarify["tasks"] == ["clarify"]
+    assert (plan2["engine"], plan2["confidence"], plan2["min_token_prob"]) == ("fake", 0.87, 0.41)
+    assert invalid["why"] and invalid["engine"] == "fake"
+    assert error["why"].startswith("RuntimeError") and error["command"] == "go to welder a"
+    # the plan message carries the same evidence
+    plans = [json.loads(m) for m in msgs(n, "plan_topic")]
+    assert len(plans) == 2 and plans[0]["confidence"] is None and plans[0]["wake_edits"] == 0
+    assert (plans[1]["confidence"], plans[1]["min_token_prob"]) == (0.87, 0.41)
+    # debug:=true -> one "decision" log line per transcript
+    lines = [msg for lvl, msg in n.get_logger().lines if msg.startswith("decision ")]
+    assert len(lines) == len(d)
+    assert "decision PLAN: 'Artaban go to welder a' | wake 'artaban' 0 edit(s), conf 1.00 | command 'go to welder a'" in lines[0]
+    assert "engine rules" in lines[0] and "confidence n/a" in lines[0] and "tasks ['goto']" in lines[0]
+    assert "decision STOP" in lines[1] and "wake 'arthaban' 1 edit(s)" in lines[1]
+    assert "decision IGNORED: 'turn left'" in lines[2]
+    assert "confidence 0.87 (min token 0.41)" in lines[5]
+    assert "decision ERROR" in lines[7] and "RuntimeError" in lines[7]
+
+
+def test_node_decisions_are_published_but_not_logged_without_debug(make_node):
+    n = make_node()
+    say(n, "artaban go to welder a")
+    say(n, "turn left")
+    assert n.wait_idle()
+    assert [x["decision"] for x in decisions(n)] == ["ignored", "plan"]       # the ignored one is decided at once
+    assert not [msg for lvl, msg in n.get_logger().lines if msg.startswith("decision ")]
