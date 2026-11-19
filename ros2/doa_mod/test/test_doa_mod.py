@@ -705,7 +705,7 @@ def test_node_flags_a_late_channel_on_the_topic():
 
 
 # ---------------------------------------------------------------------------
-# 10. what the simulated rooms showed (simulator/module, pyroomacoustics)
+# 10. what the simulated rooms showed (simulator/acoustic, pyroomacoustics)
 # ---------------------------------------------------------------------------
 def test_a_new_utterance_does_not_start_from_the_last_talker():
     """After a pause the first bearings must belong to who speaks now. The pool
@@ -742,3 +742,48 @@ def test_neural_gate_clears_its_state_while_nobody_speaks():
     for _ in range(gate._reset_hops * 2):
         gate(block)
     assert gate.n_resets == 3, "the state was cleared in the middle of speech"
+
+
+# ---------------------------------------------------------------------------
+# 11. the MUSIC method
+# ---------------------------------------------------------------------------
+@pytest.mark.parametrize("truth", [0.0, 45.0, 90.0, 135.0, 200.0, 270.0, 315.0])
+def test_music_recovers_synthetic_bearing(truth):
+    """Same convention as SRP: a mirrored or conjugated steering vector would
+    show here as a bearing on the wrong side."""
+    pos = dc.array_positions()
+    est = D.BearingEstimator(pos, gate=D.SpeechGate('off'), method='music')
+    for k in range(12):
+        est.push(plane_wave(truth, pos, seed=k))
+    az, sharp = est.bearing()
+    assert abs(wrap180(az - truth)) <= 3.0 and sharp > 0.3
+
+
+def test_music_is_not_captured_by_a_steady_noise_that_srp_follows():
+    """A talker from 60 deg who is loud in one frame out of four, and a steady
+    noise from 250 deg, 12 dB below the talker's loud frames. PHAT gives every
+    frame one vote, and three of four hold only the noise, so it takes the
+    bearing; MUSIC sums energy over the utterance and keeps to the talker."""
+    pos = dc.array_positions()
+    def frame(k):
+        noise = plane_wave(250.0, pos, seed=1000 + k, amp=1.0)
+        x = noise / np.sqrt(np.mean(noise ** 2)) * 0.05 * 10 ** (-12 / 20)
+        if k % 4 == 0:
+            talker = plane_wave(60.0, pos, seed=k, amp=1.0)
+            x = x + talker / np.sqrt(np.mean(talker ** 2)) * 0.05
+        return x
+    srp = D.BearingEstimator(pos, gate=D.SpeechGate('off'), method='srp_phat', avg_tc=3.0)
+    mus = D.BearingEstimator(pos, gate=D.SpeechGate('off'), method='music')
+    for k in range(40):
+        b = frame(k); srp.push(b); mus.push(b)
+    assert abs(wrap180(mus.bearing()[0] - 60.0)) <= 10.0, f"music gave {mus.bearing()[0]}"
+    assert abs(wrap180(srp.bearing()[0] - 60.0)) > 30.0, "SRP-PHAT was expected to be pulled to the noise here"
+
+
+def test_node_refuses_an_unknown_method_and_noise_subtraction_with_music():
+    rosmock.set_overrides(dict(source='topic', vad_mode='off', method='esprit'))
+    with pytest.raises(ValueError, match="method"):
+        D.DoaMod()
+    rosmock.set_overrides(dict(source='topic', vad_mode='energy', method='music', subtract_noise=True))
+    with pytest.raises(ValueError, match="subtract_noise"):
+        D.DoaMod()

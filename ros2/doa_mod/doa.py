@@ -372,7 +372,7 @@ class SpeechGate:
     Fed one continuous stream, the model goes deaf: in a reverberant or noisy
     room its state settles into "not speech" and later commands at the same
     level no longer raise the probability. Measured on 24 simulated room
-    scenes (sim/, pyroomacoustics; six commands each, 43 s): the first one or
+    scenes (simulator/acoustic, pyroomacoustics; six commands each, 43 s): the first one or
     two commands of a scene score 0.8-1.0, later ones 0.02-0.3, and 53 of 144
     commands did not produce a single speech frame -- no bearing at all for
     them. The same commands are detected (max 0.85-1.0) when the model starts
@@ -440,8 +440,102 @@ class SpeechGate:
         self._rms_hist.clear()
 
 
+class MusicPool:
+    """Bearing from the spatial covariance of an utterance (normalised MUSIC).
+
+    WHY A SECOND METHOD. Pooled SRP-PHAT whitens every frame, so a frame has
+    the same vote whether it holds a loud syllable or the gap between two.
+    Speech is loud in a minority of the frames the gate passes; a steady noise
+    from one direction (welding) is in all of them and outvotes it. Measured
+    in simulated rooms with welding 10 dB BELOW the commands, live in ROS 2:
+    every bearing pointed at the welding. MUSIC does not whiten over time: per
+    frequency bin it sums the covariance of the microphone spectra over the
+    utterance, so loud frames count by their energy, takes the strongest
+    direction of that sum as the signal, and scores a direction by how
+    orthogonal its steering vector is to the rest. A bin goes to whoever put
+    the most energy into it over the utterance, which for speech bins is the
+    talker even when the noise is present all the time.
+
+    What it does not fix: bins in which the noise has more energy than the
+    speech over the utterance still go to the noise, and every bin has one
+    vote (see normalisation below). With noise louder than the speech it is
+    no better than SRP-PHAT.
+
+    Measured (simulation, pyroomacoustics; last bearing of each command within
+    15 deg of the talker, 24 room scenes with wall materials, 1 mm / 0.5 dB
+    microphone errors, the node's own gate):
+
+                                   srp_phat   music
+        all 144 commands             75 %      83 %
+        quiet lab                   100 %     100 %
+        welding 10 dB below speech   89 %      94 %
+        welding as loud as speech    50 %      78 %
+        welding + machinery          72 %      89 %
+        welding 5 dB above speech    65 %      53 %
+
+    Each bin's spectrum is normalised to its own peak before summing
+    ("NormMUSIC"); without that a few bins dominate and it was worse than SRP
+    (69 %). Subtracting a noise covariance taken from the pauses was tried and
+    did not help (first bearing 62 % -> 54 %).
+
+    The covariance forgets with time constant `tc` so a talker who keeps
+    talking while walking is followed; the node clears it at the start of each
+    utterance. Needs more microphones than sources: 3 is the minimum, 4 leaves
+    a 3-dimensional noise subspace.
+
+    NOT validated on hardware. The srp_phat method is the one scored on the
+    2026-08-12 session; MUSIC leans on the geometry being right (it uses
+    magnitudes and phases together) and has been checked in simulation and on
+    the LOCATA recordings only.
+    """
+
+    def __init__(self, pos, fs=FS, f_lo=None, f_hi=None, tc=3.0, grid_deg=None):
+        pos = np.asarray(pos, dtype=np.float64)
+        self.grid = np.arange(0.0, 360.0, 1.0) if grid_deg is None else np.asarray(grid_deg, float)
+        freqs = np.fft.rfftfreq(BLOCK, 1.0 / fs)
+        self.band = (freqs >= (dc.F_LO if f_lo is None else f_lo)) & (freqs <= (dc.F_HI if f_hi is None else f_hi))
+        fb = freqs[self.band]
+        dirs = np.stack([np.cos(np.deg2rad(self.grid)), np.sin(np.deg2rad(self.grid))], axis=1)
+        # X_m carries phase exp(+2j*pi*f * p_m.u / c) for a source in direction
+        # u (the microphone nearer the source leads): the same convention as
+        # doa_core.srp_phat, whose pair term is X_i conj(X_j).
+        self.steer = np.exp(2j * np.pi * fb[None, :, None] * (dirs @ pos.T)[:, None, :] / dc.C_SOUND)   # [grid, bins, mics]
+        self.win = np.hanning(BLOCK)
+        self.alpha = float(np.exp(-HOP / (tc * fs))) if tc and tc > 0 else 1.0
+        self.cov = np.zeros((len(fb), pos.shape[0], pos.shape[0]), dtype=np.complex128)
+        self.n_speech = 0
+
+    def clear(self):
+        self.cov[:] = 0.0
+        self.n_speech = 0
+
+    def update(self, block):
+        """Add one speech frame [M, BLOCK]."""
+        X = np.fft.rfft(np.nan_to_num(block) * self.win[None, :], BLOCK, axis=1)[:, self.band]
+        self.cov = self.alpha * self.cov + np.einsum("mf,nf->fmn", X, np.conj(X))
+        self.n_speech += 1
+
+    def spectrum(self):
+        """Normalised spatial spectrum over the grid, in [0, 1]."""
+        if self.n_speech == 0:
+            return np.zeros(len(self.grid))
+        _, vec = np.linalg.eigh(self.cov)                         # eigenvalues ascending
+        noise = vec[:, :, :-1]                                    # all but the strongest direction
+        proj = np.einsum("gfm,fmk->gfk", np.conj(self.steer), noise)
+        ps = 1.0 / np.maximum((np.abs(proj) ** 2).sum(axis=-1), 1e-12)        # [grid, bins]
+        ps = ps / np.maximum(ps.max(axis=0, keepdims=True), 1e-30)
+        return dc.normalize_power(ps.sum(axis=1))
+
+    def bearing(self):
+        """(az_deg, sharpness), as SRPAccumulator.bearing()."""
+        p = self.spectrum()
+        if p.max() <= 0:
+            return float('nan'), 0.0
+        return float(self.grid[int(np.argmax(p))]), float(1.0 - p.mean() / p.max())
+
+
 class BearingEstimator:
-    """Frame-by-frame DoA state: VAD gate -> pooled SRP -> bearing.
+    """Frame-by-frame DoA state: VAD gate -> pooled SRP or MUSIC -> bearing.
 
     Deliberately free of ROS and of any audio device, so the exact code the
     node runs can be driven offline over recorded takes by
@@ -450,7 +544,7 @@ class BearingEstimator:
     """
 
     def __init__(self, pos, fs=FS, gate=None, avg_tc=0.5, subtract_noise=False,
-                 f_hi=None, utterance_gap_s=0.8):
+                 f_hi=None, utterance_gap_s=0.8, method='srp_phat', music_tc=3.0):
         self.pos = np.asarray(pos, dtype=np.float64)
         self.fs = int(fs)
         self.gate = gate if gate is not None else SpeechGate('off')
@@ -470,6 +564,13 @@ class BearingEstimator:
         self.acc = dc.SRPAccumulator(
             self.pos, fs=self.fs, f_hi=self.f_hi, decay=avg_tc, hop=HOP,
             subtract_noise=bool(subtract_noise))
+        self.method = str(method).lower().strip()
+        if self.method not in ('srp_phat', 'music'):
+            raise ValueError(f"method must be 'srp_phat' or 'music', got {method!r}")
+        # See MusicPool. In music mode the SRP pool is not fed (it is the
+        # costly part of a frame); its noise subtraction does not apply.
+        self.music = (MusicPool(self.pos, fs=self.fs, f_hi=self.f_hi, tc=music_tc)
+                      if self.method == 'music' else None)
         # A NEW UTTERANCE STARTS A NEW POOL. The pool only forgets while speech
         # frames arrive, so after a pause it still held the previous talker at
         # full weight, and the first bearings of the next command pointed at
@@ -508,6 +609,8 @@ class BearingEstimator:
         if active:
             if self._gap_hops and self._quiet_hops >= self._gap_hops:
                 self.acc.speech[:] = 0.0            # see __init__
+                if self.music is not None:
+                    self.music.clear()
                 self.n_utterances += 1
             self._quiet_hops = 0
         else:
@@ -516,7 +619,10 @@ class BearingEstimator:
         # Feed BOTH speech and non-speech frames: the accumulator routes them
         # to separate pools, so a stationary interferer can be subtracted.
         # Only active frames move the reported bearing.
-        self.acc.update(block, active=active)
+        if self.music is None:
+            self.acc.update(block, active=active)
+        elif active:
+            self.music.update(block)
         if active:
             self.n_speech += 1
             if consistent:
@@ -537,9 +643,10 @@ class BearingEstimator:
         dominates. It is NOT an angular confidence -- with a 64 mm aperture
         the main lobe is ~130 deg wide however good the frame is.
         """
-        if self.acc.n_speech == 0:
+        pool = self.music if self.music is not None else self.acc
+        if pool.n_speech == 0:
             return float('nan'), 0.0
-        az, sharp = self.acc.bearing()
+        az, sharp = pool.bearing()
         return (az % 360.0 if np.isfinite(az) else float('nan')), sharp
 
     @property
@@ -566,8 +673,10 @@ class TimingCheck:
         1   sample     25 / 26 / 26 us                      ~15 deg
         2   samples    51 / 51 / 52 us                      ~41 deg
 
-    The default threshold is 10 % of the largest delay the array can produce
-    (19 us on the ReSpeaker: a channel about 0.75 sample late).
+    The default threshold is 12 % of the largest delay the array can produce
+    (22 us on the ReSpeaker: a channel about 0.9 sample late). 10 % was too
+    tight: in a simulated office with the array 0.4 m from a wall the aligned
+    misfit reached 19 us in a live run and raised a false alarm.
 
     WHAT IT CANNOT SEE -- read this before trusting a pass
     * Three microphones: the three pair delays ALWAYS fit a plane wave, so
@@ -589,7 +698,7 @@ class TimingCheck:
             np.linalg.norm(pos[i] - pos[j])
             for i, j in dc.pairs_for(pos.shape[0])) / dc.C_SOUND * 1e6
         self.warn_us = (float(warn_us) if warn_us and float(warn_us) > 0
-                        else 0.10 * self.max_delay_us)
+                        else 0.12 * self.max_delay_us)
         self.min_frames = int(min_frames)
         self._hist = collections.deque(maxlen=int(window))
 
@@ -771,12 +880,19 @@ class DoaMod(Node):
         # -- estimator ------------------------------------------------------
         self.declare_parameter("avg_tc", 0.5, dyn)
         self.declare_parameter("subtract_noise", False)
+        # How the bearing is formed from the speech frames:
+        #   srp_phat  pooled SRP-PHAT (scored on the hardware session)
+        #   music     normalised MUSIC on the utterance's covariance: holds up
+        #             better against noise from one direction (see MusicPool);
+        #             simulation and LOCATA only, not validated on hardware
+        self.declare_parameter("method", "srp_phat")
+        self.declare_parameter("music_tc", 3.0, dyn)
         # A pause this long ends an utterance: the next speech starts a new
         # pool (see BearingEstimator). 0 = one pool for ever, as before.
         self.declare_parameter("utterance_gap_s", 0.8, dyn)
         # Channel-timing check (TimingCheck): median plane-wave misfit of the
-        # speech frames above which the node warns. 0 = 10 % of the largest
-        # delay the array can produce (19 us on the ReSpeaker).
+        # speech frames above which the node warns. 0 = 12 % of the largest
+        # delay the array can produce (22 us on the ReSpeaker).
         self.declare_parameter("timing_warn_us", 0.0, dyn)
 
         # -- output ---------------------------------------------------------
@@ -859,7 +975,10 @@ class DoaMod(Node):
         self.est = BearingEstimator(
             self.pos, fs=self.fs, gate=self.gate, avg_tc=avg_tc,
             subtract_noise=self.subtract_noise,
-            utterance_gap_s=float(gp("utterance_gap_s").value))
+            utterance_gap_s=float(gp("utterance_gap_s").value),
+            method=str(gp("method").value), music_tc=float(gp("music_tc").value))
+        if self.est.method == 'music' and self.subtract_noise:
+            raise ValueError("subtract_noise belongs to method 'srp_phat'; it has no effect with 'music'.")
         self.timing = TimingCheck(
             self.pos, warn_us=float(gp("timing_warn_us").value))
 
@@ -874,7 +993,7 @@ class DoaMod(Node):
             + (f"threshold={self.vad_threshold:.2f} " if self.vad_mode == 'neural'
                else f"percentile={self.vad_percentile:.0f} " if self.vad_mode == 'energy'
                else "(no gating: every frame moves the bearing) ")
-            + f"hangover={self.hangover_s*1000:.0f} ms, avg_tc={avg_tc:.2f}s, "
+            + f"method={self.est.method}, hangover={self.hangover_s*1000:.0f} ms, avg_tc={avg_tc:.2f}s, "
             f"subtract_noise={self.subtract_noise}")
         self.get_logger().warning(
             "GEOMETRY CHECK: a MIRRORED channel map is not a rotation and "

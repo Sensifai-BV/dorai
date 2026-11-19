@@ -73,7 +73,7 @@ python3 test/make_validation_figure.py  # writes doa_mod_validation.png
 
 ### In simulation and on other real recordings (2026-11-19)
 
-Simulated with `simulator/module` (pyroomacoustics), scored by
+Simulated with `simulator/acoustic` (pyroomacoustics), scored by
 `experiments/doa_benchmark.py` against pyroomacoustics' own SRP-PHAT and MUSIC,
 which are told when each command is spoken; the node detects it itself.
 
@@ -93,13 +93,37 @@ which are told when each command is spoken; the node detects it itself.
   and 0.5 dB microphone errors, a talker who moves between commands, the node's
   own gate) a MUSIC pool inside the node was only slightly better: 78 % of
   last bearings within 15° against 75 %. No estimator change was made on that
-  evidence; a whole-utterance covariance is the thing to try next.
+  evidence at first; the whole-utterance version that followed is `method:=music`, below.
 * **`subtract_noise` should stay off in rooms.** It helped in free field and
   made things worse with reverberation (65 % within 15° against 75 %).
 * Two faults found this way are fixed in the node: the neural gate going deaf
   on a long stream (`vad_reset_s`; 54 of 144 simulated commands had no bearing,
   now 1) and the first bearings of a command pointing at the previous talker
   (`utterance_gap_s`; first bearing within 15°: 17 % -> 62 %).
+
+**`method:=music`** (normalised MUSIC on the covariance of the utterance, in the
+node, with the node's own gate). Last bearing of each command within 15° of the
+talker, 24 simulated room scenes (144 commands, each from another place):
+
+| | `srp_phat` | `music` |
+| :--- | ---: | ---: |
+| all | 75 % | 83 % |
+| quiet lab | 100 % | 100 % |
+| welding 10 dB below speech | 89 % | 94 % |
+| welding as loud as speech, factory hall | 50 % | 78 % |
+| welding + machinery | 72 % | 89 % |
+| welding 5 dB above speech | 65 % | 59 % |
+| robot at a wall, quiet | 56 % | 67 % |
+
+In the benchmark's noise matrix (welding, RT60 0.4 s) the mean error with
+`music` is 6° at 5 dB and 17° at 0 dB (`srp_phat`: 62° and 38°), and no better
+than `srp_phat` at −5 and −10 dB: there the gate passes the noise as speech
+(about 11 bearings a minute while nobody speaks) and the covariance fills with
+it. On the LOCATA recordings, which are quiet and have talkers who walk while
+talking, `music` is slightly worse (median 14.9° against 13.7°, 50 % against
+54 % within 15°). So the default stays `srp_phat`; use `music` where a noise
+source from one direction is the problem, and treat it as unvalidated until it
+has been scored on the robot.
 
 Real recordings, LOCATA corpus (`experiments/locata_doa.py`), four equatorial
 capsules of the Eigenmike as a planar array: median error 13.7° over 708
@@ -184,11 +208,13 @@ gate and is refused with `vad_mode:=off`.
 | `vad_percentile` | `70.0` | energy mode |
 | `vad_hangover_ms` | `800` | how long publishing outlives the last speech frame |
 | `avg_tc` | `0.5` | pooling time constant, s. Longer = steadier, slower |
-| `subtract_noise` | `false` | subtract a stationary interferer; needs a gate |
+| `subtract_noise` | `false` | subtract a stationary interferer; needs a gate; `srp_phat` only, and worse in reverberant rooms |
+| `method` | `srp_phat` | `srp_phat` (scored on hardware) or `music` (better against noise from one direction, see Accuracy; not validated on hardware) |
+| `music_tc` | `3.0` | `music`: how long the utterance's covariance remembers, s |
 | `vad_reset_s` | `2.0` | neural gate: clear the model's state this often while nobody speaks; 0 = never |
 | `utterance_gap_s` | `0.8` | a pause this long ends an utterance; the next one starts a new pool; 0 = one pool for ever |
 | `max_lag_s` | `1.0` | how far the worker may fall behind before it skips to the newest audio (and reports it) |
-| `timing_warn_us` | `0` | plane-wave misfit above which channel timing is reported as suspect; 0 = 10 % of the array's largest delay |
+| `timing_warn_us` | `0` | plane-wave misfit above which channel timing is reported as suspect; 0 = 12 % of the array's largest delay |
 | `publish_period` | `0.2` | seconds between bearings, in audio time |
 | `publish_human` | `true` | also publish `/dorai_doa/human` for `ros2 topic echo` |
 
@@ -263,7 +289,7 @@ aperture has a ~130° main lobe anyway.
 ## Tests
 
 ```bash
-python3 -m pytest test/test_doa_mod.py -v     # 48 tests, no ROS needed
+python3 -m pytest test/test_doa_mod.py -v     # 57 tests, no ROS needed
 ```
 
 `doa_core.py`, `vad.py` and `vad.onnx` are **vendored byte-identical** from
