@@ -11,6 +11,9 @@
 #   docker compose up            # voice + stt + intent
 #   docker compose up stt intent # transcription + intent only (no mic needed)
 #
+# Without microphones (simulated scene, see simulator/acoustic/README.md):
+#   SCENE=~/dorai/sim/factory_welding_0db docker compose --profile sim up sim voice-sim stt intent
+#
 services:
   voice:
     build: .
@@ -28,7 +31,8 @@ services:
       - audio
     environment:
       - ROS_DOMAIN_ID=0
-    # 4-mic array -> raise the default cap (max_mics defaults to 3).
+    # dorai_beamformer.ort is exported for 3 microphones; voice_mod never opens
+    # more than the model takes (max_mics above that is clamped with a warning).
     # mic_name_filter pins the real array by device-name substring and excludes
     # stray inputs (e.g. an empty dock jack) that would otherwise be auto-picked
     # as a dead channel and collapse the beamformer. Set it to a substring of
@@ -36,7 +40,8 @@ services:
     # it (-p mic_name_filter:="") to fall back to plain auto-detection.
     command: >
       ros2 run voice_mod voice --ros-args
-      -p max_mics:=4
+      -p max_mics:=3
+      -p denoise_level:=0.75
       -p mic_name_filter:=Earpods
     restart: unless-stopped
 
@@ -55,7 +60,7 @@ services:
   # device_channels/channels below describe the ReSpeaker 4-Mic Array: 6
   # channels exposed, of which ch0 is the board's own processed mix and
   # ch1..ch4 are the raw capsules. Set them to match your hardware, and set the
-  # geometry to match the channel order -- see doa_mod/README.md.
+  # geometry to match the channel order -- see ros2/doa_mod/README.md.
   doa:
     build: .
     image: dorai:latest
@@ -83,7 +88,7 @@ services:
     environment:
       - ROS_DOMAIN_ID=0
     # No model is inside the image. Download them once on the host into ${HOME}/dorai/models
-    # (bash stt_mod/scripts/download_models.sh, from huggingface.co/sensifai/dorai); mounted here:
+    # (bash ros2/stt_mod/scripts/download_models.sh, from huggingface.co/sensifai/dorai); mounted here:
     volumes:
       - ${HOME}/dorai/models:/root/.cache/dorai/models:ro
     command: >
@@ -114,3 +119,49 @@ services:
       require_wake:=true
       num_threads:=2
     restart: unless-stopped
+
+  # --- simulation: no microphones -------------------------------------------
+  # `sim` plays a rendered scene (python -m simulator.acoustic.audio_generator,
+  # see simulator/acoustic/README.md) as the robot's microphones; `voice-sim` is
+  # voice_mod reading them from topics instead of ALSA; `doa-sim` is doa_mod on
+  # the simulated ReSpeaker. stt and intent run unchanged. The truth of the
+  # scene is on /dorai_sim/truth.
+  sim:
+    build: .
+    image: dorai:latest
+    profiles: ["sim"]
+    network_mode: host
+    ipc: host
+    environment:
+      - ROS_DOMAIN_ID=0
+    volumes:
+      - ${SCENE:-./reports/scene}:/scene:ro
+    command: >
+      ros2 run dorai_simulator virtual_mic --ros-args
+      -p scene:=/scene
+
+  voice-sim:
+    build: .
+    image: dorai:latest
+    profiles: ["sim"]
+    network_mode: host
+    ipc: host
+    environment:
+      - ROS_DOMAIN_ID=0
+    command: >
+      ros2 run voice_mod voice --ros-args
+      -p source:=topic
+      -p publish_interval:=1.0
+
+  doa-sim:
+    build: .
+    image: dorai:latest
+    profiles: ["sim"]
+    network_mode: host
+    ipc: host
+    environment:
+      - ROS_DOMAIN_ID=0
+    command: >
+      ros2 run doa_mod doa --ros-args
+      -p source:=topic
+      -p input_topic:=/dorai_sim/array

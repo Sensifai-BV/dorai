@@ -6,7 +6,7 @@ Stage 2 of the dorai pipeline. Two engines, both int8 ONNX through
 | `engine` | Model | How it decodes |
 | :--- | :--- | :--- |
 | `whisper` (default) | Whisper large-v3-turbo with the dorai command fine-tune (LoRA merged) | The clean stream is cut into utterances by a VAD gate; each utterance is decoded once, when the talker stops. No partial hypotheses. |
-| `nemotron` | NVIDIA [`nemotron-speech-streaming-en-0.6b`](https://huggingface.co/nvidia/nemotron-speech-streaming-en-0.6b) (cache-aware FastConformer + RNN-T, 600 M params) with the dorai workshop adapter **mc-ref** baked into the encoder | Streaming, partial hypotheses, its own endpointing. Ships inside the package (`stt_mod/models/`). |
+| `nemotron` | NVIDIA [`nemotron-speech-streaming-en-0.6b`](https://huggingface.co/nvidia/nemotron-speech-streaming-en-0.6b) (cache-aware FastConformer + RNN-T, 600 M params) with the dorai workshop adapter **mc-ref** baked into the encoder | Streaming, partial hypotheses, its own endpointing. Ships inside the package (`models`). |
 
 ```
 /dorai_clean_audio ──► stt_mod ──► /dorai_partial_transcript   running hypothesis (Nemotron only)
@@ -32,7 +32,7 @@ fine-tuned model wrote a complete command, while behind the gate nothing is
 decoded at all. `vad`:
 
 * `neural` (default): the neural VAD model `vad_gated.onnx`, run by
-  sherpa-onnx. The file ships inside the package (`stt_mod/stt_mod/`); it is
+  sherpa-onnx. The file ships inside the package (`stt_mod`); it is
   the same model as doa_mod's `vad.onnx`. Without it the node warns and uses
   `energy`.
 * `energy`: level gate with an adaptive noise floor, hysteresis, 0.3 s
@@ -58,10 +58,10 @@ back to the last whole sentence (`max_words_per_s`).
 | `intent-model/intent-qwen35-4b-Q4_0.gguf` | 2.6 GB | intent_mod's model (it downloads this itself on first start) |
 
 ```bash
-bash stt_mod/scripts/download_models.sh                         # Whisper + Nemotron -> ~/dorai/models, Whisper checksums verified
-MODELS=whisper bash stt_mod/scripts/download_models.sh          # only the default engine's model
-MODELS="whisper nemotron intent" bash stt_mod/scripts/download_models.sh     # everything, for an offline robot
-DEST=/data/models bash stt_mod/scripts/download_models.sh       # elsewhere; then run the node with -p models_dir:=/data/models
+bash ros2/stt_mod/scripts/download_models.sh                         # Whisper + Nemotron -> ~/dorai/models, Whisper checksums verified
+MODELS=whisper bash ros2/stt_mod/scripts/download_models.sh          # only the default engine's model
+MODELS="whisper nemotron intent" bash ros2/stt_mod/scripts/download_models.sh     # everything, for an offline robot
+DEST=/data/models bash ros2/stt_mod/scripts/download_models.sh       # elsewhere; then run the node with -p models_dir:=/data/models
 hf download sensifai/dorai --local-dir ~/dorai/models           # the same thing by hand: the whole repo
 ```
 
@@ -73,13 +73,13 @@ and `nemo-finetuned/` is recognised by its `dorai_adapter.json`. The neural
 VAD of the utterance gate (`vad_gated.onnx`) is not on the Hub; it ships in
 the package source.
 
-A model directory copied into `stt_mod/models/` is installed with the package
+A model directory copied into `models` is installed with the package
 (`setup.py` -> `share/stt_mod/models/`; a symlink with `colcon build
 --symlink-install`) and is found too. The encoders are far above GitHub's
 100 MB file limit: keep them out of git.
 
 Only the 1120 ms Nemotron profile is published. Other profiles and adapters are looked up, in order, in `models_dir`,
-`$DORAI_MODELS_DIR`, `stt_mod/models` (or `share/stt_mod/models`),
+`$DORAI_MODELS_DIR`, `models` (or `share/stt_mod/models`),
 `~/dorai/models` and `/root/.cache/dorai/models`. The first root that holds
 the requested model wins. To add one, download the stock export and bake the
 adapter on a dev machine (needs `pip install onnx`; no torch/NeMo/GPU):
@@ -155,7 +155,7 @@ a warning is logged above `backlog_warn_s`.
 ## Real end-to-end test on the Raspberry Pi 4 (2026-10-20)
 
 Setup: Pi 4 Model B, 8 GB, Ubuntu 24.04.5, ROS 2 Jazzy, provisioned with
-`test/pi_provision.sh`. The real `stt_mod` node ran with its defaults (1120 ms,
+`../../tests`. The real `stt_mod` node ran with its defaults (1120 ms,
 mc-ref, 2 threads). `test/e2e_realmic.py` played the 90 real-mic takes into
 `/dorai_clean_audio` in real time as 1 s voice_mod-format frames, with 3 s of
 silence after each take, and scored `/dorai_transcript`. The Mac column is the
@@ -258,7 +258,7 @@ manifest) and `text`, plus optional `condition` and `snr_db`.
 ros2 run stt_mod transcribe stt_mod/models/*/test_wavs/*.wav         # finals + RTF (no ROS needed)
 ros2 run stt_mod transcribe --latency-ms 560 --adapter none --frame-s 5 clean.wav
 ros2 run stt_mod record_clean --ros-args -p duration:=20.0             # save /dorai_clean_audio to wav
-python3 -m pytest stt_mod/test -v       # 11 tests; model tests use the bundled default
+python3 -m pytest ros2/stt_mod/test -v       # 11 tests; model tests use the bundled default
 ```
 
 ## Known limits / next steps

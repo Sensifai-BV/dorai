@@ -217,7 +217,11 @@ class MicChannel:
     a single microphone. All cross-thread state is guarded by `self.lock`."""
 
     def __init__(self, label, device, sample_rate, name="", hpf_hz=150.0,
-                 capture_channels=1):
+                 capture_channels=1, array_channel=None):
+        # array_channel: this object is one channel of a multi-channel array
+        # device (its index in that device's stream). All channels of the
+        # array come from one clock; at 16 kHz they are handed on untouched.
+        self.array_channel = array_channel
         self.label = label
         self.device = device
         self.sample_rate = int(sample_rate)
@@ -231,7 +235,8 @@ class MicChannel:
         self.in_end_mono = None        # capture time of the newest sample in in_buf
         self.fifo_end_mono = None      # ... and of the newest sample in out_fifo
 
-        self.resampler = Resampler(self.sample_rate, OUTPUT_RATE)
+        self.passthrough = array_channel is not None and self.sample_rate == OUTPUT_RATE
+        self.resampler = None if self.passthrough else Resampler(self.sample_rate, OUTPUT_RATE)
         self.ratio_scale = 1.0
         self.drift_err = 0.0           # smoothed head-time error against the other channels (s)
         self.drift_ref = 0.0           # that error as start-up alignment left it: what the loop holds
@@ -284,7 +289,7 @@ class MicChannel:
             if x.size:
                 self.fifo_end_mono = self.in_end_mono
 
-        y = self.resampler.process(x, self.ratio_scale)
+        y = x if self.passthrough else self.resampler.process(x, self.ratio_scale)
         if y.size and self.hpf_b is not None:
             yf, self.hpf_zi = lfilter(
                 self.hpf_b, self.hpf_a, y.astype(np.float64), zi=self.hpf_zi)
@@ -312,7 +317,7 @@ class MicChannel:
         inside DRIFT_DEAD_S are stamp noise as far as the loop can tell and
         change nothing, so channels on one clock are never moved. Absolute
         FIFO depth is regulated by the consumer, not here."""
-        if not self.resampler.variable:
+        if self.resampler is None or not self.resampler.variable:
             return
         a = math.exp(-dt / DRIFT_SMOOTH_S)
         self.drift_err = a * self.drift_err + (1.0 - a) * err_s
@@ -423,7 +428,7 @@ SIM_HEADER = 4     # a simulated device's message: [seq, rate, stamp // 1000, st
 
 def parse_device_msg(data):
     """(seq, rate, capture stamp or None, samples) of one message from a
-    simulated capture device (the sim package's virtual microphones): one block of one
+    simulated capture device (dorai_simulator's virtual microphones): one block of one
     device's audio at the device's own rate, as a PortAudio callback delivers
     it. The stamp is the monotonic capture time of the block's first sample,
     split in two so that float32 keeps it to 0.1 ms; zeros mean "no stamp"."""
@@ -456,6 +461,37 @@ def sync_status(mics, drift_correction, seq=0):
             1.0 if drift_correction else 0.0,
             max((abs(ch.ratio_scale - 1.0) for ch in mics), default=0.0) * 1e6,
             max(errs, default=0.0) * 1e6]
+
+
+def parse_array_channels(text):
+    """'1,2,3,4' -> [1, 2, 3, 4]: the channels of one array device that are microphones
+    (0-based, in the order the model expects them). Empty text = no array mode."""
+    out = [int(t) for t in str(text).replace(";", ",").split(",") if t.strip()]
+    if any(c < 0 for c in out) or len(set(out)) != len(out):
+        raise ValueError(f"array_channels must be distinct channel numbers from 0, got {text!r}")
+    return out
+
+
+def find_array_device(logger, channels, rate, name_filter="", include_internal=False):
+    """The one input device that carries all the array's channels at `rate`."""
+    need = max(channels) + 1
+    for idx, dev in enumerate(sd.query_devices()):
+        if int(dev.get("max_input_channels", 0)) < need:
+            continue
+        if name_filter and name_filter.lower() not in dev["name"].lower():
+            continue
+        if not name_filter and not is_usable_input(dev["name"], include_internal):
+            continue
+        try:
+            sd.check_input_settings(device=idx, channels=need, dtype="float32", samplerate=rate)
+        except Exception as e:
+            logger.warning(f"array device candidate #{idx} {dev['name']!r} does not open with "
+                           f"{need} channels at {rate} Hz: {e}")
+            continue
+        return idx, dev["name"], need
+    raise RuntimeError(
+        f"No input device with at least {need} channels at {rate} Hz"
+        + (f" matching {name_filter!r}" if name_filter else "") + " for array_channels.")
 
 
 def detect_microphones(logger, include_internal=False, max_mics=3,
@@ -731,7 +767,7 @@ class ContinuousEnhancer:
 
 
 class StreamingEnhancer:
-    """Driver for a *stateful streaming* enhancement model (QWise 2).
+    """Driver for a *stateful streaming* enhancement model (dorai_beamformer.ort).
 
     Such a model takes one block of new samples per microphone together with a
     state tensor and returns the enhanced block and the next state:
@@ -753,7 +789,7 @@ class StreamingEnhancer:
 
     def __init__(self, model_path, num_threads, logger, fs=OUTPUT_RATE,
                  agc_target_rms=0.06, agc_tc_s=2.0, agc_max_gain=15.0,
-                 agc_gate_rms=3e-3, out_ceiling=0.99, agc_hop=L_OUT):
+                 agc_gate_rms=3e-3, out_ceiling=0.99, agc_hop=L_OUT, denoise_level=0.75):
         so = ort.SessionOptions()
         so.log_severity_level = 3
         so.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
@@ -764,7 +800,13 @@ class StreamingEnhancer:
             model_path, sess_options=so, providers=["CPUExecutionProvider"])
         ins = self.sess.get_inputs()
         self.in_name, self.state_name = ins[0].name, ins[1].name
-        self.n_mics, self.block = int(ins[0].shape[0]), int(ins[0].shape[1])
+        # A model with "level" and "sample_rate" inputs takes 32 ms at any
+        # supported rate (its block axis is then free); it is fed at 16 kHz here.
+        names = [i.name for i in ins]
+        self.has_level, self.has_rate = "level" in names, "sample_rate" in names
+        self.level = float(denoise_level)
+        self.n_mics = int(ins[0].shape[0])
+        self.block = int(ins[0].shape[1]) if isinstance(ins[0].shape[1], int) else int(fs) * 32 // 1000   # 32 ms
         self.state_size = int(ins[1].shape[0])
         meta = self.sess.get_modelmeta().custom_metadata_map or {}
         # Algorithmic delay of the model: its STFT overlap (n_fft - hop).
@@ -792,7 +834,29 @@ class StreamingEnhancer:
                 model_path, sess_options=so, providers=["CPUExecutionProvider"]).get_inputs()
         except Exception:
             return False
-        return len(ins) == 2 and len(ins[0].shape) == 2 and len(ins[1].shape) == 1
+        extra = {i.name for i in ins[2:]}
+        return (len(ins) >= 2 and len(ins[0].shape) == 2 and len(ins[1].shape) == 1
+                and extra <= {"level", "sample_rate"})
+
+    @staticmethod
+    def model_mics(model_path):
+        """Microphone count a streaming model is exported for (its `mic` input's
+        first axis), or None when the file is not a streaming model."""
+        if not StreamingEnhancer.accepts(model_path):
+            return None
+        so = ort.SessionOptions()
+        so.log_severity_level = 3
+        shape = ort.InferenceSession(
+            model_path, sess_options=so, providers=["CPUExecutionProvider"]).get_inputs()[0].shape
+        return int(shape[0]) if isinstance(shape[0], int) else None
+
+    def _feed(self, blk, state):
+        feed = {self.in_name: blk, self.state_name: state}
+        if self.has_level:
+            feed["level"] = np.array([min(max(self.level, 0.0), 1.0)], dtype=np.float32)
+        if self.has_rate:
+            feed["sample_rate"] = np.array([self.fs], dtype=np.int64)
+        return feed
 
     def reset(self):
         """Start a new stream: forget the scene and the pending samples."""
@@ -805,7 +869,7 @@ class StreamingEnhancer:
         dummy = np.zeros((self.n_mics, self.block), dtype=np.float32)
         state = np.zeros(self.state_size, dtype=np.float32)
         for _ in range(2):
-            _, state = self.sess.run(None, {self.in_name: dummy, self.state_name: state})
+            _, state = self.sess.run(None, self._feed(dummy, state))
 
     _agc = ContinuousEnhancer._agc                 # the same slow gated AGC
 
@@ -815,8 +879,7 @@ class StreamingEnhancer:
             blk = np.ascontiguousarray(self.inbuf[:, :self.block])
             self.inbuf = self.inbuf[:, self.block:]
             try:
-                y, self.state = self.sess.run(
-                    None, {self.in_name: blk, self.state_name: self.state})
+                y, self.state = self.sess.run(None, self._feed(blk, self.state))
                 y = np.asarray(y, dtype=np.float64).reshape(-1)
                 if not np.isfinite(y).all():
                     raise FloatingPointError("non-finite output")
@@ -873,7 +936,7 @@ class VoiceMod(Node):
         dyn = ParameterDescriptor(dynamic_typing=True)
 
         # Where the audio comes from. 'mic': capture devices (the robot).
-        # 'topic': one topic per microphone, published by the sim package's virtual
+        # 'topic': one topic per microphone, published by dorai_simulator's virtual
         # microphones; each message is one capture block of one device, and
         # everything behind the capture callback (resampler, alignment, drift
         # loop, beamformer) runs exactly as with real devices.
@@ -914,6 +977,19 @@ class VoiceMod(Node):
         # its own crystal). Leave on for separate devices; switch off only when
         # all channels come from one clock (a simulation through snd-aloop).
         self.declare_parameter("drift_correction", True)
+        # Array mode: one multi-channel device whose capsules go to the model as
+        # separate microphones, in this order. "1,2,3,4" is the ReSpeaker 4-Mic
+        # Array with its 6-channel firmware (0 = processed, 1-4 = capsules,
+        # 5 = playback). Empty = off: one microphone per device, as before.
+        # One device is one clock, so there is no drift to correct, and at
+        # 16 kHz the samples reach the model as captured (no resampling).
+        self.declare_parameter("array_channels", "")
+        self.declare_parameter("array_rate", 16000)
+        # Share of the denoiser's output in the clean stream, for models that
+        # take it as an input: 0.3 ... 1.0, 1.0 = full denoise (quietest
+        # background). 0.75 is the default because it gave the fine-tuned
+        # Whisper the lowest word error rate in the beamformer rebuild tests.
+        self.declare_parameter("denoise_level", 0.75, dyn)
         # Continuous overlap-add enhancement window / hop (seconds). The model
         # is a whole-signal enhancer, so a longer window gives it more context
         # and tracks the offline reference more closely, at the cost of added
@@ -989,7 +1065,27 @@ class VoiceMod(Node):
             self.get_logger().info(
                 f"source=topic: {len(resolved)} simulated microphone(s) at {rate} Hz on "
                 + ", ".join(m["name"] for m in resolved))
+        elif parse_array_channels(gp("array_channels").value):
+            chans = parse_array_channels(gp("array_channels").value)
+            rate = int(gp("array_rate").value)
+            dev, name, self._array_open = find_array_device(
+                self.get_logger(), chans, rate, self.mic_name_filter, self.include_internal)
+            resolved = [{"label": f"mic{i}", "device": dev, "sample_rate": rate, "name": name,
+                         "capture_channels": 1, "array_channel": c} for i, c in enumerate(chans)]
+            self.drift_correction = False
+            self.get_logger().info(
+                f"array mode: device #{dev} {name!r}, channels {chans} of {self._array_open} at {rate} Hz, "
+                + ("passed on as captured" if rate == OUTPUT_RATE else f"resampled to {OUTPUT_RATE} Hz")
+                + "; one clock, drift correction off")
         else:
+            # A streaming model is exported for a fixed microphone count: never
+            # open more than it takes (max_mics above that would only fail below).
+            want = StreamingEnhancer.model_mics(model_path)
+            if want and self.max_mics > want:
+                self.get_logger().warn(
+                    f"max_mics={self.max_mics} but {os.path.basename(model_path)} takes {want} "
+                    f"microphones; opening {want}.")
+                self.max_mics = want
             resolved = detect_microphones(
                 self.get_logger(), self.include_internal, self.max_mics,
                 self.requested_rate, self.prefer_usb, self.capture_channels,
@@ -997,14 +1093,15 @@ class VoiceMod(Node):
             )
         self.mics = [
             MicChannel(m["label"], m["device"], m["sample_rate"], m["name"],
-                       hpf_hz=self.hpf_hz, capture_channels=m["capture_channels"])
+                       hpf_hz=self.hpf_hz, capture_channels=m["capture_channels"],
+                       array_channel=m.get("array_channel"))
             for m in resolved
         ]
         self.num_channels = len(self.mics)
 
         # The model file decides the driver. A streaming model (audio block +
-        # state, e.g. QWise 2) is fed block by block and needs no analysis
-        # window; a whole-signal model (dorai_beamformer.ort) goes through the
+        # state, the shipped dorai_beamformer.ort) is fed block by block and needs
+        # no analysis window; an older whole-signal model goes through the
         # overlap-add sliding window. Either way self.enhancer has push()/flush()
         # and is driven only from the publisher thread (_pub_loop / _flush).
         self.streaming = StreamingEnhancer.accepts(model_path)
@@ -1014,6 +1111,7 @@ class VoiceMod(Node):
                 model_path, num_threads, self.get_logger(), fs=OUTPUT_RATE,
                 agc_target_rms=self.agc_target_rms, agc_tc_s=self.agc_tc_s,
                 agc_max_gain=self.agc_max_gain, agc_gate_rms=self.agc_gate_rms,
+                denoise_level=float(gp("denoise_level").value),
             )
             if self.enhancer.n_mics != self.num_channels:
                 raise RuntimeError(
@@ -1036,7 +1134,6 @@ class VoiceMod(Node):
                 f"dorai_beamformer.ort ready ({self.num_channels}ch) via {self.beam.in_name}"
                 f"->{self.beam.out_name}"
             )
-
             # Continuous overlap-add enhancer wrapping the per-window model call.
             # enh_hop is clamped to <= enh_window.
             win = max(1, int(round(self.enh_window * OUTPUT_RATE)))
@@ -1052,6 +1149,9 @@ class VoiceMod(Node):
                 f"AGC target_rms={self.agc_target_rms:.3f} tc={self.agc_tc_s:.1f}s "
                 f"max_gain={self.agc_max_gain:.1f} gate={self.agc_gate_rms:.4f}"
             )
+        # denoise_level can be changed while running:
+        #   ros2 param set /voice_mod denoise_level 0.5
+        self.add_on_set_parameters_callback(self._on_set_params)
 
         self.pub = self.create_publisher(Float32MultiArray, self.output_topic, 10)
         self.diag_pub = self.create_publisher(String, "/voice_mod/diagnostics", 10)
@@ -1093,6 +1193,20 @@ class VoiceMod(Node):
                 ch.stream = None
                 self._topic_subs.append(self.create_subscription(
                     Float32MultiArray, ch.name, self._make_topic_callback(ch), 50))
+                continue
+            if ch.array_channel is not None:
+                # All channels of the array share one stream, opened with the first.
+                ch.stream = None
+                if ch is not self.mics[0]:
+                    continue
+                blocksize = int(ch.sample_rate * BLOCK_S)
+                self._array_stream = sd.InputStream(
+                    samplerate=ch.sample_rate, device=ch.device, channels=self._array_open,
+                    blocksize=blocksize, dtype="float32", latency=self.input_latency,
+                    callback=self._make_array_callback(self.mics))
+                self._array_stream.start()
+                self.get_logger().info(
+                    f"Opened array dev#{ch.device} @ {ch.sample_rate} Hz, {self._array_open} channels (blk {blocksize})")
                 continue
             blocksize = int(ch.sample_rate * BLOCK_S)
             ch.stream = sd.InputStream(
@@ -1196,6 +1310,18 @@ class VoiceMod(Node):
             throttle_duration_sec=1.0,
         )
 
+    def _on_set_params(self, params):
+        from rcl_interfaces.msg import SetParametersResult
+        for p in params:
+            if p.name == "denoise_level":
+                v = float(p.value)
+                if not 0.0 <= v <= 1.0:
+                    return SetParametersResult(successful=False, reason="denoise_level must be 0.0 ... 1.0")
+                if getattr(self, "streaming", False):
+                    self.enhancer.level = v
+                    self.get_logger().info(f"denoise_level -> {v:.2f}")
+        return SetParametersResult(successful=True)
+
     def _default_model_path(self):
         try:
             from ament_index_python.packages import get_package_share_directory
@@ -1228,6 +1354,23 @@ class VoiceMod(Node):
             state["seq"] = seq
             ch.push(samples, stamp if stamp is not None else time.monotonic())
         return on_msg
+
+    def _make_array_callback(self, chans):
+        """One capture callback for an array device: every microphone gets its own
+        channel of the same block with the same capture time."""
+        def callback(indata, frames, time_info, status):
+            if status:
+                chans[0].xruns += 1
+                self.get_logger().warning(
+                    f"array xrun ({status}); total={chans[0].xruns}.", throttle_duration_sec=5.0)
+            now = time.monotonic()
+            try:
+                capture_mono = now - max(time_info.currentTime - time_info.inputBufferAdcTime, 0.0)
+            except Exception:
+                capture_mono = now
+            for ch in chans:
+                ch.push(indata[:, ch.array_channel].copy(), capture_mono)
+        return callback
 
     def _make_callback(self, ch):
         def callback(indata, frames, time_info, status):
@@ -1501,11 +1644,11 @@ class VoiceMod(Node):
         self._running = False
         if self._worker.is_alive():
             self._worker.join(timeout=2.0)
-        for ch in self.mics:
-            if getattr(ch, "stream", None) is not None:
+        for stream in [getattr(ch, "stream", None) for ch in self.mics] + [getattr(self, "_array_stream", None)]:
+            if stream is not None:
                 try:
-                    ch.stream.stop()
-                    ch.stream.close()
+                    stream.stop()
+                    stream.close()
                 except Exception:
                     pass
         # Join the publisher thread BEFORE flushing. The publisher thread calls

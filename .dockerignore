@@ -7,11 +7,22 @@ log
 
 # MATLAB acoustic simulator — not part of the ROS runtime, needs a MATLAB
 # license, and would bloat the build context with sample wavs.
-lab
+simulator/lab
 
 # intent_mod training data/scripts and offline eval artifacts: not needed at runtime
-intent_mod/train
+ros2/intent_mod/train
 artifacts
+
+# research tree, offline evaluation and its output: not part of the runtime
+simulator/doa
+simulator/acoustic
+config
+requirements.txt
+evaluation
+experiments
+reports
+tests
+**/.pytest_cache
 
 # Docker + git noise
 .git

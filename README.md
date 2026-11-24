@@ -39,7 +39,26 @@ them on voice activity, and publishes the bearing in degrees.
 `voice_mod` and `doa_mod` both want the microphone, and two processes cannot
 open one ALSA capture device — run one or the other, or have `voice_mod`
 publish its raw tap (`-p publish_raw:=true`) and run `doa_mod -p source:=topic`.
-See `doa_mod/README.md`.
+See `ros2/doa_mod`.
+
+---
+
+## Repository layout
+
+| Folder | What |
+|---|---|
+| `ros2/` | the ROS 2 packages: `voice_mod`, `stt_mod`, `intent_mod`, `doa_mod`, and `dorai_simulator` (virtual microphones) |
+| `simulator/acoustic/` | the virtual acoustic lab: the Artaban robot's microphones in pyroomacoustics rooms, generated speech and noise, see [its README](simulator/acoustic/README.md) |
+| `simulator/doa/` | the DoA research tree (`doa_core.py` is vendored from here into `ros2/doa_mod`) |
+| `simulator/lab/` | the earlier MATLAB simulator |
+| `config/` | the robot, arrays, rooms, scenarios, the command library, see [config/README.md](config/README.md) |
+| `evaluation/`, `experiments/` | metrics and benchmark runs (simulated scenes, the LOCATA corpus), see [experiments/README.md](experiments/README.md) |
+| `tests/` | hardware and Pi end-to-end scripts |
+| `requirements.txt` | Python dependencies (`pip install -r requirements.txt`) |
+
+The pipeline can be run without microphones: a rendered scene is played by
+`ros2 run dorai_simulator virtual_mic`, `voice_mod` reads it with `-p source:=topic`, and
+`/dorai_sim/truth` says what was really spoken and from where.
 
 ---
 
@@ -64,7 +83,7 @@ See `doa_mod/README.md`.
    ```
 
 2. **Clone/Copy Modules**:
-   Place the pipeline package directories (`voice_mod`, `stt_mod`, `intent_mod`, `doa_mod`) directly inside your workspace. The `doa/` directory is the DoA research tree, not a ROS package — leave it out of the workspace.
+   Place the package directories from `ros2/` (`voice_mod`, `stt_mod`, `intent_mod`, `doa_mod`) directly inside your workspace's `src/`, plus `dorai_simulator` if you want the virtual microphones. `simulator/doa` is the DoA research tree, not a ROS package — leave it out of the workspace.
 
 3. **Install Python Package Dependencies**:
    Install the required Python packages directly to your user-site location (so they are accessible by the system Python interpreter used by ROS 2):
@@ -82,10 +101,10 @@ See `doa_mod/README.md`.
 
    **STT models**: nothing is bundled in the package; download them once into `~/dorai/models/` (the nodes look there on their own):
    ```bash
-   bash stt_mod/scripts/download_models.sh                     # Whisper + Nemotron, 1.7 GB
-   MODELS="whisper nemotron intent" bash stt_mod/scripts/download_models.sh   # + the intent model, for an offline robot
+   bash ros2/stt_mod/scripts/download_models.sh                     # Whisper + Nemotron, 1.7 GB
+   MODELS="whisper nemotron intent" bash ros2/stt_mod/scripts/download_models.sh   # + the intent model, for an offline robot
    ```
-   Details and other ways: [`stt_mod/README.md`](stt_mod/README.md#models). Check that a model loads and measure the RTF (no ROS needed):
+   Details and other ways: [`ros2/stt_mod`](ros2/stt_mod/README.md#models). Check that a model loads and measure the RTF (no ROS needed):
    ```bash
    python3 -m stt_mod.transcribe --list                                              # what is installed
    python3 -m stt_mod.transcribe --engine nemotron ~/dorai/models/stt-model/nemo-finetuned/test_wavs/*.wav
@@ -145,6 +164,9 @@ ros2 run voice_mod voice
 * `--ros-args -p output_peak:=0.9` (Loudness normalization target peak, 0.0 disables; default `0.9`)
 * `--ros-args -p output_max_gain:=12.0` (Maximum gain limit in dB for loudness normalization; default `12.0`)
 * `--ros-args -p model_path:=/path/to/dorai_beamformer.ort` (Custom path to the `dorai_beamformer.ort` beamformer model)
+* `dorai_beamformer.ort` is the single QWiSE model built for the ReSpeaker 4-Mic Array (four capsules on a 32 mm radius): delay-and-sum steered at the talker plus a neural denoiser. Its denoise level and sample rate are inputs; its delay is 56 ms. Not tried on the robot yet.
+* `--ros-args -p array_channels:="1,2,3,4" -p mic_name_filter:=ReSpeaker -p hpf_hz:=0.0` (Array mode: the four capsules of the ReSpeaker (6-channel firmware: 0 processed, 1-4 capsules, 5 playback) go to the model as four microphones. One device is one clock, so drift correction is off, and at 16 kHz (`array_rate`, the ReSpeaker's own rate) the samples reach the model as captured, with no resampling. Without `array_channels` a multi-channel device is averaged into one microphone, as before.)
+* `--ros-args -p denoise_level:=0.5` (Share of the denoiser's output in the clean stream, 0.3 to 1.0. 0.5 keeps half of the beamformed signal, which costs the recogniser the fewest words; 1.0 is the cleanest sound.)
 
 *Example — publish clean speech every 5 seconds using up to 4 mics:*
 ```bash
@@ -167,18 +189,18 @@ Two engines, both int8 ONNX through sherpa-onnx, chosen with `engine`:
   the log, when the Whisper model is not installed (`engine_fallback`).
 
 The models come from [huggingface.co/sensifai/dorai](https://huggingface.co/sensifai/dorai/tree/main)
-(`bash stt_mod/scripts/download_models.sh`).
+(`bash ros2/stt_mod/scripts/download_models.sh`).
 ```bash
 ros2 launch stt_mod stt.launch.py                          # Whisper behind the VAD gate, 2 threads
 ros2 run stt_mod stt --ros-args -p engine:=nemotron        # streaming engine, 1120 ms profile, mc-ref
 ```
 Key parameters: `engine` (whisper | nemotron), `vad` (neural | energy | none), `vad_min_silence_s`, `num_threads`;
 for Nemotron `latency_ms` and `adapter` (mc-ref | mc-das | none). The full table, the measured
-latency/accuracy behind the defaults, and the adapter bake tool are in [`stt_mod/README.md`](stt_mod/README.md).
+latency/accuracy behind the defaults, and the adapter bake tool are in [`ros2/stt_mod`](ros2/stt_mod/README.md).
 
 * On a Pi 4, no Nemotron profile decodes in real time (1120 ms reaches RTF ≈ 1.7), and Whisper has not been timed there. The node queues audio rather than
   dropping it and reports `backlog_s` on `/dorai_stt/status`. When it runs on the same Pi as `voice_mod`,
-  start voice_mod with `-p input_latency:=0.25`; at 0.0 the STT load caused capture overflows (see `test/sim_pipeline.sh`).
+  start voice_mod with `-p input_latency:=0.25`; at 0.0 the STT load caused capture overflows (see `tests`).
 
 ### 3. Stage 3: Intent (`intent_mod`)
 
@@ -237,7 +259,7 @@ ros2 launch intent_mod intent.launch.py model:=/data/models/intent-qwen35-4b-Q4_
 
 **Live test.** voice_mod → stt_mod → intent_mod in a simulated welding shop: 10/10 commands right on exact text, and 85 % right on clean speech. In welding noise the losses come from STT. Intent latency was about 0.5 s on an M4-class VM; Pi 4 latency is not measured yet.
 
-Rebuilding the model and the full details are in [`intent_mod/README.md`](intent_mod/README.md).
+Rebuilding the model and the full details are in [`ros2/intent_mod`](ros2/intent_mod/README.md).
 
 ---
 
@@ -280,7 +302,7 @@ ros2 run doa_mod  doa   --ros-args -p source:=topic
 > **Before trusting the output**, verify the geometry is not mirrored: put a
 > talker at 90°, then at 0°. If 90° reads correctly and 0° does not, the
 > channel order is mirrored — that is not an offset and cannot be calibrated
-> away. See `doa_mod/README.md`.
+> away. See `ros2/doa_mod`.
 
 ---
 
@@ -318,13 +340,20 @@ indefinitely.
 
 ---
 
-## Acoustic Simulator (Lab)
+## Simulation
 
-The workspace includes an offline, MATLAB-based physical acoustic simulator inside the [lab/](lab) directory. 
+**Virtual acoustic lab (`simulator/acoustic`, `ros2/dorai_simulator`).** Renders the robot's microphones in a room with pyroomacoustics
+(image sources, ray-traced reverberation, recorded welding and factory noise from their own places in the room),
+writes the truth of every command, and plays scenes into ROS 2 as virtual microphones. Used for the DoA
+benchmark in `experiments/`. See [simulator/acoustic/README.md](simulator/acoustic/README.md).
 
-![Acoustic Simulator](lab/img.png)
+**MATLAB simulator (`simulator/lab`).**
+
+The workspace includes an offline, MATLAB-based physical acoustic simulator inside the [lab/](simulator/lab) directory. 
+
+![Acoustic Simulator](simulator/lab/img.png)
 
 * **Overview**: It simulates a closed room (acoustic space) containing a human speaker standing near an **Artaban robotic dog** equipped with a microphone array on its back.
 * **Propagation Physics**: Models 3D sound waves reflecting off room boundaries (floor, ceiling, walls) using the **Image Source Method (ISM)**, mixing human speech with industrial factory and welding noise.
 * **Dry Runs**: Feeds the simulated noisy channels directly into `dorai_beamformer.ort` for DSP benchmarking and visualizes speech cleanup.
-* **Documentation**: See [lab/README.md](lab/README.md) for detailed abstraction, room dimensions, placement coordinates, diagrams, and execution instructions.
+* **Documentation**: See [lab/README.md](simulator/lab/README.md) for detailed abstraction, room dimensions, placement coordinates, diagrams, and execution instructions.

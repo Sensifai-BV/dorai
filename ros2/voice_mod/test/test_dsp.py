@@ -250,7 +250,7 @@ def test_sync_status_tells_a_consumer_how_the_channels_are_clocked():
 
 
 def test_device_message_of_a_simulated_microphone():
-    """the sim package's virtual microphones hand over capture blocks as messages; the
+    """dorai_simulator's virtual microphones hand over capture blocks as messages; the
     stamp must survive float32 to 0.1 ms even after days of uptime."""
     t = 345678.123456
     samples = np.linspace(-1, 1, 4800, dtype=np.float32)
@@ -325,9 +325,10 @@ def test_shipped_model_is_streaming_and_runs_block_by_block():
     assert V.StreamingEnhancer.accepts(_model_path())
     rng = np.random.default_rng(0)
     enh = V.StreamingEnhancer(_model_path(), 1, _Log())
-    assert enh.n_mics == 3 and enh.block == 512 and enh.latency == 384
+    assert enh.n_mics in (3, 4) and enh.block == 512
+    assert enh.latency in (384, 640, 896)   # 24 ms for the first streaming beamformer; 40 ms with the UL-UNAS post filter; 56 ms for the any-rate model
     n = 3 * FS
-    x = 0.02 * rng.standard_normal((3, n)).astype(np.float32)
+    x = 0.02 * rng.standard_normal((enh.n_mics, n)).astype(np.float32)
     x[:, FS:2 * FS] += _speechy(1.0, 0.05, 1).astype(np.float32)
     out = np.concatenate([enh.push(x[:, i:i + V.L_OUT]) for i in range(0, n, V.L_OUT)] + [enh.flush()])
     assert out.shape == (n,) and out.dtype == np.float32 and np.all(np.isfinite(out))
@@ -335,5 +336,46 @@ def test_shipped_model_is_streaming_and_runs_block_by_block():
     enh2 = V.StreamingEnhancer(_model_path(), 1, _Log())
     out2 = np.concatenate([enh2.push(x[:, i:i + 5 * FS]) for i in range(0, n, 5 * FS)] + [enh2.flush()])
     assert out2.shape == (n,)
-    assert np.abs(out2 - out).max() < 0.01                           # same model output; the AGC grid differs slightly
+    assert np.abs(out2 - out).max() < 0.02                           # same model output; the AGC grid differs slightly
+                                                                     # (0.011 with an earlier model, whose pauses are quieter)
     assert np.corrcoef(out, out2)[0, 1] > 0.995
+
+
+@pytest.mark.skipif(not _have_model(), reason="dorai_beamformer.ort or onnxruntime not present")
+def test_denoise_level_reaches_the_model():
+    """A model with a level input: full denoise leaves less in the pauses than half."""
+    probe = V.StreamingEnhancer(_model_path(), 1, _Log())
+    if not probe.has_level:
+        pytest.skip("this model has no denoise-level input")
+    assert probe.has_rate
+    rng = np.random.default_rng(1)
+    n = 4 * FS
+    x = 0.02 * rng.standard_normal((probe.n_mics, n)).astype(np.float32)
+    quiet = {}
+    for level in (1.0, 0.5):
+        enh = V.StreamingEnhancer(_model_path(), 1, _Log(), agc_max_gain=1.0, denoise_level=level)
+        out = np.concatenate([enh.push(x[:, i:i + V.L_OUT]) for i in range(0, n, V.L_OUT)] + [enh.flush()])
+        quiet[level] = float(np.sqrt(np.mean(out[2 * FS:] ** 2)))
+    assert quiet[1.0] < 0.5 * quiet[0.5]
+
+
+def test_array_channels_are_passed_on_as_captured():
+    """One array device at 16 kHz: no resampler, the samples reach the FIFO unchanged,
+    and every channel of a block carries the same capture time."""
+    assert V.parse_array_channels("1,2,3,4") == [1, 2, 3, 4] and V.parse_array_channels("") == []
+    with pytest.raises(ValueError):
+        V.parse_array_channels("1,1,2")
+    rng = np.random.default_rng(2)
+    chans = [V.MicChannel(f"mic{i}", 7, FS, "array", hpf_hz=0.0, array_channel=c) for i, c in enumerate((1, 2, 3, 4))]
+    assert all(c.passthrough and c.resampler is None for c in chans)
+    block = rng.standard_normal((1600, 6)).astype(np.float32)
+    for c in chans:
+        c.push(block[:, c.array_channel].copy(), 10.0)
+        c.resample_in()
+    for c in chans:
+        assert np.array_equal(c.out_fifo, block[:, c.array_channel])
+    assert len({c.fifo_end_mono for c in chans}) == 1
+    V.lock_channels(chans)                                     # nothing to trim on one clock
+    assert all(c.ratio_scale == 1.0 for c in chans)
+    # at another rate the channel is still resampled
+    assert not V.MicChannel("m", 7, 48000, "array", array_channel=1).passthrough

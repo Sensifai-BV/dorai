@@ -1,0 +1,39 @@
+# The Artaban robot as it is built now (2026-11), for the virtual lab.
+# Change this file when the robot changes; scenarios take the robot from here.
+name: artaban
+height_m: 0.50                 # top of the back, where the microphones sit
+
+arrays:
+  # voice_mod: three USB microphones in a line along the back. Each is its own
+  # capture device with its own clock; dorai_beamformer.ort is exported for
+  # exactly these three channels.
+  - name: artaban_line3
+    used_by: voice_mod
+    capture: separate_devices
+  # doa_mod: the ReSpeaker 4-Mic Array, one device, one clock. Geometry and
+  # channel order validated on the 2026-08-12 hardware session; the board
+  # revision on the robot is still to be confirmed.
+  - name: respeaker_4mic
+    used_by: doa_mod
+    capture: one_device
+
+# How the separate devices behave (ros2/dorai_simulator plays them this way).
+# start_ms: streams opened one after the other. ppm: clock error per device;
+# 0 here because it has not been measured on the robot. Put measured values in.
+capture:
+  device_rate: 48000
+  block_ms: 100
+  start_ms: [0.0, 1.0, 2.0]
+  ppm: [0.0, 0.0, 0.0]
+  stamp_jitter_ms: 0.3
+
+# Microphone imperfections (simulator/acoustic/hardware_model.py). Assumed, not measured.
+hardware:
+  gain_db_sd: 0.5
+  position_error_mm: 1.0
+  self_noise_snr_db: 40.0
+
+# The robot's own noise (motors, fans) as noise sources on the body. None yet:
+# nothing has been recorded on the robot. Example:
+#   - {type: ventilation_noise, offset_m: [0.15, 0.0, -0.1], snr_db: 15}
+self_noise: []

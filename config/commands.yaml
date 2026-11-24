@@ -1,8 +1,8 @@
-# The command library for generated speech (simulator/module/sim/tts.py).
+# The command library for generated speech (simulator/acoustic/generators/tts_generator.py).
 # The text is kept with every rendered command, so recognition and intent can be
 # scored against it.
 wake_word: Artaban
-voices: [Samantha, Daniel, Karen, Alex]       # macOS `say` voices; missing ones are skipped
+voices: [Samantha, Daniel, Karen, Alex]       # `say` voices; missing ones are skipped
 rates_wpm: [165, 185]
 commands:
   - {id: CMD001, text: "Artaban, stop."}

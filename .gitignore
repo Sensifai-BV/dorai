@@ -2,7 +2,22 @@ install
 build
 log
 .pyenv
-lab/recordings
+simulator/lab/recordings
 __pycache__
+# local colcon workspaces / scratch (dorai_ws, dorai_sim_ws, ...) — not the shipped files below
 dorai_*
+!ros2/dorai_simulator/
+!ros2/dorai_simulator/**
+!ros2/voice_mod/dorai_beamformer.ort
+!simulator/lab/dorai_ort_helper.py
 sherpa-onnx-nemotron-speech-streaming-en-0.6b-1120ms-int8-2026-04-25-dorai-mc-ref
+reports
+.pytest_cache
+
+# keep caches ignored inside the un-ignored dorai_* paths above
+__pycache__/
+*.pyc
+
+# internal project documents, kept out of the open repository
+docs/design/
+docs/*.docx

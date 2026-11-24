@@ -2,8 +2,10 @@
 #
 # Runs ROS 2 Jazzy in-container, so the host OS is irrelevant: this builds and
 # runs identically on Ubuntu 20.04 / 22.04 hosts that only have Docker. The
-# same image serves every node (voice_mod, stt_mod, intent_mod, doa_mod);
-# docker-compose picks which one each service runs.
+# same image serves every node (voice_mod, stt_mod, intent_mod, doa_mod, and
+# the simulator's virtual microphones); docker-compose picks which one each
+# service runs. Repo layout: ros2/ holds the ROS packages, simulator/acoustic the
+# virtual acoustic lab (offline, not in the image), config/ the array, room and scenario files.
 FROM ros:jazzy-ros-base
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -35,7 +37,13 @@ RUN pip3 install --no-cache-dir --break-system-packages \
         onnxruntime \
         sounddevice \
         samplerate \
-        sherpa-onnx
+        sherpa-onnx \
+        soundfile \
+        pyyaml
+
+# dorai_simulator plays scenes that are already rendered (WAV + truth.json),
+# which needs only soundfile. Scenes are rendered outside the image by
+# simulator/acoustic (pip install -r requirements.txt).
 
 # intent_mod's LLM runtime. Built from source (no aarch64 wheel): several minutes on a Pi.
 # 0.3.36 is the first llama.cpp with Qwen3.5 (Gated DeltaNet) support. The intent GGUF
@@ -45,10 +53,11 @@ RUN CMAKE_BUILD_PARALLEL_LEVEL=4 pip3 install --no-cache-dir --break-system-pack
 
 # --- Build the ROS 2 workspace ----------------------------------------------
 WORKDIR /ros2_ws
-COPY voice_mod src/voice_mod
-COPY stt_mod   src/stt_mod
-COPY doa_mod   src/doa_mod
-COPY intent_mod src/intent_mod
+COPY ros2/voice_mod src/voice_mod
+COPY ros2/stt_mod   src/stt_mod
+COPY ros2/doa_mod   src/doa_mod
+COPY ros2/intent_mod src/intent_mod
+COPY ros2/dorai_simulator src/dorai_simulator
 
 # Source the ROS base, then colcon-build the ament_python packages.
 RUN . /opt/ros/jazzy/setup.sh && \

@@ -1,0 +1,10 @@
+numpy
+scipy
+onnxruntime
+soundfile
+pyyaml
+pyroomacoustics>=0.10
+pytest
+sounddevice
+samplerate
+sherpa-onnx

@@ -12,7 +12,7 @@ Since this script bypasses ROS 2, it relies on standard Python packages for audi
 pip install numpy scipy sounddevice onnxruntime
 ```
 
-Make sure that the ONNX model `dorai_beamformer.ort` is present in your working directory (it should already be alongside the script in `test/`).
+Make sure that the ONNX model `dorai_beamformer.ort` is present in your working directory (it should already be alongside the script in ``).
 
 ## Usage
 

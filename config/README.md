@@ -5,11 +5,12 @@ or a test condition is changed without touching code.
 
 | Folder / file | What | Read by |
 |---|---|---|
-| `arrays/respeaker_4mic.yaml` | doa_mod's array: 4 capsules, 32 mm radius, at 45/135/225/315 deg in channel order | `sim.acoustics.load_array`; a test checks it equals doa_mod's built-in geometry |
+| `robots/artaban.yaml` | the robot as it is built now: its arrays, how they are captured, microphone imperfections, own noise | `simulator.acoustic.robot.load_robot` |
+| `arrays/respeaker_4mic.yaml` | doa_mod's array: 4 capsules, 32 mm radius, at 45/135/225/315 deg in channel order | `simulator.acoustic.microphone_array.load_array`; a test checks it equals doa_mod's built-in geometry |
 | `arrays/artaban_line3.yaml` | voice_mod's array: 3 microphones in a line, 10 cm apart | the same |
-| `rooms/*.yaml` | `anechoic`, `rt60` (target RT60), `office`, `workshop`, `factory` (materials per wall) | `sim.acoustics.load_room` |
-| `scenarios/*.yaml` | a room, the robot's place, the talker, the noise | `python -m sim.render` |
-| `commands.yaml` | the commands to synthesise, voices, speaking rates | `python -m sim.tts` |
+| `rooms/*.yaml` | `anechoic`, `rt60` (target RT60), `office`, `workshop`, `factory` (materials per wall) | `simulator.acoustic.room_engine.load_room` |
+| `scenarios/*.yaml` | a room, the robot's place, the talker, the noise | `python -m simulator.acoustic.audio_generator` |
+| `commands.yaml` | the commands to synthesise, voices, speaking rates | `python -m simulator.acoustic.generators.tts_generator` |
 
 Positions are metres in the robot's frame: +x is 0 deg (the robot's heading),
 +y is 90 deg, bearings counter-clockwise. doa_mod, the simulator and the truth
@@ -25,5 +26,4 @@ blocks of that file are documentation of intended settings; the code reads
 
 Node parameters stay with their packages (`ros2/stt_mod/config/stt.yaml`,
 `ros2/intent_mod/config/intent.yaml`), where the launch files install them.
-Set `DORAI_CONFIG` to use another config folder (the Docker image sets it to
-`/ros2_ws/config`).
+Set `DORAI_CONFIG` to use another config folder (scenes are rendered outside the Docker image).
