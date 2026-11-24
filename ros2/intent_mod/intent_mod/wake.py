@@ -105,12 +105,20 @@ def _is_emergency(t):
     return len(t) >= 6 and t[0] in "ei" and lev(t, "emergency") <= 3
 
 
-def is_stop(text, wake_word="artaban", wake_max_edits=2):
-    """'estop' for emergency stop, 'stop' for stop/halt/freeze, else None."""
+STOP_WAKE_MAX_EDITS = 4
+
+
+def is_stop(text, wake_word="artaban", wake_max_edits=2, stop_wake_max_edits=STOP_WAKE_MAX_EDITS):
+    """'estop' for emergency stop, 'stop' for stop/halt/freeze, else None.
+
+    The name in front of a stop is matched more loosely (``stop_wake_max_edits``)
+    than for commands: under machine noise the name is the word ASR mangles most
+    ("Fargan stop.", "Padaban stop."), and a stop that is not taken is the
+    dangerous error, a spurious stop only halts the robot."""
     norm = normalise(text)
     if not norm:
         return None
-    _, rest = strip_wake(norm, wake_word, wake_max_edits)
+    _, rest = strip_wake(norm, wake_word, max(int(wake_max_edits), int(stop_wake_max_edits)))
     toks = rest.split()
     if not toks or len(toks) > MAX_STOP_TOKENS or any(t in NEGATIONS for t in toks):
         return None

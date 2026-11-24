@@ -7,7 +7,7 @@ grammar, or the rule fallback).
 
 Topics
   in   /dorai_transcript   std_msgs/String   final text from stt_mod
-       /dorai_doa          std_msgs/Float32  bearing of the talker, degrees (latest is cached)
+       /dorai_doa          std_msgs/Float32  bearing of the talker, degrees (bursts kept; a plan gets its utterance's)
   out  /dorai_stop         std_msgs/String   'stop' | 'estop'. Published from the subscription
                                              callback itself, never queued behind the engine.
        /dorai_plan         std_msgs/String   JSON {"text","plan","bearing_deg","engine",
@@ -60,6 +60,7 @@ except ImportError:  # very old rclpy / test mocks
 from std_msgs.msg import Float32, String
 
 from . import wake
+from .bearing import BearingHistory
 from .engine import make_engine
 from .models import DEFAULT_LORA, DEFAULT_MODEL, HF_REPO, HF_SUBDIR
 from .guard import check as guard_check
@@ -86,6 +87,9 @@ PARAMS = {
     "require_wake": (True, "only act on utterances addressed to the wake word (stop always works)"),
     "wake_word": ("artaban", "robot name"),
     "wake_max_edits": (2, "max Levenshtein edits when matching the wake word"),
+    "stop_wake_max_edits": (4, "looser wake-word match in front of a stop (a missed stop is the worse error)"),
+    "doa_burst_gap_s": (0.6, "silence between /dorai_doa messages that ends one talker's burst"),
+    "doa_max_age_s": (20.0, "a finished burst older than this is not attached to a plan"),
     "lora": (DEFAULT_LORA, "optional GGUF LoRA adapter file name (normally empty: the default model has it merged)"),
     "use_grammar": (False, "JSON-schema grammar during decoding (off: faster on ARM; plans are validated anyway)"),
     "grounding_guard": (True, "ask 'did you mean X?' if the plan names a place/object the speaker did not say"),
@@ -141,7 +145,7 @@ class IntentNode(Node):
         self.pub_status = self.create_publisher(String, p["status_topic"], 10)
         self.pub_decision = self.create_publisher(String, p["decision_topic"], 20)
 
-        self.bearing = None
+        self.bearings = BearingHistory(float(p["doa_burst_gap_s"]), float(p["doa_max_age_s"]))
         self.stats = collections.Counter()
         self._lat = collections.deque(maxlen=50)
         self._q = collections.deque()
@@ -161,7 +165,7 @@ class IntentNode(Node):
 
     # ------------------------------------------------------------ ROS input
     def _on_doa(self, msg):
-        self.bearing = float(msg.data)
+        self.bearings.add(time.monotonic(), msg.data)
 
     def _on_transcript(self, msg):
         """Runs on the ROS callback thread: stop path first, everything else is queued."""
@@ -169,7 +173,7 @@ class IntentNode(Node):
         if not text:
             return
         p = self.p
-        stop = wake.is_stop(text, p["wake_word"], int(p["wake_max_edits"]))
+        stop = wake.is_stop(text, p["wake_word"], int(p["wake_max_edits"]), int(p["stop_wake_max_edits"]))
         if stop:
             self.pub_stop.publish(String(data=stop))          # immediate, never behind the engine
             self.stats["n_stop"] += 1
@@ -190,7 +194,10 @@ class IntentNode(Node):
         else:
             cmd = wake.normalise(text)
         with self._cv:
-            self._q.append((text, cmd, self.bearing, time.time(), m))
+            # the bearing of THIS utterance: the last finished speech burst, not the
+            # latest message, which may already be the next talker (see bearing.py)
+            bearing = self.bearings.for_utterance(time.monotonic())
+            self._q.append((text, cmd, bearing, time.time(), m))
             self._cv.notify()
 
     def _decide(self, decision, text, m, **more):
@@ -310,7 +317,7 @@ class IntentNode(Node):
             "n_error": s["n_error"],
             "mean_latency_s": round(sum(lat) / len(lat), 4) if lat else None,
             "queue_depth": len(self._q) + (1 if self._busy else 0),
-            "require_wake": bool(self.p["require_wake"]), "bearing_deg": self.bearing,
+            "require_wake": bool(self.p["require_wake"]), "bearing_deg": self.bearings.latest,
             "stamp": time.time()})))
 
     def shutdown(self):

@@ -1,4 +1,4 @@
-== out_clean1s: scene 'clean_speech' rt60 0.59 s
+== fix_clean: scene 'clean_speech' rt60 0.59 s
 reference                                | transcript                              
 Artaban go back to base                  | Artaban go back to base.                  (0/5)
 Artaban check the gas pressure           | Artaban check the gas pressure.           (0/5)
@@ -7,18 +7,18 @@ Artaban follow me                        | Artaban follow me.                   
 Artaban start inspection                 | Artaban start inspection.                 (0/3)
 Artaban stop the inspection              | Artaban stop the inspection.              (0/4)
 WER 0.0% over 23 words; 6 transcripts for 6 commands
-  decision plan     'Artaban go back to base.'                    tasks=['goto'] conf=1.0 0.9777s
-  decision plan     'Artaban check the gas pressure.'             tasks=['read_meter'] conf=0.997 0.977s
-  decision plan     'Artaban sit down.'                           tasks=['posture'] conf=1.0 0.5627s
-  decision plan     'Artaban follow me.'                          tasks=['follow_me'] conf=1.0 0.4261s
-  decision plan     'Artaban start inspection.'                   tasks=['inspection'] conf=0.999 0.6081s
-  decision plan     'Artaban stop the inspection.'                tasks=['inspection'] conf=0.999 0.5325s
+  decision plan     'Artaban go back to base.'                    tasks=['goto'] conf=1.0 1.3521s
+  decision plan     'Artaban check the gas pressure.'             tasks=['read_meter'] conf=0.997 0.6309s
+  decision plan     'Artaban sit down.'                           tasks=['posture'] conf=1.0 1.052s
+  decision plan     'Artaban follow me.'                          tasks=['follow_me'] conf=1.0 0.5807s
+  decision plan     'Artaban start inspection.'                   tasks=['inspection'] conf=0.999 0.7893s
+  decision plan     'Artaban stop the inspection.'                tasks=['inspection'] conf=0.999 0.424s
   doa  truth  194.9  est  191.0  err   3.9  (11 msgs)  Artaban go back to base
   doa  truth  152.2  est  150.0  err   2.2  (12 msgs)  Artaban check the gas pressure
   doa  truth   44.7  est   37.0  err   7.7  (10 msgs)  Artaban sit down
-  doa  truth  140.0  est  141.0  err   1.0  (10 msgs)  Artaban follow me
+  doa  truth  140.0  est  141.0  err   1.0  (9 msgs)  Artaban follow me
   doa  truth  111.7  est  114.0  err   2.3  (11 msgs)  Artaban start inspection
   doa  truth  128.8  est  126.0  err   2.8  (12 msgs)  Artaban stop the inspection
 DoA mean abs error 3.3 deg, within 20 deg: 6/6
-voice_mod delay (mean ms): buffer_ms=1774, queue_ms=0, infer_ms=315, publish_ms=1, total_ms=2090
-stt lag_s: 2.85, 3.33, 2.91, 2.87, 2.53, 3.04
+voice_mod delay (mean ms): buffer_ms=1831, queue_ms=0, infer_ms=300, publish_ms=1, total_ms=2133
+stt lag_s: 2.73, 3.12, 2.99, 2.92, 2.54, 2.96

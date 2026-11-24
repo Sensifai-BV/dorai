@@ -85,6 +85,8 @@ def msgs(n, key):
     ("hey artaban emergency stop", "estop"), ("stop please", "stop"), ("stop moving", "stop"),
     ("stob", "stop"), ("stopp", "stop"), ("halt now", "stop"),
     ("Arduban stopped", "stop"), ("Artaban stopped.", "stop"),            # ASR spellings of "Artaban stop."
+    ("Fargan stop.", "stop"), ("Padaban stop.", "stop"),                 # name mangled by machine noise
+    ("Arthur, emergency stop!", "estop"),
 ])
 def test_is_stop_positive(text, exp):
     assert wake.is_stop(text) == exp
@@ -93,7 +95,8 @@ def test_is_stop_positive(text, exp):
 @pytest.mark.parametrize("text", [
     "stop welding", "artaban stop welding", "start welding", "don't stop", "do not stop",
     "never stop", "go to welder a", "step forward", "the weather is nice", "", "   ",
-    "stop the gripper", "I stopped by the shop",
+    "stop the gripper", "I stopped by the shop", "Fargan stop welding", "Padaban don't stop",
+    "bus stop is near",
 ])
 def test_is_stop_negative(text):
     assert wake.is_stop(text) is None
@@ -215,9 +218,21 @@ def test_default_roots_order(monkeypatch, tmp_path):
 
 
 # -------------------------------------------------------------------- node
-def test_node_plan_inspect_meter(make_node):
+class _Clock:
+    """Stands in for time.monotonic so a test can let time pass."""
+    def __init__(self, t=1000.0):
+        self.t = t
+
+    def __call__(self):
+        return self.t
+
+
+def test_node_plan_inspect_meter(make_node, monkeypatch):
+    clock = _Clock()
+    monkeypatch.setattr(node_mod.time, "monotonic", clock)
     n = make_node()
     n.subs["/dorai_doa"](rosmock.Float32(42.5))
+    clock.t += 2.0                        # the utterance ended, its transcript arrives later
     say(n, "Artaban, go to welding device X for check meter.")
     assert n.wait_idle()
     out = json.loads(msgs(n, "plan_topic")[0])
@@ -589,3 +604,51 @@ def test_node_decisions_are_published_but_not_logged_without_debug(make_node):
     assert n.wait_idle()
     assert [x["decision"] for x in decisions(n)] == ["ignored", "plan"]       # the ignored one is decided at once
     assert not [msg for lvl, msg in n.get_logger().lines if msg.startswith("decision ")]
+
+
+# ------------------------------------------------------- bearing per utterance
+from intent_mod.bearing import BearingHistory  # noqa: E402
+
+
+def _burst(h, t0, bearing, n=8, dt=0.2):
+    for i in range(n):
+        h.add(t0 + i * dt, bearing)
+
+
+def test_bearing_is_the_finished_burst_not_the_next_talker():
+    # "go back to base" at 195 deg until t=5.4; transcript arrives at t=7.9, while
+    # the next talker (150 deg) has been speaking since t=7.5
+    h = BearingHistory(gap_s=0.6)
+    _burst(h, 4.0, 195.0)
+    _burst(h, 7.5, 150.0, n=3)
+    assert h.latest == 150.0
+    assert h.for_utterance(7.9) == 195.0
+
+
+def test_bearing_uses_the_settled_end_of_the_burst():
+    h = BearingHistory(gap_s=0.6)
+    for i, b in enumerate([10.0, 30.0, 41.0, 44.0]):
+        h.add(1.0 + 0.2 * i, b)
+    assert h.for_utterance(3.0) == 44.0
+
+
+def test_bearing_none_without_a_finished_or_recent_burst():
+    h = BearingHistory(gap_s=0.6, max_age_s=20.0)
+    assert h.for_utterance(5.0) is None
+    _burst(h, 1.0, 90.0)
+    assert h.for_utterance(1.0 + 7 * 0.2 + 0.1) is None    # still speaking
+    assert h.for_utterance(40.0) is None                     # too old
+
+
+def test_node_plan_gets_its_own_bearing(make_node, monkeypatch):
+    clock = _Clock()
+    monkeypatch.setattr(node_mod.time, "monotonic", clock)
+    n = make_node()
+    for _ in range(5):
+        n.subs["/dorai_doa"](rosmock.Float32(195.0)); clock.t += 0.2
+    clock.t += 2.0
+    for _ in range(2):
+        n.subs["/dorai_doa"](rosmock.Float32(150.0)); clock.t += 0.2
+    say(n, "Artaban, go back to base.")
+    assert n.wait_idle()
+    assert json.loads(msgs(n, "plan_topic")[0])["bearing_deg"] == 195.0

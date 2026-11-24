@@ -18,4 +18,7 @@ intent_mod:
     require_wake: true      # false: every transcript is a command (stop always works either way)
     wake_word: artaban
     wake_max_edits: 2
+    stop_wake_max_edits: 4  # looser name match in front of a stop ("Fargan stop")
+    doa_burst_gap_s: 0.6    # a plan gets the bearing of its own utterance's speech burst
+    doa_max_age_s: 20.0
     status_period_s: 5.0

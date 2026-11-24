@@ -8,7 +8,7 @@ Contract and labelling conventions: [intent_design.md](intent_design.md).
 | Dir | Topic | Type | Content |
 |---|---|---|---|
 | in | `/dorai_transcript` | String | final text |
-| in | `/dorai_doa` | Float32 | talker bearing, degrees (latest cached, attached to the next plan) |
+| in | `/dorai_doa` | Float32 | talker bearing, degrees. doa_mod publishes in bursts while someone speaks; a plan gets the last bearing of the most recent **finished** burst, i.e. its own utterance, not the next talker's (`doa_burst_gap_s`, `doa_max_age_s`) |
 | out | `/dorai_stop` | String | `stop` \| `estop` |
 | out | `/dorai_plan` | String | JSON `{"text","plan","bearing_deg","engine","latency_s","stamp","confidence","min_token_prob","wake_edits"}`; actionable, validated plans only |
 | out | `/dorai_say` | String | spoken question/refusal for tts_mod (clarify, invalid or failed engine output) |
@@ -50,6 +50,10 @@ without the wake word, and with no model installed. It fires only when the utter
 nothing but a stop request (stop / halt / freeze / emergency stop / e-stop / "stop stop",
 fuzzy on ASR errors such as `stob`, `stopp`). `stop welding` is a weld task; `don't stop`
 is not a stop. Stop utterances are never forwarded to the engine.
+
+The name in front of a stop is matched more loosely than for commands (`stop_wake_max_edits`, 4
+edits instead of `wake_max_edits` 2): under machine noise ASR mangles the name first ("Fargan stop.",
+"Padaban stop."), and a missed stop is the dangerous error while a spurious one only halts the robot.
 
 ## Wake word
 `strip_wake()` matches the first 1–3 tokens (after an optional hey/ok) to `wake_word`

@@ -24,20 +24,23 @@ header, length and level instead of the samples). `<scene>.score.txt` is the sco
 
 | Scene | Room | WER | Plans correct | DoA mean error | Capture → transcript | Intent LLM |
 |---|---|---|---|---|---|---|
-| clean_speech | workshop, RT60 0.59 s | 0 % (23 words) | 6 / 6 | 3.3° (6/6 within 20°) | 2.5 – 3.3 s | 0.43 – 0.98 s |
-| factory_welding_0db | factory, RT60 1.2 s, welding at 0 dB SNR | 52 % | 3 / 6 (2 ignored, 1 clarify) | 73° (3/6 within 20°) | 2.5 – 3.1 s | 0.47 – 1.01 s |
+| clean_speech | workshop, RT60 0.59 s | 0 % (23 words) | 6 / 6, each with its own talker's bearing | 3.3° (6/6 within 20°) | 2.5 – 3.1 s | 0.42 – 1.35 s |
+| factory_welding_0db | factory, RT60 1.2 s, welding at 0 dB SNR | 52 % | 3 / 6 + the stop (1 ignored, 1 clarify) | 73° (3/6 within 20°) | 2.6 – 3.2 s | 0.76 – 0.96 s |
 
-voice_mod per 1 s frame: inference 0.29 – 0.32 s (real-time factor ≈ 0.3), publish < 2 ms, no queueing.
+voice_mod per 1 s frame: inference ≈ 0.30 s (real-time factor ≈ 0.3), publish < 2 ms, no queueing.
 
-Known issues found by these runs:
+Fixed after the first runs (intent_mod):
+
+* `/dorai_plan.bearing_deg` used to be the latest bearing when the plan was published, about 3.5 s
+  after the utterance, which could be the next talker's ("go back to base" said at 191–199° got 148°).
+  It is now the last bearing of the most recent finished speech burst, i.e. its own utterance (191°).
+* "Artaban stop" misheard as "Fargan stop." was ignored. The name in front of a stop is now
+  matched with up to 4 edits (`stop_wake_max_edits`), and `/dorai_stop` fires.
+
+Open issues:
 
 * In the factory scene doa_mod locks onto the welding source (~46°) when the talker is
   quieter than the machine; the speech gate does not reject the welder's broadband noise.
-* `/dorai_plan.bearing_deg` is the bearing cached when the plan is published, about 3.5 s after
-  the utterance, so it can belong to the next talker (clean scene: "go back to base" said at
-  191–199°, plan carries 148°). It should be the bearing measured during the utterance.
-* "Artaban stop" misheard as "Fargan stop." was ignored: the stop gate only fires when the
-  whole utterance is a stop word, so a mangled wake word before "stop" blocks it.
 * `/dorai_stt/status` contains `NaN` (`rtf` before the first final), which strict JSON parsers reject.
 
 ## One real message per topic (clean_speech)
@@ -74,13 +77,20 @@ Known issues found by these runs:
 
 // /dorai_plan
 {"text": "Artaban go back to base.", "plan": {"steps": [{"task": "goto", "target": "base"}]},
- "bearing_deg": 148.0, "engine": "llm", "latency_s": 0.9777, "stamp": 1795540920.06,
+ "bearing_deg": 191.0, "engine": "llm", "latency_s": 1.3521, "stamp": 1795541530.78,
  "confidence": 1.0, "min_token_prob": 0.999, "wake_edits": 0}
 
 // /dorai_intent/decision
 {"text": "Artaban go back to base.", "decision": "plan", "addressed": true, "wake_heard": "artaban",
  "wake_edits": 0, "wake_confidence": 1.0, "command": "go back to base", "engine": "llm",
- "confidence": 1.0, "min_token_prob": 0.999, "latency_s": 0.9777, "tasks": ["goto"]}
+ "confidence": 1.0, "min_token_prob": 0.999, "latency_s": 1.3521, "tasks": ["goto"]}
+
+// /dorai_stop  (factory scene, "Fargan stop." with the name mangled by welding noise)
+"stop"
+
+// /dorai_intent/decision for it
+{"text": "Fargan stop.", "decision": "stop", "addressed": false, "wake_heard": "fargan",
+ "wake_edits": 4, "wake_confidence": 0.43, "tasks": []}
 
 // /dorai_intent/status
 {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 0, "n_clarify": 0, "n_none": 0,
