@@ -1,320 +1,321 @@
-{"t": 6.943, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": NaN, "backlog_s": 0.0, "busy": false, "audio_s": 0.0, "finals": 0, "lag_median_s": null}}
-{"t": 11.944, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": NaN, "backlog_s": 0.0, "busy": false, "audio_s": 0.0, "finals": 0, "lag_median_s": null}}
-{"t": 12.97, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 0, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": null, "queue_depth": 0, "require_wake": true, "bearing_deg": null, "stamp": 1795541517.7493963}}
-{"t": 16.944, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": NaN, "backlog_s": 0.0, "busy": false, "audio_s": 0.0, "finals": 0, "lag_median_s": null}}
-{"t": 17.585, "topic": "/dorai_sim/truth", "data": {"event": "scene", "name": "clean_speech", "seconds": 30.06, "room": {"name": "workshop", "size": [7.0, 5.5, 3.0], "rt60_target_s": null, "rt60_s": 0.59}, "commands": [{"text": "Artaban go back to base", "file": "CMD004_karen_165.wav", "t0": 3.0, "t1": 4.95, "bearing_deg": 194.9, "distance_m": 1.9, "elevation_deg": 30.1}, {"text": "Artaban check the gas pressure", "file": "CMD010_karen_165.wav", "t0": 7.45, "t1": 9.5, "bearing_deg": 152.2, "distance_m": 1.08, "elevation_deg": 45.4}, {"text": "Artaban sit down", "file": "CMD008_karen_165.wav", "t0": 12.0, "t1": 13.55, "bearing_deg": 44.7, "distance_m": 3.01, "elevation_deg": 20.1}, {"text": "Artaban follow me", "file": "CMD009_karen_165.wav", "t0": 16.05, "t1": 17.62, "bearing_deg": 140.0, "distance_m": 1.41, "elevation_deg": 38.1}, {"text": "Artaban start inspection", "file": "CMD005_karen_185.wav", "t0": 20.12, "t1": 22.03, "bearing_deg": 111.7, "distance_m": 2.46, "elevation_deg": 24.1}, {"text": "Artaban stop the inspection", "file": "CMD006_karen_185.wav", "t0": 24.53, "t1": 26.56, "bearing_deg": 128.8, "distance_m": 2.71, "elevation_deg": 22.1}], "noise": [], "stamp": 1795541522.3636723}}
-{"t": 17.969, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 0, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": null, "queue_depth": 0, "require_wake": true, "bearing_deg": null, "stamp": 1795541522.7480989}}
-{"t": 19.235, "topic": "/dorai_clean_audio", "header": {"capture_s": 16.645, "rate": 16000.0, "channels": 1, "seq": 0}, "samples": 14976, "duration_s": 0.936, "rms_dbfs": -83.1, "peak": 0.001}
-{"t": 20.232, "topic": "/dorai_clean_audio", "header": {"capture_s": 17.645, "rate": 16000.0, "channels": 1, "seq": 1}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -83.9, "peak": 0.0}
-{"t": 20.59, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "start", "index": 0, "text": "Artaban go back to base", "file": "CMD004_karen_165.wav", "t0": 3.0, "t1": 4.95, "bearing_deg": 194.9, "distance_m": 1.9, "elevation_deg": 30.1, "stamp": 1795541525.3696384}}
-{"t": 20.736, "topic": "/dorai_doa", "data": 199.0}
-{"t": 20.737, "topic": "/dorai_doa/state", "data": [2.976, 199.0, 0.584, 1.0, 1.0, 0.0]}
-{"t": 20.737, "topic": "/dorai_doa/human", "data": "bearing 199.0 deg  |  5 o'clock from the array's 0 deg mark  |  confidence 0.58  |  frame gate 100%  |  t    3.0s  seq 0"}
-{"t": 20.927, "topic": "/dorai_doa", "data": 194.0}
-{"t": 20.927, "topic": "/dorai_doa/state", "data": [3.2, 194.0, 0.592, 0.5, 1.0, 1.0]}
-{"t": 20.927, "topic": "/dorai_doa/human", "data": "bearing 194.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  50%  |  t    3.2s  seq 1"}
-{"t": 21.207, "topic": "/dorai_doa", "data": 195.0}
-{"t": 21.208, "topic": "/dorai_doa/state", "data": [3.424, 195.0, 0.596, 0.4, 1.0, 2.0]}
-{"t": 21.208, "topic": "/dorai_doa/human", "data": "bearing 195.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  40%  |  t    3.4s  seq 2"}
-{"t": 21.231, "topic": "/dorai_clean_audio", "header": {"capture_s": 18.645, "rate": 16000.0, "channels": 1, "seq": 2}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -83.9, "peak": 0.0}
-{"t": 21.427, "topic": "/dorai_doa", "data": 186.0}
-{"t": 21.427, "topic": "/dorai_doa/state", "data": [3.648, 186.0, 0.58, 0.364, 1.0, 3.0]}
-{"t": 21.428, "topic": "/dorai_doa/human", "data": "bearing 186.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.58  |  frame gate  36%  |  t    3.6s  seq 3"}
-{"t": 21.631, "topic": "/dorai_doa", "data": 191.0}
-{"t": 21.632, "topic": "/dorai_doa/state", "data": [3.872, 191.0, 0.586, 0.444, 1.0, 4.0]}
-{"t": 21.632, "topic": "/dorai_doa/human", "data": "bearing 191.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  44%  |  t    3.9s  seq 4"}
-{"t": 21.831, "topic": "/dorai_doa", "data": 193.0}
-{"t": 21.831, "topic": "/dorai_doa/state", "data": [4.096, 193.0, 0.599, 0.485, 1.0, 5.0]}
-{"t": 21.832, "topic": "/dorai_doa/human", "data": "bearing 193.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  48%  |  t    4.1s  seq 5"}
-{"t": 21.941, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.004, "backlog_s": 0.0, "busy": false, "audio_s": 2.9, "finals": 0, "lag_median_s": null}}
-{"t": 22.109, "topic": "/dorai_doa", "data": 192.0}
-{"t": 22.109, "topic": "/dorai_doa/state", "data": [4.32, 192.0, 0.599, 0.45, 1.0, 6.0]}
-{"t": 22.11, "topic": "/dorai_doa/human", "data": "bearing 192.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  45%  |  t    4.3s  seq 6"}
-{"t": 22.237, "topic": "/dorai_clean_audio", "header": {"capture_s": 19.645, "rate": 16000.0, "channels": 1, "seq": 3}, "samples": 16384, "duration_s": 1.024, "rms_dbfs": -30.2, "peak": 0.13}
-{"t": 22.322, "topic": "/dorai_doa", "data": 193.0}
-{"t": 22.323, "topic": "/dorai_doa/state", "data": [4.544, 193.0, 0.593, 0.489, 1.0, 7.0]}
-{"t": 22.323, "topic": "/dorai_doa/human", "data": "bearing 193.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  49%  |  t    4.5s  seq 7"}
-{"t": 22.518, "topic": "/dorai_doa", "data": 191.0}
-{"t": 22.519, "topic": "/dorai_doa/state", "data": [4.768, 191.0, 0.598, 0.444, 1.0, 8.0]}
-{"t": 22.519, "topic": "/dorai_doa/human", "data": "bearing 191.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  44%  |  t    4.8s  seq 8"}
-{"t": 22.538, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "end", "index": 0, "text": "Artaban go back to base", "file": "CMD004_karen_165.wav", "t0": 3.0, "t1": 4.95, "bearing_deg": 194.9, "distance_m": 1.9, "elevation_deg": 30.1, "stamp": 1795541527.317739}}
-{"t": 22.735, "topic": "/dorai_doa", "data": 191.0}
-{"t": 22.735, "topic": "/dorai_doa/state", "data": [4.992, 191.0, 0.6, 0.429, 0.0, 9.0]}
-{"t": 22.735, "topic": "/dorai_doa/human", "data": "bearing 191.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  43%  |  t    5.0s  seq 9"}
-{"t": 22.973, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 0, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": null, "queue_depth": 0, "require_wake": true, "bearing_deg": 191.0, "stamp": 1795541527.7520437}}
-{"t": 23.003, "topic": "/dorai_doa", "data": 191.0}
-{"t": 23.003, "topic": "/dorai_doa/state", "data": [5.216, 191.0, 0.6, 0.429, 0.0, 10.0]}
-{"t": 23.004, "topic": "/dorai_doa/human", "data": "bearing 191.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  43%  |  t    5.2s  seq 10"}
-{"t": 23.217, "topic": "/dorai_doa", "data": 191.0}
-{"t": 23.217, "topic": "/dorai_doa/state", "data": [5.44, 191.0, 0.6, 0.429, 0.0, 11.0]}
-{"t": 23.217, "topic": "/dorai_doa/human", "data": "bearing 191.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  43%  |  t    5.4s  seq 11"}
-{"t": 23.229, "topic": "/dorai_clean_audio", "header": {"capture_s": 20.645, "rate": 16000.0, "channels": 1, "seq": 4}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -28.3, "peak": 0.235}
-{"t": 24.236, "topic": "/dorai_clean_audio", "header": {"capture_s": 21.645, "rate": 16000.0, "channels": 1, "seq": 5}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -66.7, "peak": 0.007}
-{"t": 25.035, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "start", "index": 1, "text": "Artaban check the gas pressure", "file": "CMD010_karen_165.wav", "t0": 7.45, "t1": 9.5, "bearing_deg": 152.2, "distance_m": 1.08, "elevation_deg": 45.4, "stamp": 1795541529.814017}}
-{"t": 25.204, "topic": "/dorai_doa", "data": 146.0}
-{"t": 25.204, "topic": "/dorai_doa/state", "data": [7.424, 146.0, 0.572, 0.421, 1.0, 12.0]}
-{"t": 25.205, "topic": "/dorai_doa/human", "data": "bearing 146.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.57  |  frame gate  42%  |  t    7.4s  seq 12"}
-{"t": 25.245, "topic": "/dorai_clean_audio", "header": {"capture_s": 22.644, "rate": 16000.0, "channels": 1, "seq": 6}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -77.9, "peak": 0.001}
-{"t": 25.415, "topic": "/dorai_doa", "data": 152.0}
-{"t": 25.415, "topic": "/dorai_doa/state", "data": [7.648, 152.0, 0.588, 0.438, 1.0, 13.0]}
-{"t": 25.415, "topic": "/dorai_doa/human", "data": "bearing 152.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  44%  |  t    7.6s  seq 13"}
-{"t": 25.636, "topic": "/dorai_doa", "data": 148.0}
-{"t": 25.637, "topic": "/dorai_doa/state", "data": [7.872, 148.0, 0.585, 0.408, 1.0, 14.0]}
-{"t": 25.637, "topic": "/dorai_doa/human", "data": "bearing 148.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  41%  |  t    7.9s  seq 14"}
-{"t": 25.831, "topic": "/dorai_doa", "data": 148.0}
-{"t": 25.831, "topic": "/dorai_doa/state", "data": [8.096, 148.0, 0.561, 0.423, 1.0, 15.0]}
-{"t": 25.833, "topic": "/dorai_doa/human", "data": "bearing 148.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.56  |  frame gate  42%  |  t    8.1s  seq 15"}
-{"t": 26.002, "topic": "/dorai_transcript", "data": "Artaban go back to base."}
-{"t": 26.005, "topic": "/dorai_stt/metrics", "data": {"t_wall": 1795541530.781, "model": "whisper/large-v3-turbo-dorai-artaban", "text": "Artaban go back to base.", "n_words": 5, "stream_pos_s": 4.97, "window_s": 4.97, "lag_s": 2.725, "rtf_window": 0.004, "rtf_total": 0.004, "backlog_s": 0.99, "snr_est_db": 21.6, "speech_dbfs": -28.2, "noise_dbfs": -49.8, "speech_frac": 0.323, "cpu_temp_c": null, "cpu_freq_mhz": 2000, "load1": 2.64, "proc_cpu_pct": 14.8}}
-{"t": 26.109, "topic": "/dorai_doa", "data": 150.0}
-{"t": 26.111, "topic": "/dorai_doa/state", "data": [8.32, 150.0, 0.564, 0.452, 1.0, 16.0]}
-{"t": 26.111, "topic": "/dorai_doa/human", "data": "bearing 150.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.56  |  frame gate  45%  |  t    8.3s  seq 16"}
-{"t": 26.33, "topic": "/dorai_doa", "data": 149.0}
-{"t": 26.331, "topic": "/dorai_doa/state", "data": [8.544, 149.0, 0.569, 0.451, 1.0, 17.0]}
-{"t": 26.331, "topic": "/dorai_doa/human", "data": "bearing 149.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.57  |  frame gate  45%  |  t    8.5s  seq 17"}
-{"t": 26.361, "topic": "/dorai_clean_audio", "header": {"capture_s": 23.644, "rate": 16000.0, "channels": 1, "seq": 7}, "samples": 16384, "duration_s": 1.024, "rms_dbfs": -27.8, "peak": 0.227}
-{"t": 26.524, "topic": "/dorai_doa", "data": 147.0}
-{"t": 26.524, "topic": "/dorai_doa/state", "data": [8.768, 147.0, 0.569, 0.449, 1.0, 18.0]}
-{"t": 26.524, "topic": "/dorai_doa/human", "data": "bearing 147.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.57  |  frame gate  45%  |  t    8.8s  seq 18"}
-{"t": 26.724, "topic": "/dorai_doa", "data": 151.0}
-{"t": 26.724, "topic": "/dorai_doa/state", "data": [8.992, 151.0, 0.569, 0.448, 1.0, 19.0]}
-{"t": 26.724, "topic": "/dorai_doa/human", "data": "bearing 151.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.57  |  frame gate  45%  |  t    9.0s  seq 19"}
-{"t": 26.946, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.226, "backlog_s": 0.0, "busy": false, "audio_s": 7.9, "finals": 1, "lag_median_s": 2.73}}
-{"t": 27.009, "topic": "/dorai_doa", "data": 150.0}
-{"t": 27.009, "topic": "/dorai_doa/state", "data": [9.216, 150.0, 0.577, 0.438, 1.0, 20.0]}
-{"t": 27.009, "topic": "/dorai_doa/human", "data": "bearing 150.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.58  |  frame gate  44%  |  t    9.2s  seq 20"}
-{"t": 27.086, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "end", "index": 1, "text": "Artaban check the gas pressure", "file": "CMD010_karen_165.wav", "t0": 7.45, "t1": 9.5, "bearing_deg": 152.2, "distance_m": 1.08, "elevation_deg": 45.4, "stamp": 1795541531.8651342}}
-{"t": 27.216, "topic": "/dorai_doa", "data": 149.0}
-{"t": 27.216, "topic": "/dorai_doa/state", "data": [9.44, 149.0, 0.568, 0.429, 1.0, 21.0]}
-{"t": 27.216, "topic": "/dorai_doa/human", "data": "bearing 149.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.57  |  frame gate  43%  |  t    9.4s  seq 21"}
-{"t": 27.271, "topic": "/dorai_clean_audio", "header": {"capture_s": 24.644, "rate": 16000.0, "channels": 1, "seq": 8}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -25.3, "peak": 0.369}
-{"t": 27.355, "topic": "/dorai_plan", "data": {"text": "Artaban go back to base.", "plan": {"steps": [{"task": "goto", "target": "base"}]}, "bearing_deg": 191.0, "engine": "llm", "latency_s": 1.3521, "stamp": 1795541530.7814963, "confidence": 1.0, "min_token_prob": 0.999, "wake_edits": 0}}
-{"t": 27.355, "topic": "/dorai_intent/decision", "data": {"text": "Artaban go back to base.", "decision": "plan", "addressed": true, "wake_heard": "artaban", "wake_edits": 0, "wake_confidence": 1.0, "command": "go back to base", "engine": "llm", "confidence": 1.0, "min_token_prob": 0.999, "latency_s": 1.3521, "tasks": ["goto"], "stamp": 1795541532.134124}}
-{"t": 27.422, "topic": "/dorai_doa", "data": 150.0}
-{"t": 27.423, "topic": "/dorai_doa/state", "data": [9.664, 150.0, 0.564, 0.425, 0.0, 22.0]}
-{"t": 27.423, "topic": "/dorai_doa/human", "data": "bearing 150.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.56  |  frame gate  42%  |  t    9.7s  seq 22"}
-{"t": 27.627, "topic": "/dorai_doa", "data": 150.0}
-{"t": 27.627, "topic": "/dorai_doa/state", "data": [9.888, 150.0, 0.564, 0.425, 0.0, 23.0]}
-{"t": 27.627, "topic": "/dorai_doa/human", "data": "bearing 150.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.56  |  frame gate  42%  |  t    9.9s  seq 23"}
-{"t": 27.904, "topic": "/dorai_doa", "data": 150.0}
-{"t": 27.905, "topic": "/dorai_doa/state", "data": [10.112, 150.0, 0.564, 0.425, 0.0, 24.0]}
-{"t": 27.905, "topic": "/dorai_doa/human", "data": "bearing 150.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.56  |  frame gate  42%  |  t   10.1s  seq 24"}
-{"t": 27.973, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 1, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 1.3521, "queue_depth": 0, "require_wake": true, "bearing_deg": 150.0, "stamp": 1795541532.7522318}}
-{"t": 28.233, "topic": "/dorai_clean_audio", "header": {"capture_s": 25.644, "rate": 16000.0, "channels": 1, "seq": 9}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -25.6, "peak": 0.334}
-{"t": 29.229, "topic": "/dorai_clean_audio", "header": {"capture_s": 26.644, "rate": 16000.0, "channels": 1, "seq": 10}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -74.5, "peak": 0.001}
-{"t": 29.591, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "start", "index": 2, "text": "Artaban sit down", "file": "CMD008_karen_165.wav", "t0": 12.0, "t1": 13.55, "bearing_deg": 44.7, "distance_m": 3.01, "elevation_deg": 20.1, "stamp": 1795541534.3697262}}
-{"t": 29.721, "topic": "/dorai_doa", "data": 40.0}
-{"t": 29.722, "topic": "/dorai_doa/state", "data": [11.968, 40.0, 0.608, 0.421, 1.0, 25.0]}
-{"t": 29.722, "topic": "/dorai_doa/human", "data": "bearing  40.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.61  |  frame gate  42%  |  t   12.0s  seq 25"}
-{"t": 29.931, "topic": "/dorai_doa", "data": 37.0}
-{"t": 29.931, "topic": "/dorai_doa/state", "data": [12.192, 37.0, 0.607, 0.414, 1.0, 26.0]}
-{"t": 29.931, "topic": "/dorai_doa/human", "data": "bearing  37.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.61  |  frame gate  41%  |  t   12.2s  seq 26"}
-{"t": 30.209, "topic": "/dorai_doa", "data": 40.0}
-{"t": 30.209, "topic": "/dorai_doa/state", "data": [12.416, 40.0, 0.606, 0.407, 1.0, 27.0]}
-{"t": 30.209, "topic": "/dorai_doa/human", "data": "bearing  40.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.61  |  frame gate  41%  |  t   12.4s  seq 27"}
-{"t": 30.254, "topic": "/dorai_clean_audio", "header": {"capture_s": 27.645, "rate": 16000.0, "channels": 1, "seq": 11}, "samples": 16384, "duration_s": 1.024, "rms_dbfs": -74.6, "peak": 0.001}
-{"t": 30.411, "topic": "/dorai_doa", "data": 40.0}
-{"t": 30.411, "topic": "/dorai_doa/state", "data": [12.64, 40.0, 0.637, 0.408, 1.0, 28.0]}
-{"t": 30.412, "topic": "/dorai_doa/human", "data": "bearing  40.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.64  |  frame gate  41%  |  t   12.6s  seq 28"}
-{"t": 30.613, "topic": "/dorai_doa", "data": 41.0}
-{"t": 30.614, "topic": "/dorai_doa/state", "data": [12.864, 41.0, 0.635, 0.399, 1.0, 29.0]}
-{"t": 30.614, "topic": "/dorai_doa/human", "data": "bearing  41.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.64  |  frame gate  40%  |  t   12.9s  seq 29"}
-{"t": 30.825, "topic": "/dorai_doa", "data": 41.0}
-{"t": 30.825, "topic": "/dorai_doa/state", "data": [13.088, 41.0, 0.626, 0.381, 1.0, 30.0]}
-{"t": 30.825, "topic": "/dorai_doa/human", "data": "bearing  41.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.63  |  frame gate  38%  |  t   13.1s  seq 30"}
-{"t": 31.036, "topic": "/dorai_transcript", "data": "Artaban check the gas pressure."}
-{"t": 31.038, "topic": "/dorai_stt/metrics", "data": {"t_wall": 1795541535.816, "model": "whisper/large-v3-turbo-dorai-artaban", "text": "Artaban check the gas pressure.", "n_words": 5, "stream_pos_s": 9.61, "window_s": 4.64, "lag_s": 3.122, "rtf_window": 0.358, "rtf_total": 0.182, "backlog_s": 1.02, "snr_est_db": 53.2, "speech_dbfs": -25.0, "noise_dbfs": -78.2, "speech_frac": 0.496, "cpu_temp_c": null, "cpu_freq_mhz": 2000, "load1": 2.67, "proc_cpu_pct": 72.1}}
-{"t": 31.101, "topic": "/dorai_doa", "data": 39.0}
-{"t": 31.102, "topic": "/dorai_doa/state", "data": [13.312, 39.0, 0.624, 0.383, 1.0, 31.0]}
-{"t": 31.102, "topic": "/dorai_doa/human", "data": "bearing  39.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.62  |  frame gate  38%  |  t   13.3s  seq 31"}
-{"t": 31.136, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "end", "index": 2, "text": "Artaban sit down", "file": "CMD008_karen_165.wav", "t0": 12.0, "t1": 13.55, "bearing_deg": 44.7, "distance_m": 3.01, "elevation_deg": 20.1, "stamp": 1795541535.9154487}}
-{"t": 31.302, "topic": "/dorai_clean_audio", "header": {"capture_s": 28.644, "rate": 16000.0, "channels": 1, "seq": 12}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -25.9, "peak": 0.265}
-{"t": 31.305, "topic": "/dorai_doa", "data": 37.0}
-{"t": 31.305, "topic": "/dorai_doa/state", "data": [13.536, 37.0, 0.63, 0.369, 0.0, 32.0]}
-{"t": 31.305, "topic": "/dorai_doa/human", "data": "bearing  37.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.63  |  frame gate  37%  |  t   13.5s  seq 32"}
-{"t": 31.521, "topic": "/dorai_doa", "data": 37.0}
-{"t": 31.522, "topic": "/dorai_doa/state", "data": [13.76, 37.0, 0.63, 0.369, 0.0, 33.0]}
-{"t": 31.522, "topic": "/dorai_doa/human", "data": "bearing  37.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.63  |  frame gate  37%  |  t   13.8s  seq 33"}
-{"t": 31.669, "topic": "/dorai_plan", "data": {"text": "Artaban check the gas pressure.", "plan": {"steps": [{"task": "read_meter"}]}, "bearing_deg": 150.0, "engine": "llm", "latency_s": 0.6309, "stamp": 1795541535.8173127, "confidence": 0.997, "min_token_prob": 0.974, "wake_edits": 0}}
-{"t": 31.67, "topic": "/dorai_intent/decision", "data": {"text": "Artaban check the gas pressure.", "decision": "plan", "addressed": true, "wake_heard": "artaban", "wake_edits": 0, "wake_confidence": 1.0, "command": "check the gas pressure", "engine": "llm", "confidence": 0.997, "min_token_prob": 0.974, "latency_s": 0.6309, "tasks": ["read_meter"], "stamp": 1795541536.4485903}}
-{"t": 31.734, "topic": "/dorai_doa", "data": 37.0}
-{"t": 31.735, "topic": "/dorai_doa/state", "data": [13.984, 37.0, 0.63, 0.369, 0.0, 34.0]}
-{"t": 31.735, "topic": "/dorai_doa/human", "data": "bearing  37.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.63  |  frame gate  37%  |  t   14.0s  seq 34"}
-{"t": 31.941, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.28, "backlog_s": 0.0, "busy": false, "audio_s": 12.9, "finals": 2, "lag_median_s": 2.92}}
-{"t": 32.009, "topic": "/dorai_doa", "data": 37.0}
-{"t": 32.01, "topic": "/dorai_doa/state", "data": [14.208, 37.0, 0.63, 0.369, 0.0, 35.0]}
-{"t": 32.01, "topic": "/dorai_doa/human", "data": "bearing  37.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.63  |  frame gate  37%  |  t   14.2s  seq 35"}
-{"t": 32.245, "topic": "/dorai_clean_audio", "header": {"capture_s": 29.645, "rate": 16000.0, "channels": 1, "seq": 13}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -22.5, "peak": 0.413}
-{"t": 32.97, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 2, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 0.9915, "queue_depth": 0, "require_wake": true, "bearing_deg": 37.0, "stamp": 1795541537.7489474}}
-{"t": 33.239, "topic": "/dorai_clean_audio", "header": {"capture_s": 30.645, "rate": 16000.0, "channels": 1, "seq": 14}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -71.2, "peak": 0.001}
-{"t": 33.635, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "start", "index": 3, "text": "Artaban follow me", "file": "CMD009_karen_165.wav", "t0": 16.05, "t1": 17.62, "bearing_deg": 140.0, "distance_m": 1.41, "elevation_deg": 38.1, "stamp": 1795541538.413936}}
-{"t": 33.731, "topic": "/dorai_doa", "data": 129.0}
-{"t": 33.732, "topic": "/dorai_doa/state", "data": [16.0, 129.0, 0.558, 0.373, 1.0, 36.0]}
-{"t": 33.732, "topic": "/dorai_doa/human", "data": "bearing 129.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.56  |  frame gate  37%  |  t   16.0s  seq 36"}
-{"t": 34.003, "topic": "/dorai_doa", "data": 134.0}
-{"t": 34.004, "topic": "/dorai_doa/state", "data": [16.224, 134.0, 0.567, 0.381, 1.0, 37.0]}
-{"t": 34.004, "topic": "/dorai_doa/human", "data": "bearing 134.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.57  |  frame gate  38%  |  t   16.2s  seq 37"}
-{"t": 34.211, "topic": "/dorai_doa", "data": 134.0}
-{"t": 34.211, "topic": "/dorai_doa/state", "data": [16.448, 134.0, 0.577, 0.388, 1.0, 38.0]}
-{"t": 34.212, "topic": "/dorai_doa/human", "data": "bearing 134.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.58  |  frame gate  39%  |  t   16.4s  seq 38"}
-{"t": 34.247, "topic": "/dorai_clean_audio", "header": {"capture_s": 31.644, "rate": 16000.0, "channels": 1, "seq": 15}, "samples": 16384, "duration_s": 1.024, "rms_dbfs": -71.2, "peak": 0.001}
-{"t": 34.429, "topic": "/dorai_doa", "data": 130.0}
-{"t": 34.43, "topic": "/dorai_doa/state", "data": [16.672, 130.0, 0.593, 0.395, 1.0, 39.0]}
-{"t": 34.43, "topic": "/dorai_doa/human", "data": "bearing 130.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  39%  |  t   16.7s  seq 39"}
-{"t": 34.631, "topic": "/dorai_doa", "data": 134.0}
-{"t": 34.632, "topic": "/dorai_doa/state", "data": [16.896, 134.0, 0.579, 0.399, 1.0, 40.0]}
-{"t": 34.633, "topic": "/dorai_doa/human", "data": "bearing 134.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.58  |  frame gate  40%  |  t   16.9s  seq 40"}
-{"t": 34.907, "topic": "/dorai_doa", "data": 137.0}
-{"t": 34.907, "topic": "/dorai_doa/state", "data": [17.12, 137.0, 0.576, 0.4, 1.0, 41.0]}
-{"t": 34.907, "topic": "/dorai_doa/human", "data": "bearing 137.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.58  |  frame gate  40%  |  t   17.1s  seq 41"}
-{"t": 34.922, "topic": "/dorai_transcript", "data": "Artaban sit down."}
-{"t": 34.922, "topic": "/dorai_stt/metrics", "data": {"t_wall": 1795541539.701, "model": "whisper/large-v3-turbo-dorai-artaban", "text": "Artaban sit down.", "n_words": 3, "stream_pos_s": 13.61, "window_s": 4.0, "lag_s": 2.993, "rtf_window": 0.457, "rtf_total": 0.261, "backlog_s": 1.02, "snr_est_db": 51.5, "speech_dbfs": -23.4, "noise_dbfs": -74.8, "speech_frac": 0.44, "cpu_temp_c": null, "cpu_freq_mhz": 2000, "load1": 2.67, "proc_cpu_pct": 86.5}}
-{"t": 35.124, "topic": "/dorai_doa", "data": 136.0}
-{"t": 35.131, "topic": "/dorai_doa/state", "data": [17.344, 136.0, 0.593, 0.406, 1.0, 42.0]}
-{"t": 35.131, "topic": "/dorai_doa/human", "data": "bearing 136.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  41%  |  t   17.3s  seq 42"}
-{"t": 35.206, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "end", "index": 3, "text": "Artaban follow me", "file": "CMD009_karen_165.wav", "t0": 16.05, "t1": 17.62, "bearing_deg": 140.0, "distance_m": 1.41, "elevation_deg": 38.1, "stamp": 1795541539.9837499}}
-{"t": 35.317, "topic": "/dorai_doa", "data": 140.0}
-{"t": 35.318, "topic": "/dorai_doa/state", "data": [17.568, 140.0, 0.589, 0.407, 1.0, 43.0]}
-{"t": 35.318, "topic": "/dorai_doa/human", "data": "bearing 140.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  41%  |  t   17.6s  seq 43"}
-{"t": 35.335, "topic": "/dorai_clean_audio", "header": {"capture_s": 32.645, "rate": 16000.0, "channels": 1, "seq": 16}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -22.2, "peak": 0.369}
-{"t": 35.529, "topic": "/dorai_doa", "data": 141.0}
-{"t": 35.53, "topic": "/dorai_doa/state", "data": [17.792, 141.0, 0.588, 0.405, 0.0, 44.0]}
-{"t": 35.53, "topic": "/dorai_doa/human", "data": "bearing 141.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  40%  |  t   17.8s  seq 44"}
-{"t": 35.81, "topic": "/dorai_doa", "data": 141.0}
-{"t": 35.81, "topic": "/dorai_doa/state", "data": [18.016, 141.0, 0.588, 0.405, 0.0, 45.0]}
-{"t": 35.81, "topic": "/dorai_doa/human", "data": "bearing 141.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  40%  |  t   18.0s  seq 45"}
-{"t": 35.974, "topic": "/dorai_plan", "data": {"text": "Artaban sit down.", "plan": {"steps": [{"task": "posture", "pose": "sit"}]}, "bearing_deg": 37.0, "engine": "llm", "latency_s": 1.052, "stamp": 1795541539.7012043, "confidence": 1.0, "min_token_prob": 0.998, "wake_edits": 0}}
-{"t": 35.975, "topic": "/dorai_intent/decision", "data": {"text": "Artaban sit down.", "decision": "plan", "addressed": true, "wake_heard": "artaban", "wake_edits": 0, "wake_confidence": 1.0, "command": "sit down", "engine": "llm", "confidence": 1.0, "min_token_prob": 0.998, "latency_s": 1.052, "tasks": ["posture"], "stamp": 1795541540.7541661}}
-{"t": 36.017, "topic": "/dorai_doa", "data": 141.0}
-{"t": 36.017, "topic": "/dorai_doa/state", "data": [18.24, 141.0, 0.588, 0.405, 0.0, 46.0]}
-{"t": 36.017, "topic": "/dorai_doa/human", "data": "bearing 141.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  40%  |  t   18.2s  seq 46"}
-{"t": 36.244, "topic": "/dorai_clean_audio", "header": {"capture_s": 33.645, "rate": 16000.0, "channels": 1, "seq": 17}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -22.8, "peak": 0.334}
-{"t": 36.944, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.297, "backlog_s": 0.0, "busy": false, "audio_s": 17.9, "finals": 3, "lag_median_s": 2.99}}
-{"t": 37.24, "topic": "/dorai_clean_audio", "header": {"capture_s": 34.645, "rate": 16000.0, "channels": 1, "seq": 18}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -72.4, "peak": 0.001}
-{"t": 37.705, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "start", "index": 4, "text": "Artaban start inspection", "file": "CMD005_karen_185.wav", "t0": 20.12, "t1": 22.03, "bearing_deg": 111.7, "distance_m": 2.46, "elevation_deg": 24.1, "stamp": 1795541542.4843302}}
-{"t": 37.835, "topic": "/dorai_doa", "data": 110.0}
-{"t": 37.836, "topic": "/dorai_doa/state", "data": [20.096, 110.0, 0.582, 0.407, 1.0, 47.0]}
-{"t": 37.836, "topic": "/dorai_doa/human", "data": "bearing 110.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.58  |  frame gate  41%  |  t   20.1s  seq 47"}
-{"t": 37.968, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 3, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 1.0117, "queue_depth": 0, "require_wake": true, "bearing_deg": 110.0, "stamp": 1795541542.7471044}}
-{"t": 38.111, "topic": "/dorai_doa", "data": 113.0}
-{"t": 38.112, "topic": "/dorai_doa/state", "data": [20.32, 113.0, 0.549, 0.399, 1.0, 48.0]}
-{"t": 38.112, "topic": "/dorai_doa/human", "data": "bearing 113.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.55  |  frame gate  40%  |  t   20.3s  seq 48"}
-{"t": 38.255, "topic": "/dorai_clean_audio", "header": {"capture_s": 35.645, "rate": 16000.0, "channels": 1, "seq": 19}, "samples": 16384, "duration_s": 1.024, "rms_dbfs": -72.7, "peak": 0.001}
-{"t": 38.319, "topic": "/dorai_doa", "data": 110.0}
-{"t": 38.319, "topic": "/dorai_doa/state", "data": [20.544, 110.0, 0.527, 0.404, 1.0, 49.0]}
-{"t": 38.319, "topic": "/dorai_doa/human", "data": "bearing 110.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.53  |  frame gate  40%  |  t   20.5s  seq 49"}
-{"t": 38.52, "topic": "/dorai_doa", "data": 113.0}
-{"t": 38.521, "topic": "/dorai_doa/state", "data": [20.768, 113.0, 0.536, 0.403, 0.0, 50.0]}
-{"t": 38.521, "topic": "/dorai_doa/human", "data": "bearing 113.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.54  |  frame gate  40%  |  t   20.8s  seq 50"}
-{"t": 38.729, "topic": "/dorai_doa", "data": 106.0}
-{"t": 38.729, "topic": "/dorai_doa/state", "data": [20.992, 106.0, 0.558, 0.4, 1.0, 51.0]}
-{"t": 38.729, "topic": "/dorai_doa/human", "data": "bearing 106.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.56  |  frame gate  40%  |  t   21.0s  seq 51"}
-{"t": 38.876, "topic": "/dorai_transcript", "data": "Artaban follow me."}
-{"t": 38.876, "topic": "/dorai_stt/metrics", "data": {"t_wall": 1795541543.655, "model": "whisper/large-v3-turbo-dorai-artaban", "text": "Artaban follow me.", "n_words": 3, "stream_pos_s": 17.64, "window_s": 4.03, "lag_s": 2.915, "rtf_window": 0.424, "rtf_total": 0.297, "backlog_s": 1.02, "snr_est_db": 49.3, "speech_dbfs": -22.2, "noise_dbfs": -71.5, "speech_frac": 0.46, "cpu_temp_c": null, "cpu_freq_mhz": 2000, "load1": 2.93, "proc_cpu_pct": 82.9}}
-{"t": 39.003, "topic": "/dorai_doa", "data": 109.0}
-{"t": 39.006, "topic": "/dorai_doa/state", "data": [21.216, 109.0, 0.557, 0.405, 1.0, 52.0]}
-{"t": 39.007, "topic": "/dorai_doa/human", "data": "bearing 109.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.56  |  frame gate  40%  |  t   21.2s  seq 52"}
-{"t": 39.218, "topic": "/dorai_doa", "data": 110.0}
-{"t": 39.219, "topic": "/dorai_doa/state", "data": [21.44, 110.0, 0.565, 0.394, 1.0, 53.0]}
-{"t": 39.219, "topic": "/dorai_doa/human", "data": "bearing 110.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.57  |  frame gate  39%  |  t   21.4s  seq 53"}
-{"t": 39.256, "topic": "/dorai_clean_audio", "header": {"capture_s": 36.645, "rate": 16000.0, "channels": 1, "seq": 20}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -21.0, "peak": 0.393}
-{"t": 39.415, "topic": "/dorai_doa", "data": 112.0}
-{"t": 39.415, "topic": "/dorai_doa/state", "data": [21.664, 112.0, 0.581, 0.383, 1.0, 54.0]}
-{"t": 39.416, "topic": "/dorai_doa/human", "data": "bearing 112.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.58  |  frame gate  38%  |  t   21.7s  seq 54"}
-{"t": 39.457, "topic": "/dorai_plan", "data": {"text": "Artaban follow me.", "plan": {"steps": [{"task": "follow_me"}]}, "bearing_deg": 141.0, "engine": "llm", "latency_s": 0.5807, "stamp": 1795541543.6557112, "confidence": 1.0, "min_token_prob": 1.0, "wake_edits": 0}}
-{"t": 39.457, "topic": "/dorai_intent/decision", "data": {"text": "Artaban follow me.", "decision": "plan", "addressed": true, "wake_heard": "artaban", "wake_edits": 0, "wake_confidence": 1.0, "command": "follow me", "engine": "llm", "confidence": 1.0, "min_token_prob": 1.0, "latency_s": 0.5807, "tasks": ["follow_me"], "stamp": 1795541544.236657}}
-{"t": 39.615, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "end", "index": 4, "text": "Artaban start inspection", "file": "CMD005_karen_185.wav", "t0": 20.12, "t1": 22.03, "bearing_deg": 111.7, "distance_m": 2.46, "elevation_deg": 24.1, "stamp": 1795541544.3940022}}
-{"t": 39.627, "topic": "/dorai_doa", "data": 114.0}
-{"t": 39.627, "topic": "/dorai_doa/state", "data": [21.888, 114.0, 0.559, 0.384, 1.0, 55.0]}
-{"t": 39.627, "topic": "/dorai_doa/human", "data": "bearing 114.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.56  |  frame gate  38%  |  t   21.9s  seq 55"}
-{"t": 39.908, "topic": "/dorai_doa", "data": 114.0}
-{"t": 39.908, "topic": "/dorai_doa/state", "data": [22.112, 114.0, 0.555, 0.381, 0.0, 56.0]}
-{"t": 39.908, "topic": "/dorai_doa/human", "data": "bearing 114.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.56  |  frame gate  38%  |  t   22.1s  seq 56"}
-{"t": 40.106, "topic": "/dorai_doa", "data": 114.0}
-{"t": 40.107, "topic": "/dorai_doa/state", "data": [22.336, 114.0, 0.555, 0.381, 0.0, 57.0]}
-{"t": 40.107, "topic": "/dorai_doa/human", "data": "bearing 114.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.56  |  frame gate  38%  |  t   22.3s  seq 57"}
-{"t": 40.247, "topic": "/dorai_clean_audio", "header": {"capture_s": 37.645, "rate": 16000.0, "channels": 1, "seq": 21}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -21.5, "peak": 0.357}
-{"t": 40.314, "topic": "/dorai_doa", "data": 114.0}
-{"t": 40.314, "topic": "/dorai_doa/state", "data": [22.56, 114.0, 0.555, 0.381, 0.0, 58.0]}
-{"t": 40.314, "topic": "/dorai_doa/human", "data": "bearing 114.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.56  |  frame gate  38%  |  t   22.6s  seq 58"}
-{"t": 41.222, "topic": "/dorai_clean_audio", "header": {"capture_s": 38.645, "rate": 16000.0, "channels": 1, "seq": 22}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -40.7, "peak": 0.075}
-{"t": 41.94, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.318, "backlog_s": 0.0, "busy": true, "audio_s": 21.9, "finals": 4, "lag_median_s": 2.95}}
-{"t": 42.116, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "start", "index": 5, "text": "Artaban stop the inspection", "file": "CMD006_karen_185.wav", "t0": 24.53, "t1": 26.56, "bearing_deg": 128.8, "distance_m": 2.71, "elevation_deg": 22.1, "stamp": 1795541546.8949473}}
-{"t": 42.232, "topic": "/dorai_doa", "data": 120.0}
-{"t": 42.232, "topic": "/dorai_doa/state", "data": [24.48, 120.0, 0.557, 0.384, 1.0, 59.0]}
-{"t": 42.232, "topic": "/dorai_doa/human", "data": "bearing 120.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.56  |  frame gate  38%  |  t   24.5s  seq 59"}
-{"t": 42.245, "topic": "/dorai_clean_audio", "header": {"capture_s": 39.645, "rate": 16000.0, "channels": 1, "seq": 23}, "samples": 16384, "duration_s": 1.024, "rms_dbfs": -73.9, "peak": 0.001}
-{"t": 42.438, "topic": "/dorai_doa", "data": 131.0}
-{"t": 42.439, "topic": "/dorai_doa/state", "data": [24.704, 131.0, 0.613, 0.381, 1.0, 60.0]}
-{"t": 42.439, "topic": "/dorai_doa/human", "data": "bearing 131.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.61  |  frame gate  38%  |  t   24.7s  seq 60"}
-{"t": 42.703, "topic": "/dorai_doa", "data": 128.0}
-{"t": 42.703, "topic": "/dorai_doa/state", "data": [24.928, 128.0, 0.598, 0.379, 1.0, 61.0]}
-{"t": 42.703, "topic": "/dorai_doa/human", "data": "bearing 128.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  38%  |  t   24.9s  seq 61"}
-{"t": 42.895, "topic": "/dorai_transcript", "data": "Artaban start inspection."}
-{"t": 42.895, "topic": "/dorai_stt/metrics", "data": {"t_wall": 1795541547.674, "model": "whisper/large-v3-turbo-dorai-artaban", "text": "Artaban start inspection.", "n_words": 3, "stream_pos_s": 22.06, "window_s": 4.42, "lag_s": 2.535, "rtf_window": 0.412, "rtf_total": 0.318, "backlog_s": 1.02, "snr_est_db": 51.4, "speech_dbfs": -21.7, "noise_dbfs": -73.1, "speech_frac": 0.495, "cpu_temp_c": null, "cpu_freq_mhz": 2000, "load1": 3.9, "proc_cpu_pct": 83.4}}
-{"t": 42.921, "topic": "/dorai_doa", "data": 133.0}
-{"t": 42.922, "topic": "/dorai_doa/state", "data": [25.152, 133.0, 0.574, 0.374, 0.0, 62.0]}
-{"t": 42.922, "topic": "/dorai_doa/human", "data": "bearing 133.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.57  |  frame gate  37%  |  t   25.2s  seq 62"}
-{"t": 42.969, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 4, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 0.9039, "queue_depth": 1, "require_wake": true, "bearing_deg": 133.0, "stamp": 1795541547.7479994}}
-{"t": 43.128, "topic": "/dorai_doa", "data": 127.0}
-{"t": 43.128, "topic": "/dorai_doa/state", "data": [25.376, 127.0, 0.609, 0.369, 1.0, 63.0]}
-{"t": 43.128, "topic": "/dorai_doa/human", "data": "bearing 127.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.61  |  frame gate  37%  |  t   25.4s  seq 63"}
-{"t": 43.288, "topic": "/dorai_clean_audio", "header": {"capture_s": 40.644, "rate": 16000.0, "channels": 1, "seq": 24}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -25.4, "peak": 0.293}
-{"t": 43.331, "topic": "/dorai_doa", "data": 131.0}
-{"t": 43.337, "topic": "/dorai_doa/state", "data": [25.6, 131.0, 0.601, 0.368, 1.0, 64.0]}
-{"t": 43.337, "topic": "/dorai_doa/human", "data": "bearing 131.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  37%  |  t   25.6s  seq 64"}
-{"t": 43.605, "topic": "/dorai_doa", "data": 133.0}
-{"t": 43.605, "topic": "/dorai_doa/state", "data": [25.824, 133.0, 0.601, 0.369, 1.0, 65.0]}
-{"t": 43.606, "topic": "/dorai_doa/human", "data": "bearing 133.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  37%  |  t   25.8s  seq 65"}
-{"t": 43.685, "topic": "/dorai_plan", "data": {"text": "Artaban start inspection.", "plan": {"steps": [{"task": "inspection", "state": "start"}]}, "bearing_deg": 114.0, "engine": "llm", "latency_s": 0.7893, "stamp": 1795541547.6744058, "confidence": 0.999, "min_token_prob": 0.983, "wake_edits": 0}}
-{"t": 43.685, "topic": "/dorai_intent/decision", "data": {"text": "Artaban start inspection.", "decision": "plan", "addressed": true, "wake_heard": "artaban", "wake_edits": 0, "wake_confidence": 1.0, "command": "start inspection", "engine": "llm", "confidence": 0.999, "min_token_prob": 0.983, "latency_s": 0.7893, "tasks": ["inspection"], "stamp": 1795541548.464355}}
-{"t": 43.821, "topic": "/dorai_doa", "data": 128.0}
-{"t": 43.821, "topic": "/dorai_doa/state", "data": [26.048, 128.0, 0.585, 0.373, 1.0, 66.0]}
-{"t": 43.821, "topic": "/dorai_doa/human", "data": "bearing 128.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  37%  |  t   26.0s  seq 66"}
-{"t": 44.024, "topic": "/dorai_doa", "data": 128.0}
-{"t": 44.025, "topic": "/dorai_doa/state", "data": [26.272, 128.0, 0.587, 0.381, 1.0, 67.0]}
-{"t": 44.027, "topic": "/dorai_doa/human", "data": "bearing 128.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  38%  |  t   26.3s  seq 67"}
-{"t": 44.146, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "end", "index": 5, "text": "Artaban stop the inspection", "file": "CMD006_karen_185.wav", "t0": 24.53, "t1": 26.56, "bearing_deg": 128.8, "distance_m": 2.71, "elevation_deg": 22.1, "stamp": 1795541548.9256134}}
-{"t": 44.233, "topic": "/dorai_doa", "data": 126.0}
-{"t": 44.233, "topic": "/dorai_doa/state", "data": [26.496, 126.0, 0.591, 0.376, 1.0, 68.0]}
-{"t": 44.233, "topic": "/dorai_doa/human", "data": "bearing 126.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  38%  |  t   26.5s  seq 68"}
-{"t": 44.24, "topic": "/dorai_clean_audio", "header": {"capture_s": 41.644, "rate": 16000.0, "channels": 1, "seq": 25}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -22.3, "peak": 0.317}
-{"t": 44.5, "topic": "/dorai_doa", "data": 126.0}
-{"t": 44.503, "topic": "/dorai_doa/state", "data": [26.72, 126.0, 0.591, 0.376, 0.0, 69.0]}
-{"t": 44.503, "topic": "/dorai_doa/human", "data": "bearing 126.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  38%  |  t   26.7s  seq 69"}
-{"t": 44.717, "topic": "/dorai_doa", "data": 126.0}
-{"t": 44.717, "topic": "/dorai_doa/state", "data": [26.944, 126.0, 0.591, 0.376, 0.0, 70.0]}
-{"t": 44.718, "topic": "/dorai_doa/human", "data": "bearing 126.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  38%  |  t   26.9s  seq 70"}
-{"t": 44.919, "topic": "/dorai_doa", "data": 126.0}
-{"t": 44.919, "topic": "/dorai_doa/state", "data": [27.168, 126.0, 0.591, 0.376, 0.0, 71.0]}
-{"t": 44.92, "topic": "/dorai_doa/human", "data": "bearing 126.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  38%  |  t   27.2s  seq 71"}
-{"t": 45.233, "topic": "/dorai_clean_audio", "header": {"capture_s": 42.644, "rate": 16000.0, "channels": 1, "seq": 26}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -25.4, "peak": 0.239}
-{"t": 46.233, "topic": "/dorai_clean_audio", "header": {"capture_s": 43.644, "rate": 16000.0, "channels": 1, "seq": 27}, "samples": 16384, "duration_s": 1.024, "rms_dbfs": -73.7, "peak": 0.001}
-{"t": 46.94, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.322, "backlog_s": 0.0, "busy": true, "audio_s": 26.9, "finals": 5, "lag_median_s": 2.92}}
-{"t": 47.231, "topic": "/dorai_clean_audio", "header": {"capture_s": 44.644, "rate": 16000.0, "channels": 1, "seq": 28}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -73.9, "peak": 0.001}
-{"t": 47.915, "topic": "/dorai_transcript", "data": "Artaban stop the inspection."}
-{"t": 47.916, "topic": "/dorai_stt/metrics", "data": {"t_wall": 1795541552.695, "model": "whisper/large-v3-turbo-dorai-artaban", "text": "Artaban stop the inspection.", "n_words": 4, "stream_pos_s": 26.66, "window_s": 4.61, "lag_s": 2.962, "rtf_window": 0.339, "rtf_total": 0.322, "backlog_s": 0.99, "snr_est_db": 51.0, "speech_dbfs": -23.2, "noise_dbfs": -74.2, "speech_frac": 0.519, "cpu_temp_c": null, "cpu_freq_mhz": 2000, "load1": 3.67, "proc_cpu_pct": 67.1}}
-{"t": 47.973, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 5, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 0.881, "queue_depth": 1, "require_wake": true, "bearing_deg": 126.0, "stamp": 1795541552.752077}}
-{"t": 48.247, "topic": "/dorai_clean_audio", "header": {"capture_s": 45.645, "rate": 16000.0, "channels": 1, "seq": 29}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -73.9, "peak": 0.001}
-{"t": 48.341, "topic": "/dorai_plan", "data": {"text": "Artaban stop the inspection.", "plan": {"steps": [{"task": "inspection", "state": "stop"}]}, "bearing_deg": 126.0, "engine": "llm", "latency_s": 0.424, "stamp": 1795541552.6952488, "confidence": 0.999, "min_token_prob": 0.994, "wake_edits": 0}}
-{"t": 48.341, "topic": "/dorai_intent/decision", "data": {"text": "Artaban stop the inspection.", "decision": "plan", "addressed": true, "wake_heard": "artaban", "wake_edits": 0, "wake_confidence": 1.0, "command": "stop the inspection", "engine": "llm", "confidence": 0.999, "min_token_prob": 0.994, "latency_s": 0.424, "tasks": ["inspection"], "stamp": 1795541553.1200707}}
-{"t": 49.226, "topic": "/dorai_clean_audio", "header": {"capture_s": 46.643, "rate": 16000.0, "channels": 1, "seq": 30}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -82.5, "peak": 0.001}
-{"t": 50.248, "topic": "/dorai_clean_audio", "header": {"capture_s": 47.644, "rate": 16000.0, "channels": 1, "seq": 31}, "samples": 16384, "duration_s": 1.024, "rms_dbfs": -239.6, "peak": 0.0}
-{"t": 51.244, "topic": "/dorai_clean_audio", "header": {"capture_s": 48.645, "rate": 16000.0, "channels": 1, "seq": 32}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -239.8, "peak": 0.0}
-{"t": 51.943, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.315, "backlog_s": 0.0, "busy": false, "audio_s": 32.9, "finals": 6, "lag_median_s": 2.94}}
-{"t": 52.231, "topic": "/dorai_clean_audio", "header": {"capture_s": 49.645, "rate": 16000.0, "channels": 1, "seq": 33}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -239.8, "peak": 0.0}
-{"t": 52.969, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 6, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 0.8048, "queue_depth": 0, "require_wake": true, "bearing_deg": 126.0, "stamp": 1795541557.7480068}}
-{"t": 53.23, "topic": "/dorai_clean_audio", "header": {"capture_s": 50.645, "rate": 16000.0, "channels": 1, "seq": 34}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -239.8, "peak": 0.0}
-{"t": 54.231, "topic": "/dorai_clean_audio", "header": {"capture_s": 51.644, "rate": 16000.0, "channels": 1, "seq": 35}, "samples": 16384, "duration_s": 1.024, "rms_dbfs": -239.8, "peak": 0.0}
-{"t": 55.226, "topic": "/dorai_clean_audio", "header": {"capture_s": 52.644, "rate": 16000.0, "channels": 1, "seq": 36}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -239.8, "peak": 0.0}
-{"t": 55.591, "topic": "/dorai_sim/truth", "data": {"event": "end", "name": "clean_speech", "stamp": 1795541560.3703015}}
-{"t": 56.943, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.281, "backlog_s": 0.0, "busy": false, "audio_s": 36.9, "finals": 6, "lag_median_s": 2.94}}
-{"t": 57.97, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 6, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 0.8048, "queue_depth": 0, "require_wake": true, "bearing_deg": 126.0, "stamp": 1795541562.7496135}}
-{"t": 61.945, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.281, "backlog_s": 0.0, "busy": false, "audio_s": 36.9, "finals": 6, "lag_median_s": 2.94}}
-{"t": 62.974, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 6, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 0.8048, "queue_depth": 0, "require_wake": true, "bearing_deg": 126.0, "stamp": 1795541567.7526162}}
-{"t": 66.944, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.281, "backlog_s": 0.0, "busy": false, "audio_s": 36.9, "finals": 6, "lag_median_s": 2.94}}
-{"t": 67.971, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 6, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 0.8048, "queue_depth": 0, "require_wake": true, "bearing_deg": 126.0, "stamp": 1795541572.7493415}}
-{"t": 71.941, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.281, "backlog_s": 0.0, "busy": false, "audio_s": 36.9, "finals": 6, "lag_median_s": 2.94}}
-{"t": 72.97, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 6, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 0.8048, "queue_depth": 0, "require_wake": true, "bearing_deg": 126.0, "stamp": 1795541577.748873}}
-{"t": 76.944, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.281, "backlog_s": 0.0, "busy": false, "audio_s": 36.9, "finals": 6, "lag_median_s": 2.94}}
-{"t": 77.969, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 6, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 0.8048, "queue_depth": 0, "require_wake": true, "bearing_deg": 126.0, "stamp": 1795541582.7481613}}
+{"t": 6.836, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": null, "backlog_s": 0.0, "busy": false, "audio_s": 0.0, "finals": 0, "lag_median_s": null}}
+{"t": 11.84, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": null, "backlog_s": 0.0, "busy": false, "audio_s": 0.0, "finals": 0, "lag_median_s": null}}
+{"t": 14.306, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 0, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": null, "queue_depth": 0, "require_wake": true, "bearing_deg": null, "stamp": 1795542933.7511914}}
+{"t": 16.841, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": null, "backlog_s": 0.0, "busy": false, "audio_s": 0.0, "finals": 0, "lag_median_s": null}}
+{"t": 19.072, "topic": "/dorai_sim/truth", "data": {"event": "scene", "name": "clean_speech", "seconds": 30.06, "room": {"name": "workshop", "size": [7.0, 5.5, 3.0], "rt60_target_s": null, "rt60_s": 0.59}, "commands": [{"text": "Artaban go back to base", "file": "CMD004_karen_165.wav", "t0": 3.0, "t1": 4.95, "bearing_deg": 194.9, "distance_m": 1.9, "elevation_deg": 30.1}, {"text": "Artaban check the gas pressure", "file": "CMD010_karen_165.wav", "t0": 7.45, "t1": 9.5, "bearing_deg": 152.2, "distance_m": 1.08, "elevation_deg": 45.4}, {"text": "Artaban sit down", "file": "CMD008_karen_165.wav", "t0": 12.0, "t1": 13.55, "bearing_deg": 44.7, "distance_m": 3.01, "elevation_deg": 20.1}, {"text": "Artaban follow me", "file": "CMD009_karen_165.wav", "t0": 16.05, "t1": 17.62, "bearing_deg": 140.0, "distance_m": 1.41, "elevation_deg": 38.1}, {"text": "Artaban start inspection", "file": "CMD005_karen_185.wav", "t0": 20.12, "t1": 22.03, "bearing_deg": 111.7, "distance_m": 2.46, "elevation_deg": 24.1}, {"text": "Artaban stop the inspection", "file": "CMD006_karen_185.wav", "t0": 24.53, "t1": 26.56, "bearing_deg": 128.8, "distance_m": 2.71, "elevation_deg": 22.1}], "noise": [], "stamp": 1795542938.5177}}
+{"t": 19.302, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 0, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": null, "queue_depth": 0, "require_wake": true, "bearing_deg": null, "stamp": 1795542938.7494752}}
+{"t": 20.688, "topic": "/dorai_clean_audio", "header": {"capture_s": 16.979, "rate": 16000.0, "channels": 1, "seq": 0}, "samples": 14976, "duration_s": 0.936, "rms_dbfs": -83.1, "peak": 0.001}
+{"t": 21.718, "topic": "/dorai_clean_audio", "header": {"capture_s": 17.979, "rate": 16000.0, "channels": 1, "seq": 1}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -83.9, "peak": 0.0}
+{"t": 21.836, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.007, "backlog_s": 0.0, "busy": false, "audio_s": 1.9, "finals": 0, "lag_median_s": null}}
+{"t": 22.077, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "start", "index": 0, "text": "Artaban go back to base", "file": "CMD004_karen_165.wav", "t0": 3.0, "t1": 4.95, "bearing_deg": 194.9, "distance_m": 1.9, "elevation_deg": 30.1, "stamp": 1795542941.5242534}}
+{"t": 22.217, "topic": "/dorai_doa", "data": 199.0}
+{"t": 22.218, "topic": "/dorai_doa/state", "data": [2.976, 199.0, 0.584, 1.0, 1.0, 0.0]}
+{"t": 22.218, "topic": "/dorai_doa/human", "data": "bearing 199.0 deg  |  5 o'clock from the array's 0 deg mark  |  confidence 0.58  |  frame gate 100%  |  t    3.0s  seq 0"}
+{"t": 22.414, "topic": "/dorai_doa", "data": 194.0}
+{"t": 22.414, "topic": "/dorai_doa/state", "data": [3.2, 194.0, 0.592, 0.5, 1.0, 1.0]}
+{"t": 22.414, "topic": "/dorai_doa/human", "data": "bearing 194.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  50%  |  t    3.2s  seq 1"}
+{"t": 22.69, "topic": "/dorai_doa", "data": 195.0}
+{"t": 22.694, "topic": "/dorai_doa/state", "data": [3.424, 195.0, 0.596, 0.4, 1.0, 2.0]}
+{"t": 22.694, "topic": "/dorai_doa/human", "data": "bearing 195.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  40%  |  t    3.4s  seq 2"}
+{"t": 22.699, "topic": "/dorai_clean_audio", "header": {"capture_s": 18.979, "rate": 16000.0, "channels": 1, "seq": 2}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -83.9, "peak": 0.0}
+{"t": 22.903, "topic": "/dorai_doa", "data": 186.0}
+{"t": 22.904, "topic": "/dorai_doa/state", "data": [3.648, 186.0, 0.58, 0.364, 1.0, 3.0]}
+{"t": 22.904, "topic": "/dorai_doa/human", "data": "bearing 186.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.58  |  frame gate  36%  |  t    3.6s  seq 3"}
+{"t": 23.121, "topic": "/dorai_doa", "data": 191.0}
+{"t": 23.122, "topic": "/dorai_doa/state", "data": [3.872, 191.0, 0.586, 0.444, 1.0, 4.0]}
+{"t": 23.122, "topic": "/dorai_doa/human", "data": "bearing 191.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  44%  |  t    3.9s  seq 4"}
+{"t": 23.339, "topic": "/dorai_doa", "data": 192.0}
+{"t": 23.339, "topic": "/dorai_doa/state", "data": [4.096, 192.0, 0.687, 0.485, 1.0, 5.0]}
+{"t": 23.339, "topic": "/dorai_doa/human", "data": "bearing 192.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.69  |  frame gate  48%  |  t    4.1s  seq 5"}
+{"t": 23.604, "topic": "/dorai_doa", "data": 193.0}
+{"t": 23.607, "topic": "/dorai_doa/state", "data": [4.32, 193.0, 0.686, 0.45, 1.0, 6.0]}
+{"t": 23.607, "topic": "/dorai_doa/human", "data": "bearing 193.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.69  |  frame gate  45%  |  t    4.3s  seq 6"}
+{"t": 23.694, "topic": "/dorai_clean_audio", "header": {"capture_s": 19.979, "rate": 16000.0, "channels": 1, "seq": 3}, "samples": 16384, "duration_s": 1.024, "rms_dbfs": -30.2, "peak": 0.13}
+{"t": 23.819, "topic": "/dorai_doa", "data": 194.0}
+{"t": 23.819, "topic": "/dorai_doa/state", "data": [4.544, 194.0, 0.684, 0.489, 1.0, 7.0]}
+{"t": 23.819, "topic": "/dorai_doa/human", "data": "bearing 194.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.68  |  frame gate  49%  |  t    4.5s  seq 7"}
+{"t": 24.017, "topic": "/dorai_doa", "data": 194.0}
+{"t": 24.018, "topic": "/dorai_doa/state", "data": [4.768, 194.0, 0.673, 0.444, 1.0, 8.0]}
+{"t": 24.018, "topic": "/dorai_doa/human", "data": "bearing 194.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.67  |  frame gate  44%  |  t    4.8s  seq 8"}
+{"t": 24.022, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "end", "index": 0, "text": "Artaban go back to base", "file": "CMD004_karen_165.wav", "t0": 3.0, "t1": 4.95, "bearing_deg": 194.9, "distance_m": 1.9, "elevation_deg": 30.1, "stamp": 1795542943.4696412}}
+{"t": 24.231, "topic": "/dorai_doa", "data": 194.0}
+{"t": 24.231, "topic": "/dorai_doa/state", "data": [4.992, 194.0, 0.679, 0.429, 0.0, 9.0]}
+{"t": 24.231, "topic": "/dorai_doa/human", "data": "bearing 194.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.68  |  frame gate  43%  |  t    5.0s  seq 9"}
+{"t": 24.304, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 0, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": null, "queue_depth": 0, "require_wake": true, "bearing_deg": 194.0, "stamp": 1795542943.7508347}}
+{"t": 24.501, "topic": "/dorai_doa", "data": 195.0}
+{"t": 24.501, "topic": "/dorai_doa/state", "data": [5.216, 195.0, 0.68, 0.429, 0.0, 10.0]}
+{"t": 24.501, "topic": "/dorai_doa/human", "data": "bearing 195.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.68  |  frame gate  43%  |  t    5.2s  seq 10"}
+{"t": 24.677, "topic": "/dorai_clean_audio", "header": {"capture_s": 20.979, "rate": 16000.0, "channels": 1, "seq": 4}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -28.3, "peak": 0.235}
+{"t": 24.715, "topic": "/dorai_doa", "data": 194.0}
+{"t": 24.715, "topic": "/dorai_doa/state", "data": [5.44, 194.0, 0.682, 0.429, 0.0, 11.0]}
+{"t": 24.715, "topic": "/dorai_doa/human", "data": "bearing 194.0 deg  |  6 o'clock from the array's 0 deg mark  |  confidence 0.68  |  frame gate  43%  |  t    5.4s  seq 11"}
+{"t": 25.679, "topic": "/dorai_clean_audio", "header": {"capture_s": 21.979, "rate": 16000.0, "channels": 1, "seq": 5}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -66.7, "peak": 0.007}
+{"t": 26.522, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "start", "index": 1, "text": "Artaban check the gas pressure", "file": "CMD010_karen_165.wav", "t0": 7.45, "t1": 9.5, "bearing_deg": 152.2, "distance_m": 1.08, "elevation_deg": 45.4, "stamp": 1795542945.9695172}}
+{"t": 26.687, "topic": "/dorai_clean_audio", "header": {"capture_s": 22.979, "rate": 16000.0, "channels": 1, "seq": 6}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -77.9, "peak": 0.001}
+{"t": 26.701, "topic": "/dorai_doa", "data": 158.0}
+{"t": 26.701, "topic": "/dorai_doa/state", "data": [7.424, 158.0, 0.612, 0.421, 1.0, 12.0]}
+{"t": 26.701, "topic": "/dorai_doa/human", "data": "bearing 158.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.61  |  frame gate  42%  |  t    7.4s  seq 12"}
+{"t": 26.84, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.005, "backlog_s": 0.99, "busy": true, "audio_s": 4.9, "finals": 0, "lag_median_s": null}}
+{"t": 26.903, "topic": "/dorai_doa", "data": 152.0}
+{"t": 26.903, "topic": "/dorai_doa/state", "data": [7.648, 152.0, 0.588, 0.438, 1.0, 13.0]}
+{"t": 26.904, "topic": "/dorai_doa/human", "data": "bearing 152.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  44%  |  t    7.6s  seq 13"}
+{"t": 27.122, "topic": "/dorai_doa", "data": 163.0}
+{"t": 27.122, "topic": "/dorai_doa/state", "data": [7.872, 163.0, 0.607, 0.408, 1.0, 14.0]}
+{"t": 27.122, "topic": "/dorai_doa/human", "data": "bearing 163.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.61  |  frame gate  41%  |  t    7.9s  seq 14"}
+{"t": 27.329, "topic": "/dorai_doa", "data": 163.0}
+{"t": 27.329, "topic": "/dorai_doa/state", "data": [8.096, 163.0, 0.605, 0.423, 1.0, 15.0]}
+{"t": 27.333, "topic": "/dorai_doa/human", "data": "bearing 163.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  42%  |  t    8.1s  seq 15"}
+{"t": 27.491, "topic": "/dorai_transcript", "data": "Artaban go back to base."}
+{"t": 27.495, "topic": "/dorai_stt/metrics", "data": {"t_wall": 1795542946.937, "model": "whisper/large-v3-turbo-dorai-artaban", "text": "Artaban go back to base.", "n_words": 5, "stream_pos_s": 4.97, "window_s": 4.97, "lag_s": 2.769, "rtf_window": 0.005, "rtf_total": 0.005, "backlog_s": 0.99, "snr_est_db": 21.6, "speech_dbfs": -28.2, "noise_dbfs": -49.8, "speech_frac": 0.323, "cpu_temp_c": null, "cpu_freq_mhz": 2000, "load1": 1.74, "proc_cpu_pct": 14.3}}
+{"t": 27.602, "topic": "/dorai_doa", "data": 162.0}
+{"t": 27.602, "topic": "/dorai_doa/state", "data": [8.32, 162.0, 0.604, 0.452, 1.0, 16.0]}
+{"t": 27.602, "topic": "/dorai_doa/human", "data": "bearing 162.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  45%  |  t    8.3s  seq 16"}
+{"t": 27.727, "topic": "/dorai_clean_audio", "header": {"capture_s": 23.979, "rate": 16000.0, "channels": 1, "seq": 7}, "samples": 16384, "duration_s": 1.024, "rms_dbfs": -27.8, "peak": 0.227}
+{"t": 27.818, "topic": "/dorai_doa", "data": 159.0}
+{"t": 27.818, "topic": "/dorai_doa/state", "data": [8.544, 159.0, 0.599, 0.451, 1.0, 17.0]}
+{"t": 27.819, "topic": "/dorai_doa/human", "data": "bearing 159.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  45%  |  t    8.5s  seq 17"}
+{"t": 28.018, "topic": "/dorai_doa", "data": 160.0}
+{"t": 28.018, "topic": "/dorai_doa/state", "data": [8.768, 160.0, 0.598, 0.449, 1.0, 18.0]}
+{"t": 28.018, "topic": "/dorai_doa/human", "data": "bearing 160.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  45%  |  t    8.8s  seq 18"}
+{"t": 28.218, "topic": "/dorai_doa", "data": 158.0}
+{"t": 28.219, "topic": "/dorai_doa/state", "data": [8.992, 158.0, 0.597, 0.448, 1.0, 19.0]}
+{"t": 28.219, "topic": "/dorai_doa/human", "data": "bearing 158.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  45%  |  t    9.0s  seq 19"}
+{"t": 28.5, "topic": "/dorai_doa", "data": 158.0}
+{"t": 28.5, "topic": "/dorai_doa/state", "data": [9.216, 158.0, 0.596, 0.438, 1.0, 20.0]}
+{"t": 28.5, "topic": "/dorai_doa/human", "data": "bearing 158.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  44%  |  t    9.2s  seq 20"}
+{"t": 28.572, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "end", "index": 1, "text": "Artaban check the gas pressure", "file": "CMD010_karen_165.wav", "t0": 7.45, "t1": 9.5, "bearing_deg": 152.2, "distance_m": 1.08, "elevation_deg": 45.4, "stamp": 1795542948.0190518}}
+{"t": 28.659, "topic": "/dorai_plan", "data": {"text": "Artaban go back to base.", "plan": {"steps": [{"task": "goto", "target": "base"}]}, "bearing_deg": 194.0, "engine": "llm", "latency_s": 1.168, "stamp": 1795542946.937796, "confidence": 1.0, "min_token_prob": 0.999, "wake_edits": 0}}
+{"t": 28.659, "topic": "/dorai_intent/decision", "data": {"text": "Artaban go back to base.", "decision": "plan", "addressed": true, "wake_heard": "artaban", "wake_edits": 0, "wake_confidence": 1.0, "command": "go back to base", "engine": "llm", "confidence": 1.0, "min_token_prob": 0.999, "latency_s": 1.168, "tasks": ["goto"], "stamp": 1795542948.1062987}}
+{"t": 28.711, "topic": "/dorai_doa", "data": 158.0}
+{"t": 28.711, "topic": "/dorai_doa/state", "data": [9.44, 158.0, 0.596, 0.429, 1.0, 21.0]}
+{"t": 28.711, "topic": "/dorai_doa/human", "data": "bearing 158.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  43%  |  t    9.4s  seq 21"}
+{"t": 28.714, "topic": "/dorai_clean_audio", "header": {"capture_s": 24.979, "rate": 16000.0, "channels": 1, "seq": 8}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -25.3, "peak": 0.369}
+{"t": 28.915, "topic": "/dorai_doa", "data": 160.0}
+{"t": 28.916, "topic": "/dorai_doa/state", "data": [9.664, 160.0, 0.598, 0.425, 0.0, 22.0]}
+{"t": 28.916, "topic": "/dorai_doa/human", "data": "bearing 160.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  42%  |  t    9.7s  seq 22"}
+{"t": 29.126, "topic": "/dorai_doa", "data": 161.0}
+{"t": 29.126, "topic": "/dorai_doa/state", "data": [9.888, 161.0, 0.598, 0.425, 0.0, 23.0]}
+{"t": 29.126, "topic": "/dorai_doa/human", "data": "bearing 161.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  42%  |  t    9.9s  seq 23"}
+{"t": 29.304, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 1, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 1.168, "queue_depth": 0, "require_wake": true, "bearing_deg": 161.0, "stamp": 1795542948.7512245}}
+{"t": 29.403, "topic": "/dorai_doa", "data": 162.0}
+{"t": 29.404, "topic": "/dorai_doa/state", "data": [10.112, 162.0, 0.598, 0.425, 0.0, 24.0]}
+{"t": 29.404, "topic": "/dorai_doa/human", "data": "bearing 162.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  42%  |  t   10.1s  seq 24"}
+{"t": 29.678, "topic": "/dorai_clean_audio", "header": {"capture_s": 25.979, "rate": 16000.0, "channels": 1, "seq": 9}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -25.6, "peak": 0.334}
+{"t": 30.679, "topic": "/dorai_clean_audio", "header": {"capture_s": 26.979, "rate": 16000.0, "channels": 1, "seq": 10}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -74.5, "peak": 0.001}
+{"t": 31.073, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "start", "index": 2, "text": "Artaban sit down", "file": "CMD008_karen_165.wav", "t0": 12.0, "t1": 13.55, "bearing_deg": 44.7, "distance_m": 3.01, "elevation_deg": 20.1, "stamp": 1795542950.5199585}}
+{"t": 31.219, "topic": "/dorai_doa", "data": 40.0}
+{"t": 31.219, "topic": "/dorai_doa/state", "data": [11.968, 40.0, 0.716, 0.421, 1.0, 25.0]}
+{"t": 31.219, "topic": "/dorai_doa/human", "data": "bearing  40.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.72  |  frame gate  42%  |  t   12.0s  seq 25"}
+{"t": 31.417, "topic": "/dorai_doa", "data": 37.0}
+{"t": 31.418, "topic": "/dorai_doa/state", "data": [12.192, 37.0, 0.607, 0.414, 1.0, 26.0]}
+{"t": 31.418, "topic": "/dorai_doa/human", "data": "bearing  37.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.61  |  frame gate  41%  |  t   12.2s  seq 26"}
+{"t": 31.688, "topic": "/dorai_doa", "data": 40.0}
+{"t": 31.689, "topic": "/dorai_doa/state", "data": [12.416, 40.0, 0.606, 0.407, 1.0, 27.0]}
+{"t": 31.689, "topic": "/dorai_doa/human", "data": "bearing  40.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.61  |  frame gate  41%  |  t   12.4s  seq 27"}
+{"t": 31.719, "topic": "/dorai_clean_audio", "header": {"capture_s": 27.979, "rate": 16000.0, "channels": 1, "seq": 11}, "samples": 16384, "duration_s": 1.024, "rms_dbfs": -74.6, "peak": 0.001}
+{"t": 31.836, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.187, "backlog_s": 1.02, "busy": true, "audio_s": 9.9, "finals": 1, "lag_median_s": 2.77}}
+{"t": 31.907, "topic": "/dorai_doa", "data": 40.0}
+{"t": 31.907, "topic": "/dorai_doa/state", "data": [12.64, 40.0, 0.637, 0.408, 1.0, 28.0]}
+{"t": 31.909, "topic": "/dorai_doa/human", "data": "bearing  40.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.64  |  frame gate  41%  |  t   12.6s  seq 28"}
+{"t": 32.107, "topic": "/dorai_doa", "data": 41.0}
+{"t": 32.109, "topic": "/dorai_doa/state", "data": [12.864, 41.0, 0.635, 0.399, 1.0, 29.0]}
+{"t": 32.109, "topic": "/dorai_doa/human", "data": "bearing  41.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.64  |  frame gate  40%  |  t   12.9s  seq 29"}
+{"t": 32.316, "topic": "/dorai_doa", "data": 41.0}
+{"t": 32.316, "topic": "/dorai_doa/state", "data": [13.088, 41.0, 0.626, 0.381, 1.0, 30.0]}
+{"t": 32.316, "topic": "/dorai_doa/human", "data": "bearing  41.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.63  |  frame gate  38%  |  t   13.1s  seq 30"}
+{"t": 32.598, "topic": "/dorai_doa", "data": 39.0}
+{"t": 32.599, "topic": "/dorai_doa/state", "data": [13.312, 39.0, 0.624, 0.383, 1.0, 31.0]}
+{"t": 32.599, "topic": "/dorai_doa/human", "data": "bearing  39.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.62  |  frame gate  38%  |  t   13.3s  seq 31"}
+{"t": 32.622, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "end", "index": 2, "text": "Artaban sit down", "file": "CMD008_karen_165.wav", "t0": 12.0, "t1": 13.55, "bearing_deg": 44.7, "distance_m": 3.01, "elevation_deg": 20.1, "stamp": 1795542952.0686846}}
+{"t": 32.664, "topic": "/dorai_transcript", "data": "Artaban check the gas pressure."}
+{"t": 32.687, "topic": "/dorai_stt/metrics", "data": {"t_wall": 1795542952.111, "model": "whisper/large-v3-turbo-dorai-artaban", "text": "Artaban check the gas pressure.", "n_words": 5, "stream_pos_s": 9.61, "window_s": 4.64, "lag_s": 3.287, "rtf_window": 0.367, "rtf_total": 0.187, "backlog_s": 1.02, "snr_est_db": 53.2, "speech_dbfs": -25.0, "noise_dbfs": -78.2, "speech_frac": 0.496, "cpu_temp_c": null, "cpu_freq_mhz": 2000, "load1": 2.4, "proc_cpu_pct": 76.6}}
+{"t": 32.791, "topic": "/dorai_doa", "data": 37.0}
+{"t": 32.793, "topic": "/dorai_doa/state", "data": [13.536, 37.0, 0.63, 0.369, 0.0, 32.0]}
+{"t": 32.793, "topic": "/dorai_doa/human", "data": "bearing  37.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.63  |  frame gate  37%  |  t   13.5s  seq 32"}
+{"t": 32.836, "topic": "/dorai_clean_audio", "header": {"capture_s": 28.979, "rate": 16000.0, "channels": 1, "seq": 12}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -25.9, "peak": 0.265}
+{"t": 33.005, "topic": "/dorai_doa", "data": 37.0}
+{"t": 33.006, "topic": "/dorai_doa/state", "data": [13.76, 37.0, 0.63, 0.369, 0.0, 33.0]}
+{"t": 33.006, "topic": "/dorai_doa/human", "data": "bearing  37.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.63  |  frame gate  37%  |  t   13.8s  seq 33"}
+{"t": 33.218, "topic": "/dorai_doa", "data": 37.0}
+{"t": 33.219, "topic": "/dorai_doa/state", "data": [13.984, 37.0, 0.63, 0.369, 0.0, 34.0]}
+{"t": 33.219, "topic": "/dorai_doa/human", "data": "bearing  37.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.63  |  frame gate  37%  |  t   14.0s  seq 34"}
+{"t": 33.497, "topic": "/dorai_doa", "data": 37.0}
+{"t": 33.497, "topic": "/dorai_doa/state", "data": [14.208, 37.0, 0.63, 0.369, 0.0, 35.0]}
+{"t": 33.498, "topic": "/dorai_doa/human", "data": "bearing  37.0 deg  |  11 o'clock from the array's 0 deg mark  |  confidence 0.63  |  frame gate  37%  |  t   14.2s  seq 35"}
+{"t": 33.66, "topic": "/dorai_plan", "data": {"text": "Artaban check the gas pressure.", "plan": {"steps": [{"task": "read_meter"}]}, "bearing_deg": 162.0, "engine": "llm", "latency_s": 0.9951, "stamp": 1795542952.1113162, "confidence": 0.997, "min_token_prob": 0.974, "wake_edits": 0}}
+{"t": 33.66, "topic": "/dorai_intent/decision", "data": {"text": "Artaban check the gas pressure.", "decision": "plan", "addressed": true, "wake_heard": "artaban", "wake_edits": 0, "wake_confidence": 1.0, "command": "check the gas pressure", "engine": "llm", "confidence": 0.997, "min_token_prob": 0.974, "latency_s": 0.9951, "tasks": ["read_meter"], "stamp": 1795542953.1071947}}
+{"t": 33.746, "topic": "/dorai_clean_audio", "header": {"capture_s": 29.979, "rate": 16000.0, "channels": 1, "seq": 13}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -22.5, "peak": 0.413}
+{"t": 34.305, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 2, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 1.0816, "queue_depth": 0, "require_wake": true, "bearing_deg": 37.0, "stamp": 1795542953.7507374}}
+{"t": 34.733, "topic": "/dorai_clean_audio", "header": {"capture_s": 30.979, "rate": 16000.0, "channels": 1, "seq": 14}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -71.2, "peak": 0.001}
+{"t": 35.124, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "start", "index": 3, "text": "Artaban follow me", "file": "CMD009_karen_165.wav", "t0": 16.05, "t1": 17.62, "bearing_deg": 140.0, "distance_m": 1.41, "elevation_deg": 38.1, "stamp": 1795542954.5678241}}
+{"t": 35.229, "topic": "/dorai_doa", "data": 127.0}
+{"t": 35.231, "topic": "/dorai_doa/state", "data": [16.0, 127.0, 0.634, 0.373, 1.0, 36.0]}
+{"t": 35.231, "topic": "/dorai_doa/human", "data": "bearing 127.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.63  |  frame gate  37%  |  t   16.0s  seq 36"}
+{"t": 35.491, "topic": "/dorai_doa", "data": 134.0}
+{"t": 35.493, "topic": "/dorai_doa/state", "data": [16.224, 134.0, 0.567, 0.381, 1.0, 37.0]}
+{"t": 35.493, "topic": "/dorai_doa/human", "data": "bearing 134.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.57  |  frame gate  38%  |  t   16.2s  seq 37"}
+{"t": 35.701, "topic": "/dorai_doa", "data": 134.0}
+{"t": 35.726, "topic": "/dorai_clean_audio", "header": {"capture_s": 31.979, "rate": 16000.0, "channels": 1, "seq": 15}, "samples": 16384, "duration_s": 1.024, "rms_dbfs": -71.2, "peak": 0.001}
+{"t": 35.726, "topic": "/dorai_doa/state", "data": [16.448, 134.0, 0.577, 0.388, 1.0, 38.0]}
+{"t": 35.726, "topic": "/dorai_doa/human", "data": "bearing 134.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.58  |  frame gate  39%  |  t   16.4s  seq 38"}
+{"t": 35.91, "topic": "/dorai_doa", "data": 130.0}
+{"t": 35.911, "topic": "/dorai_doa/state", "data": [16.672, 130.0, 0.593, 0.395, 1.0, 39.0]}
+{"t": 35.911, "topic": "/dorai_doa/human", "data": "bearing 130.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  39%  |  t   16.7s  seq 39"}
+{"t": 36.114, "topic": "/dorai_doa", "data": 134.0}
+{"t": 36.114, "topic": "/dorai_doa/state", "data": [16.896, 134.0, 0.579, 0.399, 1.0, 40.0]}
+{"t": 36.114, "topic": "/dorai_doa/human", "data": "bearing 134.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.58  |  frame gate  40%  |  t   16.9s  seq 40"}
+{"t": 36.39, "topic": "/dorai_doa", "data": 137.0}
+{"t": 36.391, "topic": "/dorai_doa/state", "data": [17.12, 137.0, 0.576, 0.4, 1.0, 41.0]}
+{"t": 36.391, "topic": "/dorai_doa/human", "data": "bearing 137.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.58  |  frame gate  40%  |  t   17.1s  seq 41"}
+{"t": 36.475, "topic": "/dorai_transcript", "data": "Artaban sit down."}
+{"t": 36.475, "topic": "/dorai_stt/metrics", "data": {"t_wall": 1795542955.921, "model": "whisper/large-v3-turbo-dorai-artaban", "text": "Artaban sit down.", "n_words": 3, "stream_pos_s": 13.61, "window_s": 4.0, "lag_s": 3.052, "rtf_window": 0.501, "rtf_total": 0.277, "backlog_s": 1.02, "snr_est_db": 51.5, "speech_dbfs": -23.4, "noise_dbfs": -74.8, "speech_frac": 0.44, "cpu_temp_c": null, "cpu_freq_mhz": 2000, "load1": 2.37, "proc_cpu_pct": 91.6}}
+{"t": 36.612, "topic": "/dorai_doa", "data": 136.0}
+{"t": 36.614, "topic": "/dorai_doa/state", "data": [17.344, 136.0, 0.593, 0.406, 1.0, 42.0]}
+{"t": 36.615, "topic": "/dorai_doa/human", "data": "bearing 136.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  41%  |  t   17.3s  seq 42"}
+{"t": 36.691, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "end", "index": 3, "text": "Artaban follow me", "file": "CMD009_karen_165.wav", "t0": 16.05, "t1": 17.62, "bearing_deg": 140.0, "distance_m": 1.41, "elevation_deg": 38.1, "stamp": 1795542956.1381354}}
+{"t": 36.811, "topic": "/dorai_doa", "data": 140.0}
+{"t": 36.811, "topic": "/dorai_doa/state", "data": [17.568, 140.0, 0.589, 0.407, 1.0, 43.0]}
+{"t": 36.811, "topic": "/dorai_doa/human", "data": "bearing 140.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  41%  |  t   17.6s  seq 43"}
+{"t": 36.834, "topic": "/dorai_clean_audio", "header": {"capture_s": 32.979, "rate": 16000.0, "channels": 1, "seq": 16}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -22.2, "peak": 0.369}
+{"t": 36.837, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.352, "backlog_s": 0.0, "busy": false, "audio_s": 15.9, "finals": 3, "lag_median_s": 3.05}}
+{"t": 37.007, "topic": "/dorai_doa", "data": 141.0}
+{"t": 37.007, "topic": "/dorai_doa/state", "data": [17.792, 141.0, 0.588, 0.405, 0.0, 44.0]}
+{"t": 37.007, "topic": "/dorai_doa/human", "data": "bearing 141.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  40%  |  t   17.8s  seq 44"}
+{"t": 37.284, "topic": "/dorai_doa", "data": 141.0}
+{"t": 37.284, "topic": "/dorai_doa/state", "data": [18.016, 141.0, 0.588, 0.405, 0.0, 45.0]}
+{"t": 37.285, "topic": "/dorai_doa/human", "data": "bearing 141.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  40%  |  t   18.0s  seq 45"}
+{"t": 37.506, "topic": "/dorai_doa", "data": 141.0}
+{"t": 37.506, "topic": "/dorai_doa/state", "data": [18.24, 141.0, 0.588, 0.405, 0.0, 46.0]}
+{"t": 37.506, "topic": "/dorai_doa/human", "data": "bearing 141.0 deg  |  7 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  40%  |  t   18.2s  seq 46"}
+{"t": 37.73, "topic": "/dorai_clean_audio", "header": {"capture_s": 33.979, "rate": 16000.0, "channels": 1, "seq": 17}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -22.8, "peak": 0.334}
+{"t": 37.777, "topic": "/dorai_plan", "data": {"text": "Artaban sit down.", "plan": {"steps": [{"task": "posture", "pose": "sit"}]}, "bearing_deg": 37.0, "engine": "llm", "latency_s": 1.3018, "stamp": 1795542955.9217548, "confidence": 1.0, "min_token_prob": 0.998, "wake_edits": 0}}
+{"t": 37.777, "topic": "/dorai_intent/decision", "data": {"text": "Artaban sit down.", "decision": "plan", "addressed": true, "wake_heard": "artaban", "wake_edits": 0, "wake_confidence": 1.0, "command": "sit down", "engine": "llm", "confidence": 1.0, "min_token_prob": 0.998, "latency_s": 1.3018, "tasks": ["posture"], "stamp": 1795542957.224066}}
+{"t": 38.691, "topic": "/dorai_clean_audio", "header": {"capture_s": 34.979, "rate": 16000.0, "channels": 1, "seq": 18}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -72.4, "peak": 0.001}
+{"t": 39.193, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "start", "index": 4, "text": "Artaban start inspection", "file": "CMD005_karen_185.wav", "t0": 20.12, "t1": 22.03, "bearing_deg": 111.7, "distance_m": 2.46, "elevation_deg": 24.1, "stamp": 1795542958.637932}}
+{"t": 39.303, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 3, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 1.155, "queue_depth": 0, "require_wake": true, "bearing_deg": 141.0, "stamp": 1795542958.7493432}}
+{"t": 39.329, "topic": "/dorai_doa", "data": 109.0}
+{"t": 39.33, "topic": "/dorai_doa/state", "data": [20.096, 109.0, 0.647, 0.407, 1.0, 47.0]}
+{"t": 39.33, "topic": "/dorai_doa/human", "data": "bearing 109.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.65  |  frame gate  41%  |  t   20.1s  seq 47"}
+{"t": 39.594, "topic": "/dorai_doa", "data": 113.0}
+{"t": 39.594, "topic": "/dorai_doa/state", "data": [20.32, 113.0, 0.549, 0.399, 1.0, 48.0]}
+{"t": 39.594, "topic": "/dorai_doa/human", "data": "bearing 113.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.55  |  frame gate  40%  |  t   20.3s  seq 48"}
+{"t": 39.698, "topic": "/dorai_clean_audio", "header": {"capture_s": 35.979, "rate": 16000.0, "channels": 1, "seq": 19}, "samples": 16384, "duration_s": 1.024, "rms_dbfs": -72.7, "peak": 0.001}
+{"t": 39.802, "topic": "/dorai_doa", "data": 110.0}
+{"t": 39.803, "topic": "/dorai_doa/state", "data": [20.544, 110.0, 0.527, 0.404, 1.0, 49.0]}
+{"t": 39.803, "topic": "/dorai_doa/human", "data": "bearing 110.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.53  |  frame gate  40%  |  t   20.5s  seq 49"}
+{"t": 40.002, "topic": "/dorai_doa", "data": 113.0}
+{"t": 40.003, "topic": "/dorai_doa/state", "data": [20.768, 113.0, 0.536, 0.403, 0.0, 50.0]}
+{"t": 40.003, "topic": "/dorai_doa/human", "data": "bearing 113.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.54  |  frame gate  40%  |  t   20.8s  seq 50"}
+{"t": 40.214, "topic": "/dorai_doa", "data": 106.0}
+{"t": 40.214, "topic": "/dorai_doa/state", "data": [20.992, 106.0, 0.558, 0.4, 1.0, 51.0]}
+{"t": 40.214, "topic": "/dorai_doa/human", "data": "bearing 106.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.56  |  frame gate  40%  |  t   21.0s  seq 51"}
+{"t": 40.401, "topic": "/dorai_transcript", "data": "Artaban follow me."}
+{"t": 40.405, "topic": "/dorai_stt/metrics", "data": {"t_wall": 1795542959.848, "model": "whisper/large-v3-turbo-dorai-artaban", "text": "Artaban follow me.", "n_words": 3, "stream_pos_s": 17.64, "window_s": 4.03, "lag_s": 2.989, "rtf_window": 0.44, "rtf_total": 0.313, "backlog_s": 1.02, "snr_est_db": 49.3, "speech_dbfs": -22.2, "noise_dbfs": -71.5, "speech_frac": 0.46, "cpu_temp_c": null, "cpu_freq_mhz": 2000, "load1": 2.37, "proc_cpu_pct": 87.1}}
+{"t": 40.495, "topic": "/dorai_doa", "data": 109.0}
+{"t": 40.498, "topic": "/dorai_doa/state", "data": [21.216, 109.0, 0.557, 0.405, 1.0, 52.0]}
+{"t": 40.498, "topic": "/dorai_doa/human", "data": "bearing 109.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.56  |  frame gate  40%  |  t   21.2s  seq 52"}
+{"t": 40.706, "topic": "/dorai_doa", "data": 110.0}
+{"t": 40.706, "topic": "/dorai_doa/state", "data": [21.44, 110.0, 0.565, 0.394, 1.0, 53.0]}
+{"t": 40.707, "topic": "/dorai_doa/human", "data": "bearing 110.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.57  |  frame gate  39%  |  t   21.4s  seq 53"}
+{"t": 40.77, "topic": "/dorai_clean_audio", "header": {"capture_s": 36.979, "rate": 16000.0, "channels": 1, "seq": 20}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -21.0, "peak": 0.393}
+{"t": 40.903, "topic": "/dorai_doa", "data": 112.0}
+{"t": 40.903, "topic": "/dorai_doa/state", "data": [21.664, 112.0, 0.581, 0.383, 1.0, 54.0]}
+{"t": 40.904, "topic": "/dorai_doa/human", "data": "bearing 112.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.58  |  frame gate  38%  |  t   21.7s  seq 54"}
+{"t": 41.104, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "end", "index": 4, "text": "Artaban start inspection", "file": "CMD005_karen_185.wav", "t0": 20.12, "t1": 22.03, "bearing_deg": 111.7, "distance_m": 2.46, "elevation_deg": 24.1, "stamp": 1795542960.547763}}
+{"t": 41.116, "topic": "/dorai_doa", "data": 114.0}
+{"t": 41.117, "topic": "/dorai_doa/state", "data": [21.888, 114.0, 0.559, 0.384, 1.0, 55.0]}
+{"t": 41.118, "topic": "/dorai_doa/human", "data": "bearing 114.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.56  |  frame gate  38%  |  t   21.9s  seq 55"}
+{"t": 41.184, "topic": "/dorai_plan", "data": {"text": "Artaban follow me.", "plan": {"steps": [{"task": "follow_me"}]}, "bearing_deg": 141.0, "engine": "llm", "latency_s": 0.7812, "stamp": 1795542959.8483794, "confidence": 1.0, "min_token_prob": 1.0, "wake_edits": 0}}
+{"t": 41.184, "topic": "/dorai_intent/decision", "data": {"text": "Artaban follow me.", "decision": "plan", "addressed": true, "wake_heard": "artaban", "wake_edits": 0, "wake_confidence": 1.0, "command": "follow me", "engine": "llm", "confidence": 1.0, "min_token_prob": 1.0, "latency_s": 0.7812, "tasks": ["follow_me"], "stamp": 1795542960.6304302}}
+{"t": 41.395, "topic": "/dorai_doa", "data": 114.0}
+{"t": 41.4, "topic": "/dorai_doa/state", "data": [22.112, 114.0, 0.555, 0.381, 0.0, 56.0]}
+{"t": 41.4, "topic": "/dorai_doa/human", "data": "bearing 114.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.56  |  frame gate  38%  |  t   22.1s  seq 56"}
+{"t": 41.59, "topic": "/dorai_doa", "data": 114.0}
+{"t": 41.591, "topic": "/dorai_doa/state", "data": [22.336, 114.0, 0.555, 0.381, 0.0, 57.0]}
+{"t": 41.591, "topic": "/dorai_doa/human", "data": "bearing 114.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.56  |  frame gate  38%  |  t   22.3s  seq 57"}
+{"t": 41.677, "topic": "/dorai_clean_audio", "header": {"capture_s": 37.979, "rate": 16000.0, "channels": 1, "seq": 21}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -21.5, "peak": 0.357}
+{"t": 41.796, "topic": "/dorai_doa", "data": 114.0}
+{"t": 41.797, "topic": "/dorai_doa/state", "data": [22.56, 114.0, 0.555, 0.381, 0.0, 58.0]}
+{"t": 41.798, "topic": "/dorai_doa/human", "data": "bearing 114.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.56  |  frame gate  38%  |  t   22.6s  seq 58"}
+{"t": 41.837, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.335, "backlog_s": 0.0, "busy": false, "audio_s": 21.9, "finals": 4, "lag_median_s": 3.02}}
+{"t": 42.678, "topic": "/dorai_clean_audio", "header": {"capture_s": 38.979, "rate": 16000.0, "channels": 1, "seq": 22}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -40.7, "peak": 0.075}
+{"t": 43.601, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "start", "index": 5, "text": "Artaban stop the inspection", "file": "CMD006_karen_185.wav", "t0": 24.53, "t1": 26.56, "bearing_deg": 128.8, "distance_m": 2.71, "elevation_deg": 22.1, "stamp": 1795542963.0479836}}
+{"t": 43.697, "topic": "/dorai_clean_audio", "header": {"capture_s": 39.98, "rate": 16000.0, "channels": 1, "seq": 23}, "samples": 16384, "duration_s": 1.024, "rms_dbfs": -73.9, "peak": 0.001}
+{"t": 43.723, "topic": "/dorai_doa", "data": 128.0}
+{"t": 43.724, "topic": "/dorai_doa/state", "data": [24.48, 128.0, 0.658, 0.384, 1.0, 59.0]}
+{"t": 43.724, "topic": "/dorai_doa/human", "data": "bearing 128.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.66  |  frame gate  38%  |  t   24.5s  seq 59"}
+{"t": 43.925, "topic": "/dorai_doa", "data": 131.0}
+{"t": 43.925, "topic": "/dorai_doa/state", "data": [24.704, 131.0, 0.613, 0.381, 1.0, 60.0]}
+{"t": 43.925, "topic": "/dorai_doa/human", "data": "bearing 131.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.61  |  frame gate  38%  |  t   24.7s  seq 60"}
+{"t": 44.186, "topic": "/dorai_doa", "data": 128.0}
+{"t": 44.186, "topic": "/dorai_doa/state", "data": [24.928, 128.0, 0.598, 0.379, 1.0, 61.0]}
+{"t": 44.186, "topic": "/dorai_doa/human", "data": "bearing 128.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  38%  |  t   24.9s  seq 61"}
+{"t": 44.302, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 4, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 1.0615, "queue_depth": 0, "require_wake": true, "bearing_deg": 128.0, "stamp": 1795542963.7485852}}
+{"t": 44.405, "topic": "/dorai_doa", "data": 133.0}
+{"t": 44.406, "topic": "/dorai_doa/state", "data": [25.152, 133.0, 0.574, 0.374, 0.0, 62.0]}
+{"t": 44.406, "topic": "/dorai_doa/human", "data": "bearing 133.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.57  |  frame gate  37%  |  t   25.2s  seq 62"}
+{"t": 44.453, "topic": "/dorai_transcript", "data": "Artaban start inspection."}
+{"t": 44.453, "topic": "/dorai_stt/metrics", "data": {"t_wall": 1795542963.896, "model": "whisper/large-v3-turbo-dorai-artaban", "text": "Artaban start inspection.", "n_words": 3, "stream_pos_s": 22.06, "window_s": 4.42, "lag_s": 2.633, "rtf_window": 0.43, "rtf_total": 0.335, "backlog_s": 1.02, "snr_est_db": 51.4, "speech_dbfs": -21.7, "noise_dbfs": -73.1, "speech_frac": 0.495, "cpu_temp_c": null, "cpu_freq_mhz": 2000, "load1": 2.18, "proc_cpu_pct": 87.0}}
+{"t": 44.615, "topic": "/dorai_doa", "data": 127.0}
+{"t": 44.618, "topic": "/dorai_doa/state", "data": [25.376, 127.0, 0.609, 0.369, 1.0, 63.0]}
+{"t": 44.619, "topic": "/dorai_doa/human", "data": "bearing 127.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.61  |  frame gate  37%  |  t   25.4s  seq 63"}
+{"t": 44.754, "topic": "/dorai_clean_audio", "header": {"capture_s": 40.979, "rate": 16000.0, "channels": 1, "seq": 24}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -25.4, "peak": 0.293}
+{"t": 44.82, "topic": "/dorai_doa", "data": 131.0}
+{"t": 44.821, "topic": "/dorai_doa/state", "data": [25.6, 131.0, 0.601, 0.368, 1.0, 64.0]}
+{"t": 44.821, "topic": "/dorai_doa/human", "data": "bearing 131.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  37%  |  t   25.6s  seq 64"}
+{"t": 45.099, "topic": "/dorai_doa", "data": 133.0}
+{"t": 45.099, "topic": "/dorai_doa/state", "data": [25.824, 133.0, 0.601, 0.369, 1.0, 65.0]}
+{"t": 45.099, "topic": "/dorai_doa/human", "data": "bearing 133.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.60  |  frame gate  37%  |  t   25.8s  seq 65"}
+{"t": 45.388, "topic": "/dorai_doa", "data": 128.0}
+{"t": 45.394, "topic": "/dorai_doa/state", "data": [26.048, 128.0, 0.585, 0.373, 1.0, 66.0]}
+{"t": 45.394, "topic": "/dorai_doa/human", "data": "bearing 128.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  37%  |  t   26.0s  seq 66"}
+{"t": 45.519, "topic": "/dorai_doa", "data": 128.0}
+{"t": 45.519, "topic": "/dorai_doa/state", "data": [26.272, 128.0, 0.587, 0.381, 1.0, 67.0]}
+{"t": 45.519, "topic": "/dorai_doa/human", "data": "bearing 128.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  38%  |  t   26.3s  seq 67"}
+{"t": 45.634, "topic": "/dorai_sim/truth", "data": {"event": "command", "phase": "end", "index": 5, "text": "Artaban stop the inspection", "file": "CMD006_karen_185.wav", "t0": 24.53, "t1": 26.56, "bearing_deg": 128.8, "distance_m": 2.71, "elevation_deg": 22.1, "stamp": 1795542965.0801067}}
+{"t": 45.659, "topic": "/dorai_plan", "data": {"text": "Artaban start inspection.", "plan": {"steps": [{"task": "inspection", "state": "start"}]}, "bearing_deg": 114.0, "engine": "llm", "latency_s": 1.2094, "stamp": 1795542963.8963594, "confidence": 0.999, "min_token_prob": 0.983, "wake_edits": 0}}
+{"t": 45.659, "topic": "/dorai_intent/decision", "data": {"text": "Artaban start inspection.", "decision": "plan", "addressed": true, "wake_heard": "artaban", "wake_edits": 0, "wake_confidence": 1.0, "command": "start inspection", "engine": "llm", "confidence": 0.999, "min_token_prob": 0.983, "latency_s": 1.2094, "tasks": ["inspection"], "stamp": 1795542965.1062264}}
+{"t": 45.709, "topic": "/dorai_doa", "data": 126.0}
+{"t": 45.709, "topic": "/dorai_doa/state", "data": [26.496, 126.0, 0.591, 0.376, 1.0, 68.0]}
+{"t": 45.709, "topic": "/dorai_doa/human", "data": "bearing 126.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  38%  |  t   26.5s  seq 68"}
+{"t": 45.713, "topic": "/dorai_clean_audio", "header": {"capture_s": 41.979, "rate": 16000.0, "channels": 1, "seq": 25}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -22.3, "peak": 0.317}
+{"t": 45.991, "topic": "/dorai_doa", "data": 126.0}
+{"t": 45.991, "topic": "/dorai_doa/state", "data": [26.72, 126.0, 0.591, 0.376, 0.0, 69.0]}
+{"t": 45.991, "topic": "/dorai_doa/human", "data": "bearing 126.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  38%  |  t   26.7s  seq 69"}
+{"t": 46.206, "topic": "/dorai_doa", "data": 126.0}
+{"t": 46.207, "topic": "/dorai_doa/state", "data": [26.944, 126.0, 0.591, 0.376, 0.0, 70.0]}
+{"t": 46.207, "topic": "/dorai_doa/human", "data": "bearing 126.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  38%  |  t   26.9s  seq 70"}
+{"t": 46.397, "topic": "/dorai_doa", "data": 126.0}
+{"t": 46.398, "topic": "/dorai_doa/state", "data": [27.168, 126.0, 0.591, 0.376, 0.0, 71.0]}
+{"t": 46.398, "topic": "/dorai_doa/human", "data": "bearing 126.0 deg  |  8 o'clock from the array's 0 deg mark  |  confidence 0.59  |  frame gate  38%  |  t   27.2s  seq 71"}
+{"t": 46.692, "topic": "/dorai_clean_audio", "header": {"capture_s": 42.979, "rate": 16000.0, "channels": 1, "seq": 26}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -25.4, "peak": 0.239}
+{"t": 46.838, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.339, "backlog_s": 0.0, "busy": false, "audio_s": 26.9, "finals": 5, "lag_median_s": 2.99}}
+{"t": 47.762, "topic": "/dorai_clean_audio", "header": {"capture_s": 43.979, "rate": 16000.0, "channels": 1, "seq": 27}, "samples": 16384, "duration_s": 1.024, "rms_dbfs": -73.7, "peak": 0.001}
+{"t": 48.698, "topic": "/dorai_clean_audio", "header": {"capture_s": 44.979, "rate": 16000.0, "channels": 1, "seq": 28}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -73.9, "peak": 0.001}
+{"t": 49.302, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 5, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 1.0911, "queue_depth": 0, "require_wake": true, "bearing_deg": 126.0, "stamp": 1795542968.7487638}}
+{"t": 49.624, "topic": "/dorai_transcript", "data": "Artaban stop the inspection."}
+{"t": 49.624, "topic": "/dorai_stt/metrics", "data": {"t_wall": 1795542969.07, "model": "whisper/large-v3-turbo-dorai-artaban", "text": "Artaban stop the inspection.", "n_words": 4, "stream_pos_s": 26.66, "window_s": 4.61, "lag_s": 3.139, "rtf_window": 0.358, "rtf_total": 0.339, "backlog_s": 0.99, "snr_est_db": 51.0, "speech_dbfs": -23.2, "noise_dbfs": -74.2, "speech_frac": 0.519, "cpu_temp_c": null, "cpu_freq_mhz": 2000, "load1": 2.01, "proc_cpu_pct": 71.9}}
+{"t": 49.731, "topic": "/dorai_clean_audio", "header": {"capture_s": 45.979, "rate": 16000.0, "channels": 1, "seq": 29}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -73.9, "peak": 0.001}
+{"t": 50.727, "topic": "/dorai_plan", "data": {"text": "Artaban stop the inspection.", "plan": {"steps": [{"task": "inspection", "state": "stop"}]}, "bearing_deg": 126.0, "engine": "llm", "latency_s": 1.1018, "stamp": 1795542969.0702846, "confidence": 0.999, "min_token_prob": 0.994, "wake_edits": 0}}
+{"t": 50.728, "topic": "/dorai_intent/decision", "data": {"text": "Artaban stop the inspection.", "decision": "plan", "addressed": true, "wake_heard": "artaban", "wake_edits": 0, "wake_confidence": 1.0, "command": "stop the inspection", "engine": "llm", "confidence": 0.999, "min_token_prob": 0.994, "latency_s": 1.1018, "tasks": ["inspection"], "stamp": 1795542970.1738505}}
+{"t": 50.778, "topic": "/dorai_clean_audio", "header": {"capture_s": 46.978, "rate": 16000.0, "channels": 1, "seq": 30}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -82.5, "peak": 0.001}
+{"t": 51.701, "topic": "/dorai_clean_audio", "header": {"capture_s": 47.979, "rate": 16000.0, "channels": 1, "seq": 31}, "samples": 16384, "duration_s": 1.024, "rms_dbfs": -239.6, "peak": 0.0}
+{"t": 51.837, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.345, "backlog_s": 0.0, "busy": false, "audio_s": 31.9, "finals": 6, "lag_median_s": 3.02}}
+{"t": 52.7, "topic": "/dorai_clean_audio", "header": {"capture_s": 48.979, "rate": 16000.0, "channels": 1, "seq": 32}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -239.8, "peak": 0.0}
+{"t": 53.68, "topic": "/dorai_clean_audio", "header": {"capture_s": 49.979, "rate": 16000.0, "channels": 1, "seq": 33}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -239.8, "peak": 0.0}
+{"t": 54.306, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 6, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 1.0929, "queue_depth": 0, "require_wake": true, "bearing_deg": 126.0, "stamp": 1795542973.753293}}
+{"t": 54.696, "topic": "/dorai_clean_audio", "header": {"capture_s": 50.979, "rate": 16000.0, "channels": 1, "seq": 34}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -239.8, "peak": 0.0}
+{"t": 55.684, "topic": "/dorai_clean_audio", "header": {"capture_s": 51.979, "rate": 16000.0, "channels": 1, "seq": 35}, "samples": 16384, "duration_s": 1.024, "rms_dbfs": -239.8, "peak": 0.0}
+{"t": 56.679, "topic": "/dorai_clean_audio", "header": {"capture_s": 52.979, "rate": 16000.0, "channels": 1, "seq": 36}, "samples": 15872, "duration_s": 0.992, "rms_dbfs": -239.8, "peak": 0.0}
+{"t": 56.836, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.298, "backlog_s": 0.0, "busy": false, "audio_s": 36.9, "finals": 6, "lag_median_s": 3.02}}
+{"t": 57.073, "topic": "/dorai_sim/truth", "data": {"event": "end", "name": "clean_speech", "stamp": 1795542976.5204096}}
+{"t": 59.302, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 6, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 1.0929, "queue_depth": 0, "require_wake": true, "bearing_deg": 126.0, "stamp": 1795542978.7493644}}
+{"t": 61.837, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.298, "backlog_s": 0.0, "busy": false, "audio_s": 36.9, "finals": 6, "lag_median_s": 3.02}}
+{"t": 64.307, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 6, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 1.0929, "queue_depth": 0, "require_wake": true, "bearing_deg": 126.0, "stamp": 1795542983.752593}}
+{"t": 66.84, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.298, "backlog_s": 0.0, "busy": false, "audio_s": 36.9, "finals": 6, "lag_median_s": 3.02}}
+{"t": 69.306, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 6, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 1.0929, "queue_depth": 0, "require_wake": true, "bearing_deg": 126.0, "stamp": 1795542988.753432}}
+{"t": 71.836, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.298, "backlog_s": 0.0, "busy": false, "audio_s": 36.9, "finals": 6, "lag_median_s": 3.02}}
+{"t": 74.302, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 6, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 1.0929, "queue_depth": 0, "require_wake": true, "bearing_deg": 126.0, "stamp": 1795542993.7487178}}
+{"t": 76.837, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.298, "backlog_s": 0.0, "busy": false, "audio_s": 36.9, "finals": 6, "lag_median_s": 3.02}}
+{"t": 79.304, "topic": "/dorai_intent/status", "data": {"engine": "llm", "model": "intent-qwen35-4b-Q4_0.gguf", "n_plans": 6, "n_clarify": 0, "n_none": 0, "n_stop": 0, "n_invalid": 0, "n_ignored": 0, "n_error": 0, "mean_latency_s": 1.0929, "queue_depth": 0, "require_wake": true, "bearing_deg": 126.0, "stamp": 1795542998.7511027}}
+{"t": 81.839, "topic": "/dorai_stt/status", "data": {"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": 0.298, "backlog_s": 0.0, "busy": false, "audio_s": 36.9, "finals": 6, "lag_median_s": 3.02}}

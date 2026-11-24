@@ -32,7 +32,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray, String
 
-from dorai_simulator import playback_scheduler as devices
+from dorai_simulator import jsonsafe, playback_scheduler as devices
 
 
 def read_scene(folder, array):
@@ -131,7 +131,7 @@ class VirtualMic(Node):
 
     def _say(self, **event):
         event["stamp"] = time.time()
-        self.truth_pub.publish(String(data=json.dumps(event)))
+        self.truth_pub.publish(String(data=jsonsafe.dumps(event)))
 
     def _events(self):
         """(due_s, kind, payload) of everything to publish, in time order."""

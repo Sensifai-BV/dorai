@@ -55,6 +55,7 @@ except ImportError:  # very old rclpy / test mocks
         pass
 from std_msgs.msg import Float32MultiArray, String
 
+from . import jsonsafe
 from .metrics import LevelMeter, SystemProbe
 from .models import auto_rule2, default_roots, find_model, find_whisper_model
 from .streamer import NemotronStreamer
@@ -280,7 +281,7 @@ class SttNode(Node):
         m.update(self.meter.window(last["pos_s"], pos_s))
         m.update(self.sysprobe.sample())
         self._m_last = {"pos_s": pos_s, "compute_s": st["compute_s"], "audio_s": st["audio_s"]}
-        js = json.dumps(m)
+        js = jsonsafe.dumps(m)
         self.metrics_pub.publish(String(data=js))
         if self._m_file:
             self._m_file.write(js + "\n")
@@ -298,7 +299,7 @@ class SttNode(Node):
               "backlog_s": round(b, 2), "busy": self._busy, "audio_s": round(self.asr.stats["audio_s"], 1),
               "finals": self.asr.stats["finals"],
               "lag_median_s": round(float(np.median(self._lags)), 2) if self._lags else None}
-        self.status_pub.publish(String(data=json.dumps(st)))
+        self.status_pub.publish(String(data=jsonsafe.dumps(st)))
         if b > float(self.p["backlog_warn_s"]):
             self.get_logger().warning(
                 f"STT is behind real time: {b:.1f}s audio queued (RTF {st['rtf']}). "
@@ -306,7 +307,7 @@ class SttNode(Node):
                 "or run stt_mod on a faster host.",
                 throttle_duration_sec=10.0)
         elif self.p["debug"]:
-            self.get_logger().info(json.dumps(st))
+            self.get_logger().info(jsonsafe.dumps(st))
 
     def shutdown(self):
         with self._cv:

@@ -59,7 +59,7 @@ except ImportError:  # very old rclpy / test mocks
         pass
 from std_msgs.msg import Float32, String
 
-from . import wake
+from . import jsonsafe, wake
 from .bearing import BearingHistory
 from .engine import make_engine
 from .models import DEFAULT_LORA, DEFAULT_MODEL, HF_REPO, HF_SUBDIR
@@ -208,7 +208,7 @@ class IntentNode(Node):
              "engine": None, "confidence": None, "min_token_prob": None, "latency_s": None,
              "tasks": [], "stamp": time.time()}
         d.update(more)
-        self.pub_decision.publish(String(data=json.dumps(d)))
+        self.pub_decision.publish(String(data=jsonsafe.dumps(d)))
         if self.p["debug"]:
             wk = (f"wake '{m['heard']}' {m['edits']} edit(s), conf {m['confidence']:.2f}" if m["edits"] is not None
                   else "no wake-word candidate")
@@ -286,7 +286,7 @@ class IntentNode(Node):
         self.stats["n_plans"] += 1
         # TODO(task_mod): replace this JSON topic by an ExecuteTask action goal once the
         # task_mod action interface exists; keep /dorai_plan as the debug/log interface.
-        self.pub_plan.publish(String(data=json.dumps({
+        self.pub_plan.publish(String(data=jsonsafe.dumps({
             "text": text, "plan": plan, "bearing_deg": bearing, "engine": self.engine.name,
             "latency_s": round(lat, 4), "stamp": t_recv, "confidence": ev["confidence"],
             "min_token_prob": ev["min_token_prob"], "wake_edits": m["edits"] if m["addressed"] else None})))
@@ -310,7 +310,7 @@ class IntentNode(Node):
     def _status(self):
         lat = list(self._lat)
         s = self.stats
-        self.pub_status.publish(String(data=json.dumps({
+        self.pub_status.publish(String(data=jsonsafe.dumps({
             "engine": self.engine.name, "model": self.engine.model,
             "n_plans": s["n_plans"], "n_clarify": s["n_clarify"], "n_none": s["n_none"],
             "n_stop": s["n_stop"], "n_invalid": s["n_invalid"], "n_ignored": s["n_ignored"],

@@ -546,3 +546,19 @@ def test_neural_gate_keeps_the_start_of_the_utterance():
     g = NeuralGate(_vad_file(), fs)
     noise = np.random.default_rng(0).normal(0, 0.02, 10 * fs).astype(np.float32)
     assert g.accept(noise) + g.flush() == []
+
+
+# ------------------------------------------------------------- strict JSON out
+def test_published_json_is_strict():
+    import json as _json
+    import math as _math
+    import os as _os
+    import sys as _sys
+    _sys.path.insert(0, _os.path.join(_os.path.dirname(__file__), ".."))
+    from stt_mod import jsonsafe
+    s = jsonsafe.dumps({"rtf": float("nan"), "x": [1.5, float("inf")], "n": None, "k": 2})
+    assert _json.loads(s, parse_constant=lambda c: (_ for _ in ()).throw(ValueError(c))) == \
+        {"rtf": None, "x": [1.5, None], "n": None, "k": 2}
+    # every JSON the node publishes goes through jsonsafe (bare json.dumps would write NaN)
+    src = open(_os.path.join(_os.path.dirname(__file__), "..", "stt_mod/node.py"), encoding="utf-8").read()
+    assert "json.dumps(" not in src.replace("jsonsafe.dumps(", "")

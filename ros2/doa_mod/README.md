@@ -125,6 +125,38 @@ talking, `music` is slightly worse (median 14.9° against 13.7°, 50 % against
 source from one direction is the problem, and treat it as unvalidated until it
 has been scored on the robot.
 
+**`method:=auto` — the default since 2026-11-24.** Runs pooled SRP-PHAT and
+**GEVD-MUSIC** side by side and reports, per utterance, SRP-PHAT when the speech
+stands at least `auto_snr_db` (20 dB) above the noise measured between
+utterances, else GEVD-MUSIC. GEVD-MUSIC is MUSIC on the utterance covariance
+*whitened by the noise covariance* of the non-speech frames (`noise_tc`, 3 s):
+the generalized eigenvectors of (R_speech, R_noise) put the machine's own
+direction in the noise subspace, so a welder or compressor is no longer "the
+strongest source". (Plain subtraction of the noise covariance, tried earlier,
+did not help; whitening is a different operation.) In a quiet room nothing
+changes: SRP-PHAT, the hardware-validated path, stays in charge.
+
+Real node, offline (`python -m evaluation.doa_node <scenes> method=...`), five
+rendered scenes, last bearing of each command, 30 commands:
+
+| Scene | `srp_phat` | `music` | `auto` |
+| :--- | ---: | ---: | ---: |
+| clean speech, workshop RT60 0.6 s | 2.6° / 100 % | 3.9° / 100 % | 2.6° / 100 % |
+| factory, welding 0 dB, RT60 1.2 s | 54° / 33 % | 21° / 33 % | **8.8° / 83 %** |
+| welding + machinery, 5 dB each | 38° / 33 % | 16° / 50 % | **13° / 67 %** |
+| robot at a wall, office | 12° / 67 % | 16° / 50 % | 12° / 67 % |
+| welding 10 dB below speech | 159° / 0 % | 136° / 17 % | **13° / 67 %** |
+| **all** (median / within 15°) | 15.5° / 47 % | 15.8° / 50 % | **10.0° / 77 %** |
+| 90th percentile | 167° | 152° | **36°** |
+
+`auto_snr_db` 10 / 15 / 20 / 25 dB gave 63 / 73 / 77 / 77 % within 15°. Cost: the
+same per frame as `srp_phat` (the MUSIC covariance update is cheap), plus one
+4×4 generalized eigen-decomposition per band bin per published bearing
+(~9 ms at 5 Hz on the OrbStack VM). GEVD-MUSIC itself is **not yet validated on
+hardware**; `auto` only hands it the bearing when a machine is loud enough to
+break SRP-PHAT anyway. Rescore on the robot (`test/replay_session.py`) and in
+the pilots.
+
 Real recordings, LOCATA corpus (`experiments/locata_doa.py`), four equatorial
 capsules of the Eigenmike as a planar array: median error 13.7° over 708
 bearings (loudspeaker standing still 10.5°, walking talker 19°, walking talker
@@ -209,7 +241,10 @@ gate and is refused with `vad_mode:=off`.
 | `vad_hangover_ms` | `800` | how long publishing outlives the last speech frame |
 | `avg_tc` | `0.5` | pooling time constant, s. Longer = steadier, slower |
 | `subtract_noise` | `false` | subtract a stationary interferer; needs a gate; `srp_phat` only, and worse in reverberant rooms |
-| `method` | `srp_phat` | `srp_phat` (scored on hardware) or `music` (better against noise from one direction, see Accuracy; not validated on hardware) |
+| `method` | `auto` | `auto` (SRP-PHAT in quiet, GEVD-MUSIC under machine noise, see Accuracy), `srp_phat` (scored on hardware) or `music` |
+| `auto_snr_db` | `20.0` | `auto`: utterance SNR above the noise between utterances at which SRP-PHAT is used |
+| `noise_tc` | `3.0` | noise covariance / level memory, s (GEVD-MUSIC and `auto`) |
+| `music_whiten` | `false` | GEVD-MUSIC for `method:=music` too (`auto` always whitens) |
 | `music_tc` | `3.0` | `music`: how long the utterance's covariance remembers, s |
 | `vad_reset_s` | `2.0` | neural gate: clear the model's state this often while nobody speaks; 0 = never |
 | `utterance_gap_s` | `0.8` | a pause this long ends an utterance; the next one starts a new pool; 0 = one pool for ever |

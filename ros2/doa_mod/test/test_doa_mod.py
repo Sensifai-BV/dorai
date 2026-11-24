@@ -787,3 +787,84 @@ def test_node_refuses_an_unknown_method_and_noise_subtraction_with_music():
     rosmock.set_overrides(dict(source='topic', vad_mode='energy', method='music', subtract_noise=True))
     with pytest.raises(ValueError, match="subtract_noise"):
         D.DoaMod()
+
+
+# ---------------------------------------------------------------------------
+# 12. GEVD-MUSIC and the auto method (machine noise)
+# ---------------------------------------------------------------------------
+class _ScheduleGate:
+    """Stands in for SpeechGate: says 'speech' exactly when the test says so."""
+    def __init__(self):
+        self.speech = False
+        self.last_prob = None
+
+    def __call__(self, block):
+        return self.speech
+
+
+def _unit(x, rms):
+    return x / np.sqrt(np.mean(x ** 2)) * rms
+
+
+def _machine_and_talker(est_list, gate, noise_db, talker=60.0, machine=250.0, n_noise=60, n_speech=30):
+    """A steady machine from `machine` deg all the time; a talker from `talker`
+    deg during the last n_speech frames at `noise_db` relative to the machine
+    (positive = machine louder)."""
+    pos = dc.array_positions()
+    for k in range(n_noise + n_speech):
+        x = _unit(plane_wave(machine, pos, seed=2000 + k), 0.05)
+        gate.speech = k >= n_noise
+        if gate.speech:
+            x = x + _unit(plane_wave(talker, pos, seed=k), 0.05 * 10 ** (-noise_db / 20))
+        for est in est_list:
+            est.push(x)
+
+
+def test_gevd_music_finds_a_talker_quieter_than_the_machine():
+    """Machine 3 dB LOUDER than the talker, in every frame. Plain MUSIC and
+    SRP-PHAT both report the machine; GEVD-MUSIC whitens with the covariance
+    measured before the talker started and reports the talker."""
+    pos = dc.array_positions()
+    gate = _ScheduleGate()
+    plain = D.BearingEstimator(pos, gate=gate, method='music')
+    gevd = D.BearingEstimator(pos, gate=gate, method='music', music_whiten=True)
+    srp = D.BearingEstimator(pos, gate=gate, method='srp_phat', avg_tc=3.0)
+    _machine_and_talker([plain, gevd, srp], gate, noise_db=3.0)
+    assert abs(wrap180(gevd.bearing()[0] - 60.0)) <= 10.0, f"GEVD gave {gevd.bearing()[0]}"
+    assert abs(wrap180(plain.bearing()[0] - 250.0)) <= 20.0, "plain MUSIC was expected to follow the machine"
+    assert abs(wrap180(srp.bearing()[0] - 250.0)) <= 20.0, "SRP-PHAT was expected to follow the machine"
+
+
+def test_auto_uses_srp_in_quiet_and_gevd_under_machine_noise():
+    pos = dc.array_positions()
+    # quiet: talker 30 dB above the machine -> SRP-PHAT, on the talker
+    gate = _ScheduleGate()
+    quiet = D.BearingEstimator(pos, gate=gate, method='auto')
+    _machine_and_talker([quiet], gate, noise_db=-30.0)
+    az, _ = quiet.bearing()
+    assert quiet.last_choice == 'srp_phat' and quiet.snr_db() > 20.0
+    assert abs(wrap180(az - 60.0)) <= 10.0
+    # loud machine -> GEVD-MUSIC, still on the talker
+    gate = _ScheduleGate()
+    loud = D.BearingEstimator(pos, gate=gate, method='auto')
+    _machine_and_talker([loud], gate, noise_db=3.0)
+    az, _ = loud.bearing()
+    assert loud.last_choice == 'gevd_music' and loud.snr_db() < 20.0
+    assert abs(wrap180(az - 60.0)) <= 10.0, f"auto gave {az}"
+
+
+def test_auto_without_measured_noise_is_srp():
+    """Speech from the first frame on: no noise has been measured, SNR is
+    infinite, and the validated SRP-PHAT path is used."""
+    pos = dc.array_positions()
+    est = D.BearingEstimator(pos, gate=D.SpeechGate('off'), method='auto')
+    for k in range(12):
+        est.push(plane_wave(135.0, pos, seed=k))
+    az, _ = est.bearing()
+    assert est.last_choice == 'srp_phat' and abs(wrap180(az - 135.0)) <= 3.0
+
+
+def test_node_default_method_is_auto():
+    rosmock.set_overrides(dict(source='topic', vad_mode='energy'))
+    node = D.DoaMod()
+    assert node.est.method == 'auto'

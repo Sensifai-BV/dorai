@@ -1,4 +1,4 @@
-== fix_factory: scene 'factory_welding_0db' rt60 1.2 s
+== v3_factory: scene 'factory_welding_0db' rt60 1.2 s
 reference                                | transcript                              
 Artaban follow me                        | Artaban follow me.                        (0/3)
 Artaban stop                             | Fargan stop.                              (1/2)
@@ -7,18 +7,18 @@ Artaban start inspection                 | Artaban start inspection.            
 Artaban go back to base                  | And then turn on the base.                (5/5)
 Artaban go to the door                   | Artaban say that so.                      (4/5)
 WER 52.2% over 23 words; 6 transcripts for 6 commands
-  decision plan     'Artaban follow me.'                          tasks=['follow_me'] conf=1.0 0.8744s
+  decision plan     'Artaban follow me.'                          tasks=['follow_me'] conf=1.0 1.4834s
   decision stop     'Fargan stop.'                                tasks=[] conf=None Nones
-  decision plan     'Artaban check the welding station.'          tasks=['inspect_visual'] conf=0.96 0.9614s
-  decision plan     'Artaban start inspection.'                   tasks=['inspection'] conf=0.999 0.8134s
+  decision plan     'Artaban check the welding station.'          tasks=['inspect_visual'] conf=0.96 4.0368s
+  decision plan     'Artaban start inspection.'                   tasks=['inspection'] conf=0.999 3.0362s
   decision ignored  'And then turn on the base.'                  tasks=[] conf=None Nones
-  decision clarify  'Artaban say that so.'                        tasks=['clarify'] conf=0.988 0.7645s
-  doa  truth  194.9  est   46.0  err 148.9  (10 msgs)  Artaban follow me
-  doa  truth  152.2  est  146.0  err   6.2  (8 msgs)  Artaban stop
-  doa  truth   44.7  est   41.0  err   3.7  (12 msgs)  Artaban check the gas pressure
-  doa  truth  233.0  est   46.0  err 173.0  (12 msgs)  Artaban start inspection
-  doa  truth  138.1  est   47.0  err  91.1  (7 msgs)  Artaban go back to base
-  doa  truth  353.1  est    9.0  err  15.9  (9 msgs)  Artaban go to the door
-DoA mean abs error 73.1 deg, within 20 deg: 3/6
-voice_mod delay (mean ms): buffer_ms=1883, queue_ms=0, infer_ms=306, publish_ms=1, total_ms=2190
-stt lag_s: 2.8, 3.15, 2.58, 3.2, 2.85, 2.76
+  decision clarify  'Artaban say that so.'                        tasks=['clarify'] conf=0.988 4.047s
+  doa  truth  194.9  est  194.0  err   0.9  (10 msgs)  Artaban follow me
+  doa  truth  152.2  est  167.0  err  14.8  (8 msgs)  Artaban stop
+  doa  truth   44.7  est   38.0  err   6.7  (12 msgs)  Artaban check the gas pressure
+  doa  truth  233.0  est  235.0  err   2.0  (12 msgs)  Artaban start inspection
+  doa  truth  138.1  est   45.0  err  93.1  (7 msgs)  Artaban go back to base
+  doa  truth  353.1  est    5.0  err  11.9  (9 msgs)  Artaban go to the door
+DoA mean abs error 21.6 deg, within 20 deg: 5/6
+voice_mod delay (mean ms): buffer_ms=1859, queue_ms=6, infer_ms=410, publish_ms=8, total_ms=2283
+stt lag_s: 2.92, 5.67, 3.9, 3.63, 3.32, 3.15

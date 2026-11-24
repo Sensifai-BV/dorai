@@ -489,7 +489,8 @@ class MusicPool:
     the LOCATA recordings only.
     """
 
-    def __init__(self, pos, fs=FS, f_lo=None, f_hi=None, tc=3.0, grid_deg=None):
+    def __init__(self, pos, fs=FS, f_lo=None, f_hi=None, tc=3.0, grid_deg=None,
+                 whiten=False, noise_tc=3.0, noise_min_frames=16, loading=1e-3):
         pos = np.asarray(pos, dtype=np.float64)
         self.grid = np.arange(0.0, 360.0, 1.0) if grid_deg is None else np.asarray(grid_deg, float)
         freqs = np.fft.rfftfreq(BLOCK, 1.0 / fs)
@@ -504,6 +505,17 @@ class MusicPool:
         self.alpha = float(np.exp(-HOP / (tc * fs))) if tc and tc > 0 else 1.0
         self.cov = np.zeros((len(fb), pos.shape[0], pos.shape[0]), dtype=np.complex128)
         self.n_speech = 0
+        # GEVD-MUSIC (whiten=True): the noise covariance of the non-speech frames
+        # (exponential forget, noise_tc s) whitens the utterance covariance before
+        # the eigen-decomposition, so a directional machine stops looking like the
+        # strongest source. See spectrum().
+        self.whiten = bool(whiten)
+        self.ncov = np.zeros_like(self.cov)
+        self.nw = 0.0
+        self.n_noise = 0
+        self.noise_min = int(noise_min_frames)
+        self.nalpha = float(np.exp(-HOP / (noise_tc * fs))) if noise_tc and noise_tc > 0 else 1.0
+        self.loading = float(loading)
 
     def clear(self):
         self.cov[:] = 0.0
@@ -515,12 +527,42 @@ class MusicPool:
         self.cov = self.alpha * self.cov + np.einsum("mf,nf->fmn", X, np.conj(X))
         self.n_speech += 1
 
+    def update_noise(self, block):
+        """Add one NON-speech frame [M, BLOCK] to the noise covariance."""
+        if not self.whiten:
+            return
+        X = np.fft.rfft(np.nan_to_num(block) * self.win[None, :], BLOCK, axis=1)[:, self.band]
+        self.ncov = self.nalpha * self.ncov + np.einsum("mf,nf->fmn", X, np.conj(X))
+        self.nw = self.nalpha * self.nw + 1.0
+        self.n_noise += 1
+
+    def _noise_subspace(self):
+        """[bins, M, M-1]: the directions orthogonal to the strongest source.
+
+        Plain MUSIC: eigenvectors of the utterance covariance Rx. GEVD-MUSIC:
+        generalized eigenvectors of (Rx, Rn). With Rx = s a a^H + Rn the
+        generalized eigenvectors of eigenvalue 1 satisfy a^H e = 0, so the
+        noise field's own direction is no longer 'the strongest source'."""
+        if not (self.whiten and self.n_noise >= self.noise_min and self.nw > 0):
+            _, vec = np.linalg.eigh(self.cov)                     # eigenvalues ascending
+            return vec[:, :, :-1]
+        M = self.cov.shape[-1]
+        Rn = self.ncov / self.nw
+        Rx = self.cov / max(self.n_speech, 1)
+        tr = np.real(np.trace(Rn, axis1=1, axis2=2))[:, None, None] / M
+        Rn = Rn + self.loading * np.maximum(tr, 1e-20) * np.eye(M)[None]   # diagonal loading
+        L = np.linalg.cholesky(Rn)
+        Li = np.linalg.inv(L)
+        Rw = Li @ Rx @ np.conj(np.swapaxes(Li, 1, 2))
+        _, V = np.linalg.eigh(Rw)
+        E = np.conj(np.swapaxes(Li, 1, 2)) @ V[:, :, :-1]       # back to the microphone domain
+        return E / np.maximum(np.linalg.norm(E, axis=1, keepdims=True), 1e-30)
+
     def spectrum(self):
         """Normalised spatial spectrum over the grid, in [0, 1]."""
         if self.n_speech == 0:
             return np.zeros(len(self.grid))
-        _, vec = np.linalg.eigh(self.cov)                         # eigenvalues ascending
-        noise = vec[:, :, :-1]                                    # all but the strongest direction
+        noise = self._noise_subspace()                            # all but the strongest direction
         proj = np.einsum("gfm,fmk->gfk", np.conj(self.steer), noise)
         ps = 1.0 / np.maximum((np.abs(proj) ** 2).sum(axis=-1), 1e-12)        # [grid, bins]
         ps = ps / np.maximum(ps.max(axis=0, keepdims=True), 1e-30)
@@ -544,7 +586,8 @@ class BearingEstimator:
     """
 
     def __init__(self, pos, fs=FS, gate=None, avg_tc=0.5, subtract_noise=False,
-                 f_hi=None, utterance_gap_s=0.8, method='srp_phat', music_tc=3.0):
+                 f_hi=None, utterance_gap_s=0.8, method='srp_phat', music_tc=3.0,
+                 noise_tc=3.0, music_whiten=False, auto_snr_db=20.0):
         self.pos = np.asarray(pos, dtype=np.float64)
         self.fs = int(fs)
         self.gate = gate if gate is not None else SpeechGate('off')
@@ -565,12 +608,32 @@ class BearingEstimator:
             self.pos, fs=self.fs, f_hi=self.f_hi, decay=avg_tc, hop=HOP,
             subtract_noise=bool(subtract_noise))
         self.method = str(method).lower().strip()
-        if self.method not in ('srp_phat', 'music'):
-            raise ValueError(f"method must be 'srp_phat' or 'music', got {method!r}")
+        if self.method not in ('srp_phat', 'music', 'auto'):
+            raise ValueError(f"method must be 'auto', 'srp_phat' or 'music', got {method!r}")
+        # AUTO (the default) runs pooled SRP-PHAT and GEVD-MUSIC side by side and
+        # reports, per utterance, SRP-PHAT when the speech stands auto_snr_db or
+        # more above the noise measured between utterances, else GEVD-MUSIC.
+        # Why: SRP-PHAT gives every frequency bin one vote, so a broadband machine
+        # (welder, compressor) that owns most bins owns the bearing even while
+        # somebody talks -- 159 deg median error with welding 10 dB BELOW the
+        # speech. GEVD-MUSIC whitens the utterance covariance with the noise
+        # covariance, so the machine stops being "the strongest source". In a
+        # quiet room SRP-PHAT is the hardware-validated estimator (6.1 deg) and
+        # stays in charge. Measured on 5 simulated scenes (30 commands, last
+        # bearing within 15 deg): srp_phat 47 %, music 50 %, auto: see README.
+        self.auto_snr_db = float(auto_snr_db)
+        self.noise_alpha = float(np.exp(-HOP / (float(noise_tc) * self.fs))) if noise_tc and noise_tc > 0 else 1.0
+        self._p_speech = 0.0
+        self._n_pspeech = 0
+        self._p_noise = 0.0
+        self._w_noise = 0.0
+        self.last_choice = self.method
         # See MusicPool. In music mode the SRP pool is not fed (it is the
         # costly part of a frame); its noise subtraction does not apply.
-        self.music = (MusicPool(self.pos, fs=self.fs, f_hi=self.f_hi, tc=music_tc)
-                      if self.method == 'music' else None)
+        self.music = (MusicPool(self.pos, fs=self.fs, f_hi=self.f_hi, tc=music_tc,
+                                whiten=bool(music_whiten) or self.method == 'auto',
+                                noise_tc=noise_tc)
+                      if self.method in ('music', 'auto') else None)
         # A NEW UTTERANCE STARTS A NEW POOL. The pool only forgets while speech
         # frames arrive, so after a pause it still held the previous talker at
         # full weight, and the first bearings of the next command pointed at
@@ -611,6 +674,7 @@ class BearingEstimator:
                 self.acc.speech[:] = 0.0            # see __init__
                 if self.music is not None:
                     self.music.clear()
+                self._p_speech, self._n_pspeech = 0.0, 0
                 self.n_utterances += 1
             self._quiet_hops = 0
         else:
@@ -619,10 +683,22 @@ class BearingEstimator:
         # Feed BOTH speech and non-speech frames: the accumulator routes them
         # to separate pools, so a stationary interferer can be subtracted.
         # Only active frames move the reported bearing.
-        if self.music is None:
+        if self.method in ('srp_phat', 'auto'):
             self.acc.update(block, active=active)
-        elif active:
-            self.music.update(block)
+        if self.music is not None:
+            if active:
+                self.music.update(block)
+            else:
+                self.music.update_noise(block)
+        # band power of speech (this utterance) and of the noise between
+        # utterances, for the auto switch
+        p = float(est['band_rms']) ** 2
+        if active:
+            self._p_speech += p
+            self._n_pspeech += 1
+        else:
+            self._p_noise = self.noise_alpha * self._p_noise + p
+            self._w_noise = self.noise_alpha * self._w_noise + 1.0
         if active:
             self.n_speech += 1
             if consistent:
@@ -643,11 +719,26 @@ class BearingEstimator:
         dominates. It is NOT an angular confidence -- with a 64 mm aperture
         the main lobe is ~130 deg wide however good the frame is.
         """
-        pool = self.music if self.music is not None else self.acc
+        if self.method == 'auto':
+            pool = self.acc if self.snr_db() >= self.auto_snr_db else self.music
+            self.last_choice = 'srp_phat' if pool is self.acc else 'gevd_music'
+        else:
+            pool = self.music if self.music is not None else self.acc
         if pool.n_speech == 0:
             return float('nan'), 0.0
         az, sharp = pool.bearing()
         return (az % 360.0 if np.isfinite(az) else float('nan')), sharp
+
+    def snr_db(self):
+        """Speech band power of this utterance over the noise between
+        utterances, dB. +inf while no noise has been measured (a quiet start)."""
+        if self._n_pspeech == 0:
+            return float('nan')
+        if self._w_noise <= 0:
+            return float('inf')
+        n = self._p_noise / self._w_noise
+        s = self._p_speech / self._n_pspeech
+        return float(10.0 * np.log10(max(s - n, 1e-20) / max(n, 1e-20)))
 
     @property
     def consistent_frac(self):
@@ -880,12 +971,20 @@ class DoaMod(Node):
         # -- estimator ------------------------------------------------------
         self.declare_parameter("avg_tc", 0.5, dyn)
         self.declare_parameter("subtract_noise", False)
+        # Noise model for GEVD-MUSIC and the auto switch: the non-speech frames,
+        # remembered with time constant noise_tc (s). music_whiten turns GEVD on
+        # for method 'music' too ('auto' always uses it).
+        self.declare_parameter("noise_tc", 3.0)
+        self.declare_parameter("music_whiten", False)
+        # method 'auto': SRP-PHAT when the utterance is at least this many dB
+        # above the noise between utterances, else GEVD-MUSIC.
+        self.declare_parameter("auto_snr_db", 20.0, dyn)
         # How the bearing is formed from the speech frames:
         #   srp_phat  pooled SRP-PHAT (scored on the hardware session)
         #   music     normalised MUSIC on the utterance's covariance: holds up
         #             better against noise from one direction (see MusicPool);
         #             simulation and LOCATA only, not validated on hardware
-        self.declare_parameter("method", "srp_phat")
+        self.declare_parameter("method", "auto")
         self.declare_parameter("music_tc", 3.0, dyn)
         # A pause this long ends an utterance: the next speech starts a new
         # pool (see BearingEstimator). 0 = one pool for ever, as before.
@@ -975,9 +1074,12 @@ class DoaMod(Node):
         self.est = BearingEstimator(
             self.pos, fs=self.fs, gate=self.gate, avg_tc=avg_tc,
             subtract_noise=self.subtract_noise,
+            noise_tc=float(gp("noise_tc").value),
+            music_whiten=bool(gp("music_whiten").value) and self.vad_mode != "off",
+            auto_snr_db=float(gp("auto_snr_db").value),
             utterance_gap_s=float(gp("utterance_gap_s").value),
             method=str(gp("method").value), music_tc=float(gp("music_tc").value))
-        if self.est.method == 'music' and self.subtract_noise:
+        if self.est.method != 'srp_phat' and self.subtract_noise:
             raise ValueError("subtract_noise belongs to method 'srp_phat'; it has no effect with 'music'.")
         self.timing = TimingCheck(
             self.pos, warn_us=float(gp("timing_warn_us").value))

@@ -1,7 +1,7 @@
 # Interface samples — real recordings of every DORAI topic
 
 Recorded on 2026-11-24 with the full graph running natively on ROS 2 Lyrical
-(OrbStack `ros2` VM, Ubuntu 26.04, arm64, CPU only), fed by `dorai_simulator`:
+(OrbStack `ros2` VM, Ubuntu 26.04, arm64, CPU only), fed by `dorai_simulator`, doa_mod `method:=auto`:
 
 ```
 virtual_mic (scene) ─► voice_mod (3-mic dorai_beamformer.ort, denoise_level 0.75, 1 s frames)
@@ -24,24 +24,33 @@ header, length and level instead of the samples). `<scene>.score.txt` is the sco
 
 | Scene | Room | WER | Plans correct | DoA mean error | Capture → transcript | Intent LLM |
 |---|---|---|---|---|---|---|
-| clean_speech | workshop, RT60 0.59 s | 0 % (23 words) | 6 / 6, each with its own talker's bearing | 3.3° (6/6 within 20°) | 2.5 – 3.1 s | 0.42 – 1.35 s |
-| factory_welding_0db | factory, RT60 1.2 s, welding at 0 dB SNR | 52 % | 3 / 6 + the stop (1 ignored, 1 clarify) | 73° (3/6 within 20°) | 2.6 – 3.2 s | 0.76 – 0.96 s |
+| clean_speech | workshop, RT60 0.59 s | 0 % (23 words) | 6 / 6, each with its own talker's bearing | 3.8° (6/6 within 20°) | 2.6 – 3.3 s | 0.78 – 1.30 s |
+| factory_welding_0db | factory, RT60 1.2 s, welding at 0 dB SNR | 52 % | 3 / 6 + the stop (1 ignored, 1 clarify) | 21.6° (5/6 within 20°) | 2.9 – 5.7 s | 1.10 – 4.05 s |
 
-voice_mod per 1 s frame: inference ≈ 0.30 s (real-time factor ≈ 0.3), publish < 2 ms, no queueing.
+voice_mod per 1 s frame: inference 0.31 – 0.41 s (real-time factor ≈ 0.3 – 0.4), publish < 10 ms.
+In the factory run the intent LLM took up to 4 s (CPU shared by all five nodes on the VM).
 
-Fixed after the first runs (intent_mod):
+Fixed after the first runs:
 
-* `/dorai_plan.bearing_deg` used to be the latest bearing when the plan was published, about 3.5 s
-  after the utterance, which could be the next talker's ("go back to base" said at 191–199° got 148°).
-  It is now the last bearing of the most recent finished speech burst, i.e. its own utterance (191°).
-* "Artaban stop" misheard as "Fargan stop." was ignored. The name in front of a stop is now
-  matched with up to 4 edits (`stop_wake_max_edits`), and `/dorai_stop` fires.
+* **intent_mod** — `/dorai_plan.bearing_deg` used to be the latest bearing when the plan was
+  published, about 3.5 s after the utterance, which could be the next talker's ("go back to base"
+  said at 191–199° got 148°). It is now the last bearing of the most recent finished speech burst,
+  i.e. its own utterance (194°).
+* **intent_mod** — "Artaban stop" misheard as "Fargan stop." was ignored. The name in front of a
+  stop is now matched with up to 4 edits (`stop_wake_max_edits`), and `/dorai_stop` fires.
+* **doa_mod** — with a welder in the room the bearing locked onto the welder (~46°): SRP-PHAT gives
+  every frequency bin one vote and a broadband machine owns most of them. The default is now
+  `method:=auto`: SRP-PHAT when the utterance is ≥ 20 dB above the noise between utterances, else
+  GEVD-MUSIC (utterance covariance whitened by the noise covariance). Factory scene: 73° → 21.6°
+  mean error, 3/6 → 5/6 within 20°; clean scene unchanged. Offline over five scenes, within 15°:
+  47 % → 77 % (see `ros2/doa_mod/README.md`).
+* **stt_mod, intent_mod, dorai_simulator** — `/dorai_stt/status` sent `NaN` (`rtf` before the
+  first final), which strict JSON parsers reject. Every published JSON now goes through a strict
+  encoder (non-finite numbers become `null`); a test in each package fails if a bare `json.dumps`
+  is used for a published message.
 
-Open issues:
-
-* In the factory scene doa_mod locks onto the welding source (~46°) when the talker is
-  quieter than the machine; the speech gate does not reject the welder's broadband noise.
-* `/dorai_stt/status` contains `NaN` (`rtf` before the first final), which strict JSON parsers reject.
+Still open: in the factory scene the quietest command ("go back to base", also lost by STT) gets
+the welder's bearing; GEVD-MUSIC has not yet been scored on the robot's own recordings.
 
 ## One real message per topic (clean_speech)
 
@@ -72,18 +81,18 @@ Open issues:
  "speech_dbfs": -28.2, "noise_dbfs": -49.8, "speech_frac": 0.323, "proc_cpu_pct": 15.1}
 
 // /dorai_stt/status
-{"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": NaN, "backlog_s": 0.0, "busy": false,
+{"model": "whisper/large-v3-turbo-dorai-artaban", "rtf": null, "backlog_s": 0.0, "busy": false,
  "audio_s": 0.0, "finals": 0, "lag_median_s": null}
 
 // /dorai_plan
 {"text": "Artaban go back to base.", "plan": {"steps": [{"task": "goto", "target": "base"}]},
- "bearing_deg": 191.0, "engine": "llm", "latency_s": 1.3521, "stamp": 1795541530.78,
+ "bearing_deg": 194.0, "engine": "llm", "latency_s": 1.168, "stamp": 1795542946.94,
  "confidence": 1.0, "min_token_prob": 0.999, "wake_edits": 0}
 
 // /dorai_intent/decision
 {"text": "Artaban go back to base.", "decision": "plan", "addressed": true, "wake_heard": "artaban",
  "wake_edits": 0, "wake_confidence": 1.0, "command": "go back to base", "engine": "llm",
- "confidence": 1.0, "min_token_prob": 0.999, "latency_s": 1.3521, "tasks": ["goto"]}
+ "confidence": 1.0, "min_token_prob": 0.999, "latency_s": 1.168, "tasks": ["goto"]}
 
 // /dorai_stop  (factory scene, "Fargan stop." with the name mangled by welding noise)
 "stop"
